@@ -1,0 +1,2543 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ROAB LAB // HIGH-PERFORMANCE HARDWARE MANAGEMENT</title>
+  
+  <!-- Tailwind CSS & DaisyUI CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.10.1/dist/full.min.css" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Oswald (Headings), Inter (Body), JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Vue 3 CDN -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              black: '#07080B',
+              dark: '#0D0E15',
+              card: '#12141D',
+              cardHover: '#171A26',
+              border: '#1F2333',
+              borderHighlight: '#2E354D',
+              red: '#FF2A36',
+              redHover: '#E01723',
+              grayText: '#8E95A5',
+              gold: '#F59E0B',
+              cyan: '#06B6D4'
+            }
+          },
+          fontFamily: {
+            heading: ['Oswald', 'sans-serif'],
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    * { -webkit-tap-highlight-color: transparent; }
+    body {
+      background-color: #07080B;
+      color: #E2E8F0;
+      font-family: 'Inter', sans-serif;
+    }
+    .font-oswald { font-family: 'Oswald', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    /* JDM / Automotive Style Card */
+    .jdm-card {
+      background: #11131C;
+      border: 1px solid #1E2232;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .jdm-card:hover {
+      border-color: #FF2A36;
+      box-shadow: 0 12px 30px -8px rgba(255, 42, 54, 0.22);
+      transform: translateY(-3px);
+    }
+    
+    /* Red Gradient CTA Button */
+    .btn-red-cta {
+      background: linear-gradient(135deg, #FF2A36 0%, #D4121F 100%);
+      color: #FFFFFF;
+      font-family: 'Oswald', sans-serif;
+      letter-spacing: 0.05em;
+      border: none;
+      transition: all 0.2s ease;
+    }
+    .btn-red-cta:hover {
+      background: linear-gradient(135deg, #FF4550 0%, #E01723 100%);
+      box-shadow: 0 4px 18px rgba(255, 42, 54, 0.45);
+    }
+    
+    /* Cyan Gradient Inspector CTA Button */
+    .btn-cyan-cta {
+      background: linear-gradient(135deg, #06B6D4 0%, #0891B2 100%);
+      color: #FFFFFF;
+      font-family: 'Oswald', sans-serif;
+      letter-spacing: 0.05em;
+      border: none;
+      transition: all 0.2s ease;
+    }
+    .btn-cyan-cta:hover {
+      background: linear-gradient(135deg, #22D3EE 0%, #06B6D4 100%);
+      box-shadow: 0 4px 18px rgba(6, 182, 212, 0.45);
+    }
+
+    .border-tech {
+      position: relative;
+    }
+    .border-tech::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 8px;
+      height: 8px;
+      border-bottom: 2px solid #FF2A36;
+      border-right: 2px solid #FF2A36;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-brand-red selection:text-white">
+
+<div id="app" class="min-h-screen flex flex-col relative bg-brand-black text-slate-100">
+
+  <!-- ==================== 1. TOP TICKER STRIP ==================== -->
+  <div class="bg-brand-red text-white py-1 px-4 text-[11px] font-bold tracking-wider uppercase flex items-center justify-between font-oswald shadow-md">
+    <div class="max-w-7xl mx-auto w-full flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <span class="inline-block w-2 h-2 rounded-full bg-white animate-ping"></span>
+        <span class="tracking-widest">ROAB LAB // HIGH-PERFORMANCE HARDWARE MANAGEMENT</span>
+      </div>
+      <div class="hidden sm:flex items-center space-x-4 font-mono text-[10px]">
+        <span class="opacity-90"><i class="fa-solid fa-server mr-1"></i> ZERO-COST HOSTING</span>
+        <span class="opacity-90"><i class="fa-solid fa-shield mr-1"></i> PHOTO AUDIT VERIFIED</span>
+        <span class="text-white bg-black/30 px-2 py-0.5 rounded font-bold">24/7 LIVE INVENTORY</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 2. HEADER NAVBAR ==================== -->
+  <header class="sticky top-0 z-40 bg-brand-dark/95 backdrop-blur-md border-b border-brand-border px-4 py-2.5 shadow-xl">
+    <div class="max-w-7xl mx-auto w-full flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      
+      <!-- Left: Brand Logo & Navigation Tags -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3 cursor-pointer" @click="currentViewMode = 'SHOWROOM'">
+          <div class="w-10 h-10 rounded-xl bg-brand-red flex items-center justify-center text-white font-oswald font-black text-xl shadow-lg shadow-brand-red/30 tracking-tighter">
+            R
+          </div>
+          <div>
+            <div class="flex items-center space-x-2 leading-none">
+              <span class="font-oswald text-xl font-black tracking-wider text-white">ROAB LAB</span>
+              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-brand-red/20 text-brand-red border border-brand-red/40 font-oswald">HARDWARE</span>
+            </div>
+            <p class="text-[10px] text-brand-grayText uppercase tracking-widest font-mono mt-0.5">Asset & Photo Audit System</p>
+          </div>
+        </div>
+
+        <!-- Mobile Quick Actions -->
+        <div class="flex items-center space-x-1.5 md:hidden">
+          <button 
+            @click="enterInspectionMode" 
+            class="btn btn-xs rounded-lg font-oswald uppercase"
+            :class="currentViewMode === 'INSPECTOR' ? 'bg-cyan-600 text-white' : 'bg-brand-card text-cyan-400 border border-cyan-500/30'">
+            <i class="fa-solid fa-shield-halved"></i> QA
+          </button>
+          <button 
+            @click="enterAdminMode" 
+            class="btn btn-xs rounded-lg font-oswald uppercase"
+            :class="currentViewMode === 'ADMIN' ? 'bg-amber-500 text-black' : 'bg-brand-card text-amber-400 border border-amber-500/30'">
+            <i class="fa-solid fa-gear"></i> Admin
+          </button>
+
+          <!-- Mobile Staff Auth button -->
+          <button v-if="!adminUser" @click="showStaffLoginModal = true" class="btn btn-xs bg-brand-red text-white font-oswald uppercase px-2">
+            <i class="fa-solid fa-lock"></i> Login
+          </button>
+          <button v-else @click="logoutStaff" class="btn btn-xs bg-rose-950/60 text-rose-300 border border-rose-800 font-oswald uppercase px-2">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Center: 3 MAIN TABS SWITCHER -->
+      <div class="flex items-center justify-center">
+        <div class="bg-brand-black/90 p-1 rounded-2xl border border-white/10 flex items-center space-x-1 shadow-inner font-oswald uppercase text-xs font-bold">
+          
+          <!-- Tab 1: Showroom Sinh viên -->
+          <button 
+            @click="currentViewMode = 'SHOWROOM'"
+            :class="currentViewMode === 'SHOWROOM' ? 'bg-brand-red text-white shadow-lg shadow-brand-red/30' : 'text-brand-grayText hover:text-white'"
+            class="px-3.5 py-2 rounded-xl transition flex items-center space-x-1.5">
+            <i class="fa-solid fa-microchip"></i>
+            <span>Kho Thiết Bị</span>
+          </button>
+
+          <!-- Tab 2: Chế độ Kiểm định QA -->
+          <button 
+            @click="enterInspectionMode"
+            :class="currentViewMode === 'INSPECTOR' ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/30' : 'text-brand-grayText hover:text-cyan-400'"
+            class="px-3.5 py-2 rounded-xl transition flex items-center space-x-1.5">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span>Bàn Kiểm Định (QA)</span>
+            <span class="badge badge-xs bg-black text-cyan-300 font-mono font-bold">{{ pendingAuditCount }}</span>
+          </button>
+
+          <!-- Tab 3: Trung tâm Quản trị Admin -->
+          <button 
+            @click="enterAdminMode"
+            :class="currentViewMode === 'ADMIN' ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/30' : 'text-brand-grayText hover:text-amber-400'"
+            class="px-3.5 py-2 rounded-xl transition flex items-center space-x-1.5">
+            <i class="fa-solid fa-screwdriver-wrench"></i>
+            <span>Quản Trị Admin</span>
+          </button>
+
+        </div>
+      </div>
+
+      <!-- Right: MSSV Bar + Staff Account Profile / Login Button -->
+      <div class="flex items-center space-x-2.5">
+        
+        <!-- Student MSSV Input Bar -->
+        <div class="bg-brand-card border border-brand-border rounded-xl p-1 px-2.5 flex items-center space-x-2 shadow-inner">
+          <i class="fa-solid fa-id-card text-brand-red text-xs"></i>
+          <span class="text-[10px] font-oswald uppercase font-bold text-slate-300">MSSV:</span>
+          <input 
+            v-model="inputMssv" 
+            @input="checkStudentWhitelist"
+            type="text" 
+            placeholder="MSSV (sv01, 20210001)..." 
+            class="w-32 sm:w-36 bg-brand-black border border-brand-border focus:border-brand-red rounded-lg px-2 py-0.5 text-xs font-mono font-bold text-white placeholder-slate-600 focus:outline-none">
+          
+          <span v-if="currentStudent" class="text-[10px] font-bold text-emerald-400 font-oswald uppercase truncate max-w-[80px]" :title="currentStudent.full_name">
+            {{ getFirstName(currentStudent.full_name) }}
+          </span>
+          <span v-else-if="inputMssv.trim()" class="text-[9px] text-rose-400 font-mono">
+            Chưa cấp phép
+          </span>
+        </div>
+
+        <!-- STAFF LOGIN / PROFILE BUTTON (DESKTOP) -->
+        <div class="hidden sm:flex items-center space-x-1.5">
+          
+          <!-- Case 1: NOT LOGGED IN -> Show Big Clear Login Button -->
+          <button 
+            v-if="!adminUser"
+            @click="openStaffLoginModal" 
+            class="btn btn-sm bg-white/5 hover:bg-white/10 text-slate-200 hover:text-white border border-brand-border rounded-xl font-oswald uppercase tracking-wider text-xs px-3 shadow-sm transition flex items-center space-x-1.5">
+            <i class="fa-solid fa-lock text-brand-red text-xs"></i>
+            <span>Đăng Nhập Cán Bộ</span>
+          </button>
+
+          <!-- Case 2: ALREADY LOGGED IN -> Show Staff Role Badge + Logout Button -->
+          <div v-else class="flex items-center space-x-1.5 bg-brand-card border border-brand-border rounded-xl p-1 pr-2 shadow-md">
+            <span 
+              class="px-2 py-0.5 rounded-lg text-xs font-oswald font-black uppercase tracking-wider flex items-center space-x-1"
+              :class="adminUser.role === 'ADMIN' ? 'bg-amber-500 text-black' : 'bg-cyan-600 text-white'">
+              <i class="fa-solid" :class="adminUser.role === 'ADMIN' ? 'fa-crown' : 'fa-shield-halved'"></i>
+              <span>{{ adminUser.role }}</span>
+            </span>
+            <span class="text-xs text-slate-300 font-mono max-w-[110px] truncate" :title="adminUser.full_name">{{ getFirstName(adminUser.full_name) }}</span>
+            
+            <button @click="logoutStaff" class="btn btn-ghost btn-circle btn-xs text-rose-400 hover:text-rose-300 hover:bg-rose-500/20" title="Đăng xuất Cán bộ">
+              <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            </button>
+          </div>
+
+          <button @click="showSettingsModal = true" class="btn btn-ghost btn-circle btn-sm text-brand-grayText hover:text-white" title="Cấu hình Google Apps Script">
+            <i class="fa-solid fa-gear"></i>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ==================== VIEW 1: SHOWROOM THIẾT BỊ SINH VIÊN ==================== -->
+  <div v-show="currentViewMode === 'SHOWROOM'" class="flex-1 flex flex-col">
+    
+    <!-- Hero Banner (DriveCraft & JDM Showroom Style) -->
+    <section class="border-b border-brand-border bg-gradient-to-b from-[#0F111B] via-brand-dark to-brand-black py-6 px-4">
+      <div class="max-w-7xl mx-auto w-full">
+        <div class="relative rounded-3xl overflow-hidden border border-brand-border bg-gradient-to-r from-[#11131E] via-[#141724] to-[#2B0E14] p-6 sm:p-8 shadow-2xl">
+          <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+            
+            <div class="lg:col-span-7 space-y-3">
+              <div class="inline-flex items-center space-x-2 text-[10px] font-oswald uppercase tracking-widest text-brand-red font-bold px-3 py-1 rounded-full bg-brand-red/10 border border-brand-red/30">
+                <span class="w-1.5 h-1.5 rounded-full bg-brand-red"></span>
+                <span>ROBOTICS HARDWARE ARSENAL</span>
+              </div>
+
+              <h1 class="font-oswald text-3xl sm:text-4xl lg:text-5xl font-black uppercase tracking-tight text-white leading-tight">
+                GEAR UP YOUR ROBOT.<br>
+                <span class="text-brand-red">ENGINEER PROUD.</span>
+              </h1>
+
+              <p class="text-xs sm:text-sm text-brand-grayText leading-relaxed max-w-xl">
+                Quản lý bo mạch Jetson Nano, STM32F4, LiDAR 360°, IMU công nghiệp & động cơ Dynamixel. Chụp ảnh trải phẳng linh kiện đối soát chống thất lạc.
+              </p>
+
+              <div class="pt-2 flex flex-wrap items-center gap-2.5 font-oswald text-xs uppercase tracking-wider">
+                <button @click="scrollToInventory" class="btn-red-cta px-4 py-2 rounded-xl font-bold flex items-center space-x-1.5 shadow-lg">
+                  <i class="fa-solid fa-microchip"></i>
+                  <span>Xem Danh Sách Mạch</span>
+                </button>
+                <button @click="enterInspectionMode" class="btn-cyan-cta px-4 py-2 rounded-xl font-bold flex items-center space-x-1.5 shadow-lg">
+                  <i class="fa-solid fa-shield-halved"></i>
+                  <span>Bàn Kiểm Định QA ({{ pendingAuditCount }})</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="lg:col-span-5 grid grid-cols-2 gap-3">
+              <div class="p-3.5 rounded-2xl bg-brand-black/80 border border-white/10 text-center">
+                <p class="font-oswald text-2xl sm:text-3xl font-black text-white">{{ devices.length }}</p>
+                <p class="text-[10px] text-brand-grayText uppercase font-mono">Tổng Thiết Bị</p>
+              </div>
+              <div class="p-3.5 rounded-2xl bg-brand-black/80 border border-emerald-500/30 text-center">
+                <p class="font-oswald text-2xl sm:text-3xl font-black text-emerald-400">{{ inStockCount }}</p>
+                <p class="text-[10px] text-emerald-300 uppercase font-mono">Sẵn Sàng Mượn</p>
+              </div>
+              <div class="p-3.5 rounded-2xl bg-brand-black/80 border border-cyan-500/30 text-center">
+                <p class="font-oswald text-2xl sm:text-3xl font-black text-cyan-400">{{ auditQueue.length }}</p>
+                <p class="text-[10px] text-cyan-300 uppercase font-mono">Lượt Kiểm Định</p>
+              </div>
+              <div class="p-3.5 rounded-2xl bg-brand-black/80 border border-brand-red/30 text-center">
+                <p class="font-oswald text-2xl sm:text-3xl font-black text-brand-red">{{ faultyCount }}</p>
+                <p class="text-[10px] text-rose-300 uppercase font-mono">Báo Lỗi / Khóa</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filters & Search -->
+    <section id="inventory-section" class="sticky top-[58px] z-30 bg-brand-dark/95 backdrop-blur-md border-b border-brand-border py-2.5 px-4 shadow-xl">
+      <div class="max-w-7xl mx-auto w-full space-y-2.5">
+        <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+          
+          <div class="relative flex-1 max-w-md">
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-brand-grayText"></i>
+            <input 
+              v-model="searchQuery"
+              type="text" 
+              placeholder="Tìm theo tên mạch, mã hộp (MCU-01), vị trí tủ..." 
+              class="w-full bg-brand-card border border-brand-border focus:border-brand-red rounded-xl pl-9 pr-8 py-2 text-xs text-white placeholder-slate-500 focus:outline-none">
+            <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-brand-grayText">
+              <i class="fa-solid fa-circle-xmark"></i>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-4 sm:flex items-center gap-1.5 p-1 bg-brand-card rounded-xl text-center text-xs font-oswald uppercase font-bold border border-brand-border">
+            <button 
+              @click="activeStatusFilter = 'ALL'"
+              :class="activeStatusFilter === 'ALL' ? 'bg-brand-red text-white shadow-md' : 'text-brand-grayText'"
+              class="py-1.5 px-3 rounded-lg transition">
+              Tất cả ({{ devices.length }})
+            </button>
+            <button 
+              @click="activeStatusFilter = 'MY_HOLDING'"
+              :class="activeStatusFilter === 'MY_HOLDING' ? 'bg-cyan-600 text-white shadow-md' : 'text-brand-grayText'"
+              class="py-1.5 px-3 rounded-lg transition">
+              Đang giữ ({{ myHoldingCount }})
+            </button>
+            <button 
+              @click="activeStatusFilter = 'IN_STOCK'"
+              :class="activeStatusFilter === 'IN_STOCK' ? 'bg-emerald-600 text-white shadow-md' : 'text-brand-grayText'"
+              class="py-1.5 px-3 rounded-lg transition">
+              Trong kho ({{ inStockCount }})
+            </button>
+            <button 
+              @click="activeStatusFilter = 'FAULTY'"
+              :class="activeStatusFilter === 'FAULTY' ? 'bg-rose-700 text-white shadow-md' : 'text-brand-grayText'"
+              class="py-1.5 px-3 rounded-lg transition">
+              Khóa ({{ faultyCount }})
+            </button>
+          </div>
+
+        </div>
+
+        <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar text-xs font-oswald uppercase tracking-wider pt-0.5">
+          <span class="text-brand-grayText text-[11px] font-mono mr-1 hidden sm:inline">NHÓM:</span>
+          <button 
+            v-for="cat in categories" 
+            :key="cat"
+            @click="selectedCategory = cat"
+            :class="selectedCategory === cat ? 'bg-white text-black font-black border-white' : 'bg-brand-card text-brand-grayText border-brand-border'"
+            class="px-3.5 py-1 rounded-full border whitespace-nowrap transition">
+            {{ cat }}
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cards Grid (3 Columns Desktop, 1 Column Mobile) -->
+    <main class="flex-1 py-6 px-4">
+      <div class="max-w-7xl mx-auto w-full">
+        
+        <div v-if="filteredDevices.length === 0" class="text-center py-20 px-4 bg-brand-card border border-brand-border rounded-3xl">
+          <i class="fa-solid fa-box-open text-3xl text-brand-grayText mb-3"></i>
+          <h3 class="font-oswald text-lg uppercase font-bold text-white">Không tìm thấy thiết bị phù hợp</h3>
+          <button @click="resetFilters" class="btn btn-sm btn-ghost text-brand-red mt-3 font-oswald uppercase">
+            Xóa bộ lọc
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-5">
+          <div 
+            v-for="device in filteredDevices" 
+            :key="device.device_id"
+            class="jdm-card rounded-2xl overflow-hidden flex flex-col group border-tech">
+            
+            <!-- Card Header -->
+            <div class="p-3.5 pb-2.5 flex items-center justify-between border-b border-white/5 bg-brand-dark/50">
+              <div class="flex items-center space-x-2">
+                <span class="font-oswald text-xs font-bold px-2 py-0.5 rounded bg-brand-red text-white uppercase tracking-wider">
+                  {{ device.device_id }}
+                </span>
+                <span class="text-[10px] uppercase font-mono text-brand-grayText">{{ device.category }}</span>
+              </div>
+
+              <div>
+                <span v-if="device.status === 'Trong kho'" class="text-[10px] font-oswald uppercase font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center space-x-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span>TRONG KHO</span>
+                </span>
+                <span v-else-if="device.status === 'Đang mượn'" class="text-[10px] font-oswald uppercase font-bold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center space-x-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                  <span>ĐANG MƯỢN</span>
+                </span>
+                <span v-else-if="device.status === 'Chờ kiểm định'" class="text-[10px] font-oswald uppercase font-bold px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">CHỜ KIỂM ĐỊNH</span>
+                <span v-else class="text-[10px] font-oswald uppercase font-bold px-2.5 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/30 flex items-center space-x-1.5">
+                  <i class="fa-solid fa-triangle-exclamation text-[10px]"></i>
+                  <span>BÁO LỖI / KHÓA</span>
+                </span>
+              </div>
+            </div>
+
+            <!-- Image -->
+            <div class="relative w-full h-48 bg-brand-black overflow-hidden cursor-pointer" @click="openPinoutModal(device)">
+              <img 
+                :src="device.golden_image || 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80'" 
+                :alt="device.name" 
+                class="w-full h-full object-cover group-hover:scale-105 transition duration-500 opacity-90 group-hover:opacity-100">
+              
+              <div class="absolute bottom-2.5 left-2.5 bg-black/80 backdrop-blur-md border border-white/10 px-2.5 py-1 rounded-lg text-[10px] text-white/90 font-oswald uppercase tracking-wider flex items-center space-x-1.5 shadow-md">
+                <i class="fa-solid fa-bolt text-brand-red text-[10px]"></i>
+                <span>Xem Ảnh Chuẩn & Document</span>
+              </div>
+
+              <button 
+                 v-if="canEditDevices"
+                @click.stop="openEditDeviceModal(device)"
+                class="absolute top-2.5 right-2.5 bg-brand-black/85 hover:bg-brand-red text-white p-1.5 rounded-lg border border-white/10 text-xs shadow-lg transition"
+                title="Sửa thông số & tài liệu">
+                <i class="fa-solid fa-pen-to-square"></i>
+              </button>
+            </div>
+
+            <!-- Title & Location -->
+            <div class="p-4 pb-2.5 space-y-1.5">
+              <h3 class="font-oswald text-base font-bold uppercase tracking-wide text-white leading-snug group-hover:text-brand-red transition line-clamp-1" :title="device.name">
+                {{ device.name }}
+              </h3>
+              
+              <p class="text-xs text-brand-grayText flex items-center">
+                <i class="fa-solid fa-location-crosshairs text-brand-red mr-1.5 text-[11px]"></i>
+                <span class="font-medium text-slate-300 font-mono">{{ device.location }}</span>
+              </p>
+
+              <div v-if="device.status === 'Đang mượn'" class="mt-2 p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-amber-300 truncate">
+                     <i class="fa-solid fa-user-tag mr-1 text-[10px]"></i> {{ device.holder_name }}<span v-if="getHolderCohort(device)"> ({{ getHolderCohort(device) }})</span>
+                  </span>
+                  <span v-if="isHeldByCurrentStudent(device)" class="badge badge-warning badge-xs font-oswald uppercase font-black">CỦA BẠN</span>
+                </div>
+                 <a v-if="getHolderPhone(device)" :href="'tel:' + getHolderPhone(device)"
+                    class="inline-flex items-center gap-1.5 mt-1 text-amber-200 underline underline-offset-2 hover:text-white"
+                    :aria-label="'Gọi người đang mượn: ' + getHolderPhone(device)">
+                   <i class="fa-solid fa-phone text-[10px]"></i>
+                   <span>Liên hệ: {{ getHolderPhone(device) }}</span>
+                 </a>
+                 <p v-else class="mt-1 text-[10px] text-amber-200/60">Chưa có số điện thoại liên hệ</p>
+                <p v-if="device.project_tag" class="text-[10px] text-amber-200/80 font-mono truncate mt-0.5">
+                  🏷️ {{ device.project_tag }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Spec Sheet 2 Cột -->
+            <div class="mx-4 p-3 rounded-xl bg-brand-black/90 border border-white/5 space-y-2 text-xs font-mono">
+              <div class="flex items-center justify-between text-[11px] pb-1.5 border-b border-white/5">
+                <span class="text-brand-grayText uppercase font-oswald">Cảnh Báo Nguồn:</span>
+                <span class="text-white font-bold text-right truncate max-w-[160px]" :title="device.specs_note">
+                  {{ getShortVoltage(device.specs_note) }}
+                </span>
+              </div>
+              <div class="flex items-center justify-between text-[11px] pb-1.5 border-b border-white/5">
+                <span class="text-brand-grayText uppercase font-oswald">Phụ Kiện:</span>
+                <span class="text-slate-300 font-semibold text-right truncate max-w-[160px]" :title="device.accessories">
+                  {{ getAccessoriesCount(device.accessories) }} món đủ bộ
+                </span>
+              </div>
+              <div class="flex items-center justify-between text-[11px]">
+                <span class="text-brand-grayText uppercase font-oswald">Kiểm Định QA:</span>
+                <span class="text-cyan-400 font-bold flex items-center space-x-1 cursor-pointer" @click="enterInspectionMode">
+                  <i class="fa-solid fa-shield-halved text-[10px]"></i>
+                  <span>Đối soát 100%</span>
+                </span>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="p-4 pt-3 flex items-center justify-between gap-2 mt-auto border-t border-white/5">
+              <div class="flex items-center space-x-1.5">
+                <button @click="openPinoutModal(device)" class="px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white border border-brand-border text-xs font-oswald uppercase">
+                  <i class="fa-solid fa-file-lines text-brand-red text-[10px] mr-1"></i> Document
+                </button>
+                <button @click="openHistoryModal(device)" class="px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-brand-grayText hover:text-white border border-brand-border text-xs font-oswald uppercase">
+                  <i class="fa-regular fa-clock text-[10px] mr-1"></i> Log
+                </button>
+              </div>
+
+              <div>
+                <button 
+                  v-if="device.status === 'Trong kho'"
+                  @click="openTxModal(device, 'Mượn mới')"
+                  class="btn-red-cta px-3.5 py-1.5 rounded-lg font-bold text-xs uppercase flex items-center space-x-1 shadow-md">
+                  <span>MƯỢN MÁY</span>
+                  <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                </button>
+                <button 
+                  v-else-if="device.status === 'Đang mượn' && isHeldByCurrentStudent(device)"
+                  @click="openTxModal(device, 'Trả về kho')"
+                  class="bg-amber-500 hover:bg-amber-600 text-black px-3.5 py-1.5 rounded-lg font-oswald font-black text-xs uppercase flex items-center space-x-1 shadow-md transition">
+                  <i class="fa-solid fa-arrow-down-to-bracket text-[10px] mr-1"></i>
+                  <span>TRẢ VỀ KHO</span>
+                </button>
+                <button 
+                  v-else-if="device.status === 'Đang mượn' && !isHeldByCurrentStudent(device)"
+                   disabled title="Người đang giữ cần trả về kho trước khi bạn mượn lại"
+                  class="bg-cyan-600 hover:bg-cyan-500 text-white px-3 py-1.5 rounded-lg font-oswald font-bold text-xs uppercase flex items-center space-x-1 shadow-md transition">
+                  <i class="fa-solid fa-handshake text-[10px] mr-1"></i>
+                   <span class="max-w-[140px]">CHỜ NGƯỜI GIỮ TRẢ KHO</span>
+                </button>
+                <button v-else-if="device.status === 'Chờ kiểm định'" disabled class="text-cyan-300 text-xs px-3 py-1.5">CHỜ CÁN BỘ KIỂM TRA</button>
+                <div v-else class="flex items-center space-x-1">
+                  <button 
+                    v-if="adminUser"
+                    @click="unlockDeviceAsAdmin(device)"
+                    class="bg-amber-500 hover:bg-amber-600 text-black px-3 py-1.5 rounded-lg font-oswald font-bold text-xs uppercase shadow-md">
+                    <i class="fa-solid fa-lock-open mr-1"></i> MỞ KHÓA
+                  </button>
+                  <button 
+                    v-else
+                    disabled
+                    class="bg-rose-950/40 border border-rose-800/40 text-rose-500 px-3 py-1.5 rounded-lg font-oswald font-bold text-xs uppercase cursor-not-allowed">
+                    <i class="fa-solid fa-lock mr-1"></i> BẢO TRÌ
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- ==================== VIEW 2: BÀN KIỂM ĐỊNH (QA INSPECTION AUDIT CENTER) ==================== -->
+  <div v-show="currentViewMode === 'INSPECTOR'" class="flex-1 flex flex-col py-6 px-4">
+    <div class="max-w-7xl mx-auto w-full space-y-5">
+      
+      <!-- CHECK AUTHENTICATION FOR INSPECTOR -->
+      <div v-if="!adminUser" class="max-w-md mx-auto my-12 p-8 rounded-3xl bg-brand-card border border-cyan-500/30 shadow-2xl space-y-5 text-center">
+        <div class="w-16 h-16 rounded-2xl bg-cyan-600/20 border border-cyan-500/40 mx-auto flex items-center justify-center text-cyan-400 text-2xl">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <div>
+          <h3 class="font-oswald text-xl font-black uppercase text-white">YÊU CẦU ĐĂNG NHẬP CÁN BỘ KIỂM ĐỊNH</h3>
+          <p class="text-xs text-brand-grayText mt-1">Vui lòng đăng nhập tài khoản Cán bộ Kiểm định (QA) hoặc Quản trị viên để xem và phê duyệt đối soát ảnh bàn giao.</p>
+        </div>
+
+        <button @click="openStaffLoginModalWithRole('inspector')" class="btn btn-cyan-cta btn-block py-3 rounded-xl font-oswald uppercase font-bold text-xs shadow-lg">
+          <i class="fa-solid fa-lock mr-1.5"></i> Đăng Nhập Cán Bộ Kiểm Định (QA)
+        </button>
+
+        <div class="text-[10px] text-brand-grayText font-mono pt-2 border-t border-white/5">
+          Tài khoản Demo có sẵn: User <code>inspector</code> • PIN <code>7777</code>
+        </div>
+      </div>
+
+      <!-- MAIN INSPECTOR WORKSPACE (SHOWN ONLY WHEN LOGGED IN) -->
+      <div v-else class="space-y-5">
+        
+        <!-- Inspection Workspace Header -->
+        <div class="p-6 rounded-3xl bg-brand-card border border-brand-border flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-2xl">
+          <div>
+            <div class="flex items-center space-x-2.5">
+              <span class="w-3 h-3 rounded-full bg-cyan-400 animate-ping"></span>
+              <span class="font-oswald text-xs uppercase tracking-widest text-cyan-400 font-bold">QA INSPECTION WORKSPACE</span>
+            </div>
+            <h2 class="font-oswald text-2xl sm:text-3xl font-black text-white uppercase tracking-tight mt-1">
+              BÀN KIỂM ĐỊNH ĐỐI SOÁT HÌNH ẢNH THIẾT BỊ
+            </h2>
+            <p class="text-xs text-brand-grayText mt-1 max-w-2xl">
+              So sánh song song <strong>Ảnh Mẫu Chuẩn (Golden Image)</strong> và <strong>Ảnh Bàn Giao Của Sinh Viên</strong>. Kiểm tra các cáp nối, chân cắm và phụ kiện trước khi phê duyệt đưa máy về kho hoặc cảnh báo vi phạm.
+            </p>
+          </div>
+
+          <div class="flex items-center space-x-3">
+            <div class="p-3 bg-brand-black rounded-2xl border border-white/10 text-right">
+              <p class="text-[10px] text-brand-grayText font-mono uppercase">Kiểm Định Viên</p>
+              <p class="font-oswald font-bold text-cyan-300 text-sm">{{ adminUser.full_name }} ({{ adminUser.role }})</p>
+            </div>
+            <button @click="logoutStaff" class="btn btn-sm bg-rose-950/50 hover:bg-rose-900 border border-rose-800 text-rose-300 rounded-xl font-oswald uppercase">
+              <i class="fa-solid fa-arrow-right-from-bracket mr-1"></i> Đăng Xuất
+            </button>
+          </div>
+        </div>
+
+        <!-- Filters Strip -->
+        <div v-if="canEditDevices" class="flex flex-wrap items-center gap-3 p-4 rounded-2xl bg-brand-card border border-brand-border">
+          <span class="text-xs text-slate-300">Thông tin thiết bị:</span>
+          <button @click="openAddDeviceModal" class="btn btn-sm btn-cyan-cta rounded-xl font-oswald uppercase font-bold">
+            <i class="fa-solid fa-plus mr-1"></i> Thêm thiết bị mới
+          </button>
+          <button @click="currentViewMode = 'SHOWROOM'; resetFilters()" class="btn btn-sm bg-white/10 text-white rounded-xl font-oswald uppercase font-bold">
+            <i class="fa-solid fa-pen-to-square mr-1"></i> Sửa thông tin thiết bị
+          </button>
+          <span class="text-xs text-brand-grayText">Chọn biểu tượng bút trên thiết bị cần sửa trong kho.</span>
+        </div>
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center space-x-2 text-xs font-oswald uppercase tracking-wider">
+            <button 
+              @click="auditFilter = 'ALL'" 
+              :class="auditFilter === 'ALL' ? 'bg-cyan-600 text-white font-bold shadow-md' : 'bg-brand-card text-brand-grayText border border-brand-border'"
+              class="px-3.5 py-1.5 rounded-xl transition">
+              Tất cả ({{ auditQueue.length }})
+            </button>
+            <button 
+              @click="auditFilter = 'PENDING'" 
+              :class="auditFilter === 'PENDING' ? 'bg-amber-500 text-black font-black shadow-md' : 'bg-brand-card text-brand-grayText border border-brand-border'"
+              class="px-3.5 py-1.5 rounded-xl transition">
+              Chờ kiểm định ({{ pendingAuditCount }})
+            </button>
+            <button 
+              @click="auditFilter = 'PASSED'" 
+              :class="auditFilter === 'PASSED' ? 'bg-emerald-600 text-white font-bold shadow-md' : 'bg-brand-card text-brand-grayText border border-brand-border'"
+              class="px-3.5 py-1.5 rounded-xl transition">
+              Đã duyệt hợp lệ ({{ passedAuditCount }})
+            </button>
+            <button 
+              @click="auditFilter = 'FAILED'" 
+              :class="auditFilter === 'FAILED' ? 'bg-rose-700 text-white font-bold shadow-md' : 'bg-brand-card text-brand-grayText border border-brand-border'"
+              class="px-3.5 py-1.5 rounded-xl transition">
+              Vi phạm / Lỗi ({{ failedAuditCount }})
+            </button>
+          </div>
+
+          <span class="text-xs text-brand-grayText font-mono">Hiển thị {{ filteredAuditQueue.length }} giao dịch đối soát</span>
+        </div>
+
+        <!-- Audit Items Cards List -->
+        <div class="space-y-4">
+          <div v-if="filteredAuditQueue.length === 0" class="text-center py-16 bg-brand-card border border-brand-border rounded-3xl">
+            <i class="fa-solid fa-circle-check text-4xl text-emerald-400 mb-2"></i>
+            <h3 class="font-oswald text-base uppercase font-bold text-white">Không có giao dịch nào cần xử lý</h3>
+            <p class="text-xs text-brand-grayText mt-1">Tất cả thiết bị bàn giao đã được đối soát hoàn tất.</p>
+          </div>
+
+          <div 
+            v-for="item in filteredAuditQueue" 
+            :key="item.tx_id"
+            class="p-5 rounded-2xl bg-brand-card border border-brand-border space-y-4 shadow-xl">
+            
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-white/5">
+              <div class="flex items-center space-x-2.5">
+                <span class="font-oswald text-sm font-bold px-2.5 py-0.5 rounded-lg bg-brand-red text-white uppercase">
+                  {{ item.device_ids }}
+                </span>
+                <span class="font-oswald text-sm uppercase font-bold text-slate-100">
+                  {{ item.action }}
+                </span>
+                <span class="text-xs text-brand-grayText font-mono">#{{ item.tx_id }}</span>
+              </div>
+
+              <div class="flex items-center space-x-3 text-xs font-mono">
+                <span class="text-brand-grayText">{{ item.timestamp }}</span>
+                <span 
+                  class="px-3 py-1 rounded-full font-bold font-oswald uppercase text-xs"
+                  :class="getAuditBadgeClass(item.audit_status)">
+                  {{ item.audit_status || 'Chờ kiểm định' }}
+                </span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs bg-brand-black p-3 rounded-xl border border-white/5">
+              <div>
+                <span class="text-brand-grayText">Người bàn giao:</span>
+                <span class="text-white font-bold ml-1.5">{{ item.user_name }}</span>
+                <p v-if="item.project_tag" class="text-[11px] text-amber-300 font-mono mt-0.5">Mục đích: {{ item.project_tag }}</p>
+              </div>
+              <div>
+                <span class="text-brand-grayText">Tình trạng khai báo:</span>
+                <span class="text-white font-semibold ml-1.5">{{ item.return_condition || 'N/A' }}</span>
+                <p v-if="item.note" class="text-[11px] text-slate-400 italic mt-0.5">"{{ item.note }}"</p>
+              </div>
+            </div>
+
+            <!-- SIDE-BY-SIDE VISUAL INSPECTION -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+              
+              <div class="space-y-1.5">
+                <div class="flex items-center justify-between text-xs font-oswald uppercase text-slate-300 font-bold">
+                  <span class="flex items-center space-x-1.5">
+                    <i class="fa-solid fa-camera-retro text-emerald-400"></i>
+                    <span>1. Ảnh Mẫu Chuẩn (Golden Image):</span>
+                  </span>
+                  <span class="text-[10px] text-emerald-400 font-mono">Chuẩn 100% Phụ Kiện</span>
+                </div>
+                <div class="h-60 rounded-2xl overflow-hidden bg-black border border-white/10 flex items-center justify-center p-2 relative group">
+                  <img 
+                    :src="getDeviceGoldenImage(item.device_ids)" 
+                    class="w-full h-full object-contain group-hover:scale-105 transition duration-300">
+                </div>
+              </div>
+
+              <div class="space-y-1.5">
+                <div class="flex items-center justify-between text-xs font-oswald uppercase text-slate-300 font-bold">
+                  <span class="flex items-center space-x-1.5">
+                    <i class="fa-solid fa-camera text-cyan-400"></i>
+                    <span>2. Ảnh Bàn Giao Sinh Viên Chụp Thực Tế:</span>
+                  </span>
+                  <a v-if="item.photo_url" :href="item.photo_url" target="_blank" class="text-xs text-brand-red font-bold hover:underline flex items-center space-x-1">
+                    <span>Mở ảnh lớn</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                  </a>
+                </div>
+                <div class="h-60 rounded-2xl overflow-hidden bg-black border border-white/10 flex items-center justify-center p-2 relative group">
+                  <img 
+                    v-if="item.photo_url" 
+                    :src="item.photo_url" 
+                    class="w-full h-full object-contain group-hover:scale-105 transition duration-300">
+                  <div v-else class="text-brand-grayText text-xs italic">
+                    Không có ảnh bàn giao
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Checked Accessories List -->
+            <div class="bg-brand-black p-3 rounded-xl border border-white/5 text-xs">
+              <span class="text-brand-grayText font-oswald uppercase tracking-wider text-[11px] block mb-1">
+                Phụ kiện đã được sinh viên tích xác nhận:
+              </span>
+              <span class="text-slate-300 font-mono">{{ item.checked_accessories || 'Không có ghi nhận' }}</span>
+            </div>
+
+            <!-- Inspection Decision Toolbar -->
+            <div class="pt-2 border-t border-white/5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+              <div class="flex-1">
+                <input 
+                  v-model="auditNotes[item.tx_id]" 
+                  type="text" 
+                  placeholder="Ghi chú đánh giá của Kiểm định viên (VD: Đủ đồ mạch sạch / Thiếu 1 cáp Type-C)..." 
+                  class="w-full bg-brand-black border border-brand-border rounded-xl px-3 py-2 text-xs text-white focus:border-cyan-400 font-mono">
+              </div>
+
+              <div class="flex items-center space-x-2.5">
+                <button 
+                  @click="submitAuditDecision(item, 'Đã duyệt hợp lệ')" 
+                  class="btn btn-sm bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-oswald uppercase font-bold px-4">
+                  <i class="fa-solid fa-check mr-1.5"></i> Duyệt Hợp Lệ
+                </button>
+
+                <button 
+                  @click="submitAuditDecision(item, 'Báo vi phạm')" 
+                  class="btn btn-sm bg-brand-red hover:bg-red-700 text-white rounded-xl font-oswald uppercase font-bold px-4">
+                  <i class="fa-solid fa-triangle-exclamation mr-1.5"></i> Báo Vi Phạm (Khóa)
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== VIEW 3: TRUNG TÂM QUẢN TRỊ ADMIN (CRUD THIẾT BỊ & LOGS) ==================== -->
+  <div v-show="currentViewMode === 'ADMIN'" class="flex-1 flex flex-col py-6 px-4">
+    <div class="max-w-7xl mx-auto w-full space-y-5">
+      
+      <!-- CHECK AUTHENTICATION FOR ADMIN -->
+      <div v-if="!adminUser || adminUser.role !== 'ADMIN'" class="max-w-md mx-auto my-12 p-8 rounded-3xl bg-brand-card border border-amber-500/30 shadow-2xl space-y-5 text-center">
+        <div class="w-16 h-16 rounded-2xl bg-amber-500/20 border border-amber-500/40 mx-auto flex items-center justify-center text-amber-400 text-2xl">
+          <i class="fa-solid fa-crown"></i>
+        </div>
+        <div>
+          <h3 class="font-oswald text-xl font-black uppercase text-white">YÊU CẦU QUYỀN QUẢN TRỊ VIÊN LAB</h3>
+          <p class="text-xs text-brand-grayText mt-1">
+            Khu vực này yêu cầu tài khoản ADMIN để quản lý thiết bị, document và theo dõi nhật ký hệ thống.
+          </p>
+        </div>
+
+        <button @click="openStaffLoginModalWithRole('admin')" class="btn btn-red-cta btn-block py-3 rounded-xl font-oswald uppercase font-bold text-xs shadow-lg">
+          <i class="fa-solid fa-lock mr-1.5"></i> Đăng Nhập Tài Khoản Admin Lab
+        </button>
+
+        <div class="text-[10px] text-brand-grayText font-mono pt-2 border-t border-white/5">
+          Tài khoản Demo Admin: User <code>admin</code> • PIN <code>9999</code>
+        </div>
+      </div>
+
+      <!-- MAIN ADMIN WORKSPACE (SHOWN ONLY WHEN LOGGED IN AS ADMIN) -->
+      <div v-else class="space-y-5">
+        
+        <!-- Admin Workspace Header -->
+        <div class="p-6 rounded-3xl bg-brand-card border border-brand-border flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-2xl">
+          <div>
+            <div class="flex items-center space-x-2.5">
+              <span class="w-3 h-3 rounded-full bg-amber-400 animate-pulse"></span>
+              <span class="font-oswald text-xs uppercase tracking-widest text-amber-400 font-bold">ADMIN MANAGEMENT CONSOLE</span>
+            </div>
+            <h2 class="font-oswald text-2xl sm:text-3xl font-black text-white uppercase tracking-tight mt-1">
+              TRUNG TÂM QUẢN TRỊ THIẾT BỊ & TÀI LIỆU LAB
+            </h2>
+            <p class="text-xs text-brand-grayText mt-1 max-w-2xl">
+              Cán bộ: <strong>{{ adminUser.full_name }}</strong>. Thêm mới, bớt/xóa thiết bị, chỉnh sửa document (ảnh hoặc link tài liệu) và theo dõi toàn bộ nhật ký thay đổi của ban quản trị.
+            </p>
+          </div>
+
+          <div class="flex items-center space-x-2.5">
+            <button @click="openPasswordModal" class="btn btn-sm bg-white/10 text-white rounded-xl font-oswald uppercase">
+              <i class="fa-solid fa-key mr-1"></i> Đổi mật khẩu tài khoản
+            </button>
+            <button @click="openAddDeviceModal" class="btn btn-sm btn-red-cta rounded-xl font-oswald uppercase font-bold px-4 shadow-lg">
+              <i class="fa-solid fa-plus mr-1"></i> Thêm Thiết Bị Mới
+            </button>
+            <button @click="logoutStaff" class="btn btn-sm bg-rose-950/50 hover:bg-rose-900 border border-rose-800 text-rose-300 rounded-xl font-oswald uppercase">
+              <i class="fa-solid fa-arrow-right-from-bracket mr-1"></i> Đăng Xuất
+            </button>
+          </div>
+        </div>
+
+        <!-- Admin Sub-Tabs Navigation -->
+        <div class="flex flex-wrap gap-2 border-b border-brand-border pb-2 text-xs font-oswald uppercase font-bold tracking-wider">
+          <button 
+            @click="adminSubTab = 'DEVICES'" 
+            :class="adminSubTab === 'DEVICES' ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' : 'bg-brand-card text-brand-grayText hover:text-white'"
+            class="px-4 py-2 rounded-xl transition flex items-center space-x-1.5">
+            <i class="fa-solid fa-boxes-stacked"></i>
+            <span>1. Quản Lý Thiết Bị ({{ devices.length }})</span>
+          </button>
+          <button 
+            @click="adminSubTab = 'LOGS'" 
+            :class="adminSubTab === 'LOGS' ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' : 'bg-brand-card text-brand-grayText hover:text-white'"
+            class="px-4 py-2 rounded-xl transition flex items-center space-x-1.5">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <span>2. Nhật Ký Chỉnh Sửa & Quản Trị ({{ editLogs.length }})</span>
+          </button>
+          <button @click="adminSubTab = 'STUDENTS'"
+            :class="adminSubTab === 'STUDENTS' ? 'bg-amber-500 text-black' : 'bg-brand-card text-brand-grayText hover:text-white'"
+            class="px-4 py-2 rounded-xl transition">
+            <i class="fa-solid fa-user-graduate mr-1"></i> 3. Tra cứu sinh viên
+          </button>
+        </div>
+
+        <div v-if="adminSubTab === 'STUDENTS'" class="space-y-4">
+          <div class="p-4 rounded-2xl bg-brand-card border border-brand-border space-y-2">
+            <label for="admin-student-search" class="block text-sm font-bold text-white">Tra cứu theo MSSV hoặc họ tên</label>
+            <input id="admin-student-search" v-model="adminStudentSearch" type="search"
+              placeholder="Nhập MSSV hoặc họ tên (có thể không dấu)..."
+              class="input w-full bg-brand-black border border-brand-border text-white">
+            <p class="text-xs text-brand-grayText">{{ adminStudentResults.length }} sinh viên. Hiển thị thiết bị đang mượn theo dữ liệu hiện tại.</p>
+            <button @click="fetchData" class="btn btn-xs bg-white/10 text-white">Làm mới dữ liệu</button>
+          </div>
+          <div class="overflow-x-auto rounded-2xl border border-brand-border bg-brand-card">
+            <table class="table text-xs">
+              <thead><tr class="text-slate-300"><th>MSSV</th><th>Họ tên</th><th>Khóa</th><th>Liên hệ</th><th>Thiết bị đang mượn</th></tr></thead>
+              <tbody>
+                <tr v-for="student in adminStudentResults" :key="student.user_id">
+                  <td class="font-mono">{{ student.user_id }}</td>
+                  <td>{{ student.full_name }}</td>
+                  <td>{{ student.cohort || '—' }}</td>
+                  <td><a v-if="getHolderPhone({holder_id: student.user_id})" :href="'tel:' + getHolderPhone({holder_id: student.user_id})" class="text-amber-300 underline">{{ getHolderPhone({holder_id: student.user_id}) }}</a><span v-else>Chưa có SĐT</span></td>
+                  <td>
+                    <ul v-if="student.borrowed_devices.length" class="space-y-1">
+                      <li v-for="device in student.borrowed_devices" :key="device.device_id"><strong>{{ device.device_id }}</strong> — {{ device.name }}</li>
+                    </ul>
+                    <span v-else class="text-brand-grayText">Không có thiết bị đang mượn</span>
+                  </td>
+                </tr>
+                <tr v-if="!adminStudentResults.length"><td colspan="5" class="text-center text-brand-grayText py-6">Không tìm thấy sinh viên phù hợp.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- SUB-TAB 1: DANH SÁCH & CRUD THIẾT BỊ -->
+        <div v-show="adminSubTab === 'DEVICES'" class="space-y-4">
+          
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-brand-card p-3 rounded-2xl border border-brand-border">
+            <div class="relative flex-1 max-w-sm">
+              <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-brand-grayText"></i>
+              <input 
+                v-model="adminDeviceSearch" 
+                type="text" 
+                placeholder="Lọc thiết bị theo mã, tên, vị trí..." 
+                class="w-full bg-brand-black border border-brand-border rounded-xl pl-9 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-400">
+            </div>
+
+            <button @click="openAddDeviceModal" class="btn btn-xs sm:btn-sm btn-red-cta rounded-xl font-oswald uppercase font-bold">
+              <i class="fa-solid fa-plus mr-1"></i> Thêm Thiết Bị
+            </button>
+          </div>
+
+          <!-- Devices Management Table -->
+          <div class="overflow-x-auto rounded-2xl border border-brand-border bg-brand-card shadow-xl">
+            <table class="table table-xs sm:table-sm w-full text-left">
+              <thead class="bg-brand-black text-[11px] font-oswald uppercase text-brand-grayText tracking-wider border-b border-brand-border">
+                <tr>
+                  <th>Mã Hộp</th>
+                  <th>Tên Thiết Bị & Vị Trí</th>
+                  <th>Danh Mục</th>
+                  <th>Cảnh Báo Nguồn</th>
+                  <th>Phụ Kiện</th>
+                  <th>Trạng Thái</th>
+                  <th class="text-right">Thao Tác Quản Trị</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-white/5 text-xs font-mono">
+                <tr v-for="dev in adminFilteredDevices" :key="dev.device_id" class="hover:bg-white/5 transition">
+                  <td class="font-bold text-brand-red font-oswald">{{ dev.device_id }}</td>
+                  <td>
+                    <div class="font-bold text-white font-sans text-xs">{{ dev.name }}</div>
+                    <div class="text-[10px] text-brand-grayText"><i class="fa-solid fa-location-dot text-brand-red mr-1"></i>{{ dev.location }}</div>
+                  </td>
+                  <td class="text-slate-300">{{ dev.category }}</td>
+                  <td class="text-slate-300 max-w-[140px] truncate" :title="dev.specs_note">{{ dev.specs_note }}</td>
+                  <td class="text-slate-300 max-w-[150px] truncate" :title="dev.accessories">{{ dev.accessories }}</td>
+                  <td>
+                    <span v-if="dev.status === 'Trong kho'" class="badge badge-success badge-xs font-oswald uppercase font-bold">Trong kho</span>
+                    <span v-else-if="dev.status === 'Đang mượn'" class="badge badge-warning badge-xs font-oswald uppercase font-bold">Đang mượn: {{ dev.holder_name }}</span>
+                    <span v-else-if="dev.status === 'Chờ kiểm định'" class="badge badge-info badge-xs font-oswald uppercase font-bold">Chờ kiểm định</span>
+                    <span v-else class="badge badge-error badge-xs font-oswald uppercase font-bold">Báo lỗi/Khóa</span>
+                  </td>
+                  <td class="text-right whitespace-nowrap">
+                    <div class="flex items-center justify-end space-x-1.5">
+                      <button @click="openEditDeviceModal(dev)" class="btn btn-xs bg-white/10 hover:bg-white/20 text-white rounded-lg font-oswald uppercase" title="Sửa thông số & tài liệu">
+                        <i class="fa-solid fa-pen text-[10px] mr-1 text-amber-400"></i> Sửa
+                      </button>
+                      <button v-if="dev.status === 'Báo lỗi/Khóa'" @click="unlockDeviceAsAdmin(dev)" class="btn btn-xs bg-amber-500 hover:bg-amber-600 text-black rounded-lg font-oswald uppercase font-bold" title="Mở khóa thiết bị">
+                        <i class="fa-solid fa-lock-open text-[10px]"></i>
+                      </button>
+                      <button @click="deleteDeviceAsAdmin(dev)" class="btn btn-xs bg-rose-950/40 hover:bg-rose-900 border border-rose-800 text-rose-400 hover:text-white rounded-lg font-oswald uppercase" title="Xóa thiết bị khỏi kho">
+                        <i class="fa-solid fa-trash text-[10px] mr-1"></i> Xóa
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+        <!-- SUB-TAB 2: NHẬT KÝ CHỈNH SỬA & QUẢN TRỊ (ADMIN EDIT LOGS) -->
+        <div v-show="adminSubTab === 'LOGS'" class="space-y-4">
+          
+          <div class="p-3 bg-brand-card rounded-2xl border border-brand-border flex items-center justify-between text-xs">
+            <span class="font-oswald uppercase font-bold text-white flex items-center space-x-2">
+              <i class="fa-solid fa-list-check text-amber-400"></i>
+              <span>Lịch Sử Hoạt Động Cán Bộ Quản Trị</span>
+            </span>
+            <span class="text-brand-grayText font-mono">Tự động ghi nhận mọi thao tác Thêm, Sửa, Xóa, Mở khóa</span>
+          </div>
+
+          <div class="space-y-2.5 max-h-[65vh] overflow-y-auto pr-1">
+            <div v-if="editLogs.length === 0" class="text-center py-12 text-brand-grayText font-oswald uppercase text-xs">
+              Chưa có ghi nhận chỉnh sửa nào.
+            </div>
+
+            <div 
+              v-for="(elog, index) in editLogs" 
+              :key="index"
+              class="p-3.5 rounded-2xl bg-brand-card border border-brand-border space-y-1.5 text-xs font-mono">
+              <div class="flex items-center justify-between">
+                <span class="font-oswald font-bold uppercase text-amber-400">
+                  <i class="fa-solid fa-tag mr-1 text-[10px]"></i>{{ elog.action }}
+                </span>
+                <span class="text-[10px] text-brand-grayText">{{ elog.timestamp }}</span>
+              </div>
+
+              <div class="text-white font-sans font-medium flex items-center justify-between">
+                <span>Người thực hiện: <strong>{{ elog.user_name }}</strong></span>
+                <span class="badge badge-xs bg-brand-red text-white font-oswald font-bold">{{ elog.device_ids }}</span>
+              </div>
+
+              <div class="text-slate-300 text-xs bg-brand-black p-2 rounded-xl border border-white/5 font-sans">
+                {{ elog.note }}
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="mt-auto border-t border-brand-border bg-brand-dark py-6 px-4">
+    <div class="max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between text-xs text-brand-grayText font-mono gap-2">
+      <p>ROAB LAB HARDWARE ASSETS // ZERO-COST SERVERLESS ARCHITECTURE</p>
+      <div class="flex items-center space-x-3 text-white">
+        <button @click="currentViewMode = 'SHOWROOM'" class="hover:text-brand-red font-oswald uppercase">Kho Thiết Bị</button>
+        <span>•</span>
+        <button @click="enterInspectionMode" class="hover:text-cyan-400 font-oswald uppercase">Kiểm Định QA</button>
+        <span>•</span>
+        <button @click="enterAdminMode" class="hover:text-amber-400 font-oswald uppercase">Quản Trị Admin</button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==================== MODALS ==================== -->
+  
+  <dialog :open="showPasswordModal" class="modal bg-black/85 backdrop-blur-sm z-50">
+    <form v-if="showPasswordModal" @submit.prevent="changeAccountPassword" class="modal-box bg-brand-card border border-brand-border rounded-2xl space-y-4">
+      <h3 class="font-oswald text-lg font-bold text-white">ĐỔI MẬT KHẨU TÀI KHOẢN</h3>
+      <p class="text-xs text-brand-grayText">Chỉ Admin được đổi mật khẩu. Cần xác nhận mật khẩu Admin hiện tại.</p>
+      <label class="block text-xs text-slate-300">Tài khoản cần đổi
+        <select v-model="passwordForm.target_id" required class="select w-full bg-brand-black mt-1">
+          <option disabled value="">Chọn tài khoản</option>
+          <option v-for="user in studentsWhitelist" :key="user.user_id" :value="user.user_id">{{ user.full_name }} — {{ user.user_id }} ({{ user.role }})</option>
+        </select>
+      </label>
+      <label class="block text-xs text-slate-300">Mật khẩu Admin hiện tại
+        <input v-model="passwordForm.admin_pin" type="password" autocomplete="current-password" required class="input w-full bg-brand-black mt-1">
+      </label>
+      <label class="block text-xs text-slate-300">Mật khẩu mới (8–128 ký tự)
+        <input v-model="passwordForm.new_pin" type="password" autocomplete="new-password" minlength="8" maxlength="128" required class="input w-full bg-brand-black mt-1">
+      </label>
+      <label class="block text-xs text-slate-300">Nhập lại mật khẩu mới
+        <input v-model="passwordForm.confirm_pin" type="password" autocomplete="new-password" required class="input w-full bg-brand-black mt-1">
+      </label>
+      <p v-if="passwordError" role="alert" class="text-xs text-rose-400">{{ passwordError }}</p>
+      <div class="flex justify-end gap-2">
+        <button type="button" :disabled="isChangingPassword" @click="closePasswordModal" class="btn btn-sm">Đóng</button>
+        <button type="submit" :disabled="isChangingPassword" class="btn btn-sm btn-red-cta">{{ isChangingPassword ? 'Đang lưu...' : 'Đổi mật khẩu' }}</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- MODAL: STAFF LOGIN (ADMIN / INSPECTOR) -->
+  <dialog :open="showStaffLoginModal" class="modal modal-bottom sm:modal-middle bg-black/85 backdrop-blur-sm z-50">
+    <div class="modal-box bg-brand-card border border-brand-border p-6 rounded-2xl max-w-sm w-full mx-auto shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-brand-border pb-3">
+        <h3 class="font-oswald text-base font-bold text-white uppercase flex items-center space-x-2">
+          <i class="fa-solid fa-shield-halved text-brand-red"></i>
+          <span>CỔNG ĐĂNG NHẬP CÁN BỘ LAB</span>
+        </h3>
+        <button @click="showStaffLoginModal = false" class="btn btn-circle btn-ghost btn-sm text-brand-grayText hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <!-- Quick 1-Click Fill Buttons for Demo -->
+      <div class="space-y-1.5">
+        <span class="text-[10px] font-oswald uppercase text-brand-grayText tracking-wider">Đăng nhập nhanh 1-Click:</span>
+        <div class="grid grid-cols-2 gap-2">
+          <button 
+            @click="quickFillStaff('inspector', '7777')" 
+            class="p-2.5 rounded-xl bg-cyan-950/40 border border-cyan-500/40 hover:bg-cyan-900/60 text-left transition">
+            <span class="font-oswald text-xs font-bold text-cyan-300 block"><i class="fa-solid fa-shield-halved mr-1"></i> KIỂM ĐỊNH (QA)</span>
+            <span class="text-[9px] text-cyan-400 font-mono">PIN: 7777</span>
+          </button>
+          <button 
+            @click="quickFillStaff('admin', '9999')" 
+            class="p-2.5 rounded-xl bg-amber-950/40 border border-amber-500/40 hover:bg-amber-900/60 text-left transition">
+            <span class="font-oswald text-xs font-bold text-amber-300 block"><i class="fa-solid fa-crown mr-1"></i> ADMIN LAB</span>
+            <span class="text-[9px] text-amber-400 font-mono">PIN: 9999</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="divider my-1 text-[10px] text-brand-grayText uppercase font-mono">Hoặc nhập thủ công</div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-oswald uppercase text-brand-grayText mb-1">Tài khoản Cán bộ:</label>
+          <input v-model="staffLoginForm.user_id" type="text" placeholder="admin hoặc inspector" class="w-full bg-brand-black border border-brand-border rounded-xl px-3 py-2 text-xs text-white focus:border-brand-red font-mono">
+        </div>
+        <div>
+          <label class="block text-xs font-oswald uppercase text-brand-grayText mb-1">Mã PIN bảo mật:</label>
+          <input v-model="staffLoginForm.pin" type="password" placeholder="Admin: 9999 | Kiểm định: 7777" class="w-full bg-brand-black border border-brand-border rounded-xl px-3 py-2 text-xs text-white focus:border-brand-red font-mono">
+        </div>
+
+        <div v-if="staffLoginError" class="p-2.5 rounded-xl bg-rose-500/10 border border-brand-red/30 text-rose-400 text-xs font-mono">
+          {{ staffLoginError }}
+        </div>
+      </div>
+
+      <div class="modal-action mt-2">
+        <button @click="handleStaffLogin" :disabled="isStaffLoggingIn" class="btn-red-cta btn-block py-2.5 rounded-xl font-oswald uppercase font-bold text-xs">
+          <i v-if="isStaffLoggingIn" class="fa-solid fa-spinner fa-spin mr-1"></i>
+          <span>Xác Nhận Đăng Nhập</span>
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- MODAL: PINOUT -->
+  <dialog :open="!!pinoutModal" class="modal modal-bottom sm:modal-middle bg-black/85 backdrop-blur-sm z-50">
+    <div v-if="pinoutModal" class="modal-box bg-brand-card border border-brand-border p-5 sm:p-6 rounded-2xl max-w-lg w-full mx-auto shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-brand-border pb-3">
+        <div>
+          <span class="text-[10px] font-oswald uppercase font-bold text-brand-red tracking-wider">{{ pinoutModal.device_id }}</span>
+          <h3 class="font-oswald text-lg font-bold text-white uppercase">{{ pinoutModal.name }}</h3>
+        </div>
+        <button @click="pinoutModal = null" class="btn btn-circle btn-ghost btn-sm text-brand-grayText hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="bg-rose-500/10 border border-brand-red/30 rounded-xl p-3.5 text-rose-300">
+        <div class="flex items-start space-x-2.5">
+          <i class="fa-solid fa-triangle-exclamation text-lg mt-0.5 text-brand-red"></i>
+          <div>
+            <h4 class="font-oswald text-xs font-bold uppercase tracking-wider text-brand-red">Cảnh Báo Nguồn Điện</h4>
+            <p class="text-xs mt-1 leading-relaxed text-slate-300 font-medium">
+              {{ pinoutModal.specs_note || 'Đọc kỹ datasheet trước khi cấp nguồn!' }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-oswald uppercase font-bold text-slate-300 mb-1.5 flex items-center justify-between">
+          <span>Document — Ảnh hoặc tài liệu:</span>
+          <a v-if="getDocumentUrl(pinoutModal)" :href="getDocumentUrl(pinoutModal)" target="_blank" rel="noopener noreferrer" class="text-xs text-brand-red hover:underline">
+            Mở tài liệu <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+          </a>
+        </label>
+        <div class="rounded-xl overflow-hidden bg-brand-black border border-brand-border max-h-72 flex items-center justify-center p-2">
+          <img v-if="getDocumentUrl(pinoutModal) && !documentImageFailed" :src="getDocumentUrl(pinoutModal)" @error="documentImageFailed = true" alt="Ảnh document của thiết bị" class="w-full h-auto max-h-64 object-contain rounded-lg">
+          <p v-else-if="getDocumentUrl(pinoutModal)" class="text-xs text-brand-grayText">Bấm mở tài liệu để xem PDF, trang hướng dẫn hoặc ảnh không hỗ trợ xem trước.</p>
+          <p v-else class="text-xs text-brand-grayText">Chưa có document. Thêm link ảnh hoặc tài liệu trong phần sửa thiết bị.</p>
+        </div>
+      </div>
+
+      <div class="modal-action mt-4">
+        <button @click="pinoutModal = null" class="btn btn-sm btn-block bg-white/10 text-white border-none rounded-xl font-oswald uppercase font-bold">Đóng</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- MODAL: HISTORY LOG -->
+  <dialog :open="!!historyModal" class="modal modal-bottom sm:modal-middle bg-black/85 backdrop-blur-sm z-50">
+    <div v-if="historyModal" class="modal-box bg-brand-card border border-brand-border p-5 sm:p-6 rounded-2xl max-w-md w-full mx-auto shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-brand-border pb-3">
+        <div>
+          <h3 class="font-oswald text-base font-bold text-white uppercase flex items-center space-x-2">
+            <i class="fa-regular fa-clock text-brand-red"></i>
+            <span>Nhật Ký: {{ historyModal.device_id }}</span>
+          </h3>
+          <p class="text-xs text-brand-grayText truncate max-w-[280px]">{{ historyModal.name }}</p>
+        </div>
+        <button @click="historyModal = null" class="btn btn-circle btn-ghost btn-sm text-brand-grayText hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="space-y-3 max-h-96 overflow-y-auto pr-1">
+        <div v-if="!historyModal.recent_logs || historyModal.recent_logs.length === 0" class="text-center py-10 text-brand-grayText text-xs font-oswald uppercase">
+          Chưa có lượt giao dịch nào được ghi nhận.
+        </div>
+
+        <div v-for="(log, idx) in historyModal.recent_logs" :key="idx" class="p-3 bg-brand-black border border-brand-border rounded-xl text-xs space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="font-oswald uppercase font-bold" :class="log.action === 'Mượn mới' ? 'text-emerald-400' : (log.action === 'Trả về kho' ? 'text-amber-400' : 'text-cyan-400')">
+              ● {{ log.action }}
+            </span>
+            <span class="text-[10px] text-brand-grayText font-mono">{{ log.timestamp }}</span>
+          </div>
+          <div class="text-slate-200 font-medium"><i class="fa-regular fa-user mr-1.5 text-brand-grayText"></i>{{ log.user_name }}</div>
+          <div v-if="log.return_condition && log.return_condition !== 'N/A'" class="text-[10px] text-amber-300 font-mono">Tình trạng: {{ log.return_condition }}</div>
+          <div v-if="log.note" class="text-[10px] text-slate-300 italic bg-white/5 p-2 rounded-lg">"{{ log.note }}"</div>
+          <div v-if="log.photo_url" class="pt-1.5 flex items-center justify-between border-t border-white/5">
+            <span class="text-[10px] text-brand-grayText">Ảnh đối soát:</span>
+            <a :href="log.photo_url" target="_blank" class="text-xs text-brand-red font-bold hover:underline font-oswald uppercase">Xem ảnh</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-action mt-2">
+        <button @click="historyModal = null" class="btn btn-sm btn-block bg-white/10 text-white border-none rounded-xl font-oswald uppercase font-bold">Đóng</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- MODAL: TRANSACTION (MƯỢN/TRẢ) -->
+  <dialog :open="!!txModal" class="modal modal-bottom sm:modal-middle bg-black/85 backdrop-blur-sm z-50">
+    <div v-if="txModal" class="modal-box bg-brand-card border border-brand-border p-5 sm:p-6 rounded-2xl max-w-md w-full mx-auto shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-brand-border pb-3">
+        <div>
+          <span class="text-[10px] font-oswald uppercase font-black px-2 py-0.5 rounded bg-brand-red text-white">{{ txType }}</span>
+          <h3 class="font-oswald text-base font-bold text-white uppercase mt-1">{{ txModal.device_id }} - {{ txModal.name }}</h3>
+        </div>
+        <button @click="closeTxModal" class="btn btn-circle btn-ghost btn-sm text-brand-grayText hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="bg-brand-black border border-brand-border rounded-xl p-3 text-xs text-slate-300 flex items-center justify-between">
+        <div>
+          <p class="font-oswald uppercase font-bold text-white">{{ currentStudent.full_name }}</p>
+          <p class="text-[10px] text-brand-grayText font-mono">MSSV: {{ currentStudent.user_id }} • {{ currentStudent.phone }}</p>
+        </div>
+        <span class="text-[10px] font-oswald uppercase font-bold text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-lg">ĐÃ ĐỐI SOÁT</span>
+      </div>
+
+      <!-- Golden Standard Image -->
+      <div class="bg-brand-black rounded-xl p-3 border border-brand-border space-y-1.5">
+        <div class="flex items-center justify-between text-xs font-oswald uppercase font-bold text-white">
+          <span>Ảnh Mẫu Chuẩn (Golden Image):</span>
+          <span class="text-[10px] text-brand-red font-mono">Trải phẳng đồ theo mẫu</span>
+        </div>
+        <div class="rounded-lg overflow-hidden bg-black max-h-36 border border-white/10">
+          <img :src="txModal.golden_image || 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80'" class="w-full h-36 object-contain">
+        </div>
+      </div>
+
+      <!-- Checklist -->
+      <div class="bg-brand-black rounded-xl p-3 border border-brand-border space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-oswald uppercase font-bold text-white">Checklist Phụ Kiện:</span>
+          <span class="text-xs font-mono font-bold" :class="isAllAccessoriesChecked ? 'text-emerald-400' : 'text-brand-red'">
+            {{ checkedAccessoriesCount }}/{{ accessoryList.length }} món
+          </span>
+        </div>
+        <div class="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+          <label v-for="(acc, index) in accessoryList" :key="index" class="flex items-center p-2 rounded-lg bg-brand-card border border-brand-border cursor-pointer text-xs">
+            <input type="checkbox" v-model="checkedAccessories[acc]" class="checkbox checkbox-xs checkbox-error mr-2.5">
+            <span class="text-slate-200" :class="{'line-through text-slate-500': checkedAccessories[acc]}">{{ acc }}</span>
+          </label>
+        </div>
+      </div>
+
+      <div v-if="txType === 'Mượn mới' || txType === 'Nhận bàn giao tay đôi'" class="space-y-1">
+        <label class="block text-xs font-oswald uppercase font-bold text-slate-300">Mục Đích / Đề Tài:</label>
+        <select v-model="projectTag" class="w-full bg-brand-black border border-brand-border rounded-xl px-3 py-2 text-xs text-white focus:border-brand-red">
+          <option value="Test trong ngày">⚡ Test trong ngày (Hoàn trả trước 18h)</option>
+          <option value="Mượn ngắn hạn (<7 ngày)">📅 Mượn ngắn hạn (< 7 ngày)</option>
+          <option value="Gắn cố định Đồ án/Robot">🤖 Gắn cố định Đồ án / Robot</option>
+        </select>
+      </div>
+
+      <div v-if="txType === 'Trả về kho'" class="space-y-1.5">
+        <label class="block text-xs font-oswald uppercase font-bold text-slate-300">Tình Trạng Hoàn Trả:</label>
+        <div class="grid grid-cols-1 gap-1.5">
+          <label v-for="cond in returnConditionOptions" :key="cond.val" class="flex items-center p-2.5 rounded-xl border cursor-pointer text-xs transition" :class="returnCondition === cond.val ? 'bg-brand-black border-brand-red font-bold text-white' : 'bg-brand-card border-brand-border text-brand-grayText'">
+            <input type="radio" v-model="returnCondition" :value="cond.val" class="radio radio-xs radio-error mr-2.5">
+            <span>{{ cond.label }}</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Camera Capture -->
+      <div class="bg-brand-black rounded-xl p-3 border border-brand-border space-y-2">
+        <div class="flex items-center justify-between text-xs font-oswald uppercase font-bold">
+          <span class="text-white flex items-center space-x-1.5"><i class="fa-solid fa-camera text-brand-red"></i><span>Chụp Ảnh Bàn Giao *</span></span>
+          <span v-if="photoBase64" class="text-[10px] text-emerald-400 font-mono">Đã nén ({{ compressedKb }} KB)</span>
+        </div>
+
+        <div v-if="!photoBase64">
+          <label class="flex flex-col items-center justify-center p-5 border-2 border-dashed border-brand-border hover:border-brand-red rounded-xl bg-brand-card cursor-pointer transition">
+            <i class="fa-solid fa-camera text-3xl text-brand-red mb-1.5"></i>
+            <span class="text-xs font-oswald uppercase font-bold text-white">Bấm để chụp ảnh trải phẳng linh kiện</span>
+            <input type="file" accept="image/*" capture="environment" @change="handleCaptureImage" class="hidden">
+          </label>
+        </div>
+
+        <div v-else class="relative rounded-xl overflow-hidden border border-brand-border">
+          <img :src="photoBase64" class="w-full h-36 object-cover">
+          <div class="absolute inset-0 bg-black/60 flex items-center justify-center space-x-2">
+            <label class="btn btn-xs bg-white/20 text-white rounded font-oswald uppercase">Chụp lại<input type="file" accept="image/*" capture="environment" @change="handleCaptureImage" class="hidden"></label>
+            <button @click="photoBase64 = null" class="btn btn-xs btn-error rounded font-oswald uppercase">Xóa</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-oswald uppercase font-bold text-slate-300 mb-1">Ghi Chú Thêm:</label>
+        <input v-model="txNote" type="text" placeholder="Ghi chú thêm nếu có..." class="w-full bg-brand-black border border-brand-border rounded-xl px-3 py-2 text-xs text-white focus:border-brand-red">
+      </div>
+
+      <div class="modal-action pt-1">
+        <button @click="submitTransaction" :disabled="isSubmitting || !isTxFormValid" class="btn-red-cta btn-block py-3 rounded-xl font-oswald text-sm uppercase tracking-wider font-bold">
+          <i v-if="isSubmitting" class="fa-solid fa-spinner fa-spin mr-1.5"></i>
+          <span>{{ isSubmitting ? 'ĐANG TẢI LÊN LAB CLOUD...' : 'XÁC NHẬN ' + txType.toUpperCase() }}</span>
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- MODAL: ADD/EDIT DEVICE -->
+  <dialog :open="showDeviceEditModal" class="modal modal-bottom sm:modal-middle bg-black/85 backdrop-blur-sm z-50">
+    <div class="modal-box bg-brand-card border border-brand-border p-6 rounded-2xl max-w-xl w-full mx-auto shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-brand-border pb-3">
+        <h3 class="font-oswald text-base sm:text-lg font-bold text-white uppercase flex items-center space-x-2">
+          <i class="fa-solid fa-microchip text-brand-red"></i>
+          <span>{{ isEditingExistingDevice ? 'Chỉnh Sửa Thiết Bị & Tài Liệu' : 'Thêm Thiết Bị Mới Vào Kho' }}</span>
+        </h3>
+        <button @click="showDeviceEditModal = false" class="btn btn-circle btn-ghost btn-sm text-brand-grayText hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="space-y-3 max-h-[70vh] overflow-y-auto pr-1 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-oswald uppercase font-bold text-slate-300 mb-1">Mã Thiết Bị (Device ID) *:</label>
+            <input v-model="deviceForm.device_id" :disabled="isEditingExistingDevice" type="text" placeholder="VD: MCU-03, SEN-04..." class="w-full bg-brand-black border border-brand-border rounded-xl px-3 py-2 text-white font-mono uppercase focus:border-brand-red disabled:opacity-50">
+          </div>
+          <div>
+            <label class="block font-oswald uppercase font-bold text-slate-300 mb-1">Danh Mục:</label>
+            <select v-model="deviceForm.category" class="w-full bg-brand-black border border-brand-border rounded-xl px-3 py-2 text-white focus:border-brand-red">
+              <option value="MCU/SBC">MCU/SBC</option>
+              <option value="Cảm biến">Cảm biến</option>
+              <option value="Động cơ/Driver">Động cơ/Driver</option>
+              <option value="Mạch giao tiếp">Mạch giao tiếp</option>
+              <option value="Khác">Khác</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-oswald uppercase font-bold text-slate-300 mb-1">Tên Thiết Bị Đầy Đủ *:</label>
+          <input v-model="deviceForm.name" type="text" placeholder="VD: Kit Raspberry Pi 5 8GB..." class="w-full bg-brand-black border border-brand-border rounded-xl px-3 py-2 text-white focus:border-brand-red">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-oswald uppercase font-bold text-slate-300 mb-1">Vị Trí Hộp / Khay:</label>
+            <input v-model="deviceForm.location" type="text" placeholder="VD: Tủ A - Khay 03" class="w-full bg-brand-black border border-brand-border rounded-xl px-3 py-2 text-white font-mono focus:border-brand-red">
+          </div>
+          <div>
+            <label class="block font-oswald uppercase font-bold text-slate-300 mb-1">Cảnh Báo Nguồn Điện:</label>
+            <input v-model="deviceForm.specs_note" type="text" placeholder="VD: 5V-4A Type-C (IO 3.3V)" class="w-full bg-brand-black border border-brand-border rounded-xl px-3 py-2 text-white focus:border-brand-red">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-oswald uppercase font-bold text-slate-300 mb-1">Danh Sách Phụ Kiện (Phân tách bằng dấu phẩy) *:</label>
+          <textarea v-model="deviceForm.accessories" rows="2" placeholder="VD: 1x Mạch chính, 1x Nguồn DC, 1x Cáp nạp..." class="w-full bg-brand-black border border-brand-border rounded-xl p-2.5 text-white focus:border-brand-red"></textarea>
+        </div>
+
+        <div>
+          <label class="block font-oswald uppercase font-bold text-slate-300 mb-1">Link Ảnh Mẫu Chuẩn (Golden Image URL):</label>
+          <input v-model="deviceForm.golden_image" type="text" placeholder="https://..." class="w-full bg-brand-black border border-brand-border rounded-xl px-3 py-2 text-white font-mono text-[11px] focus:border-brand-red">
+        </div>
+
+        <div>
+          <label class="block font-oswald uppercase font-bold text-slate-300 mb-1">Document (Link ảnh hoặc tài liệu):</label>
+          <input v-model="deviceForm.pinout_link" type="text" placeholder="https://..." class="w-full bg-brand-black border border-brand-border rounded-xl px-3 py-2 text-white font-mono text-[11px] focus:border-brand-red">
+          <p class="text-[10px] text-brand-grayText mt-1">Dán link ảnh, PDF, Google Drive, datasheet hoặc trang hướng dẫn (http/https).</p>
+        </div>
+      </div>
+
+      <div class="modal-action mt-4 flex items-center justify-between">
+        <button @click="showDeviceEditModal = false" class="btn btn-sm btn-ghost text-brand-grayText font-oswald uppercase">Hủy</button>
+        <button @click="saveDeviceAsAdmin" :disabled="isSavingDevice" class="btn-red-cta px-5 py-2 rounded-xl font-oswald uppercase font-bold text-xs">
+          <i v-if="isSavingDevice" class="fa-solid fa-spinner fa-spin mr-1"></i>
+          <span>Lưu Thiết Bị & Tài Liệu</span>
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- MODAL: SETTINGS -->
+  <dialog :open="showSettingsModal" class="modal modal-bottom sm:modal-middle bg-black/85 backdrop-blur-sm z-50">
+    <div class="modal-box bg-brand-card border border-brand-border p-6 rounded-2xl max-w-sm w-full mx-auto shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-brand-border pb-3">
+        <h3 class="font-oswald text-base font-bold text-white uppercase flex items-center space-x-2">
+          <i class="fa-solid fa-sliders text-brand-red"></i>
+          <span>Cấu Hình API Google Apps Script</span>
+        </h3>
+        <button @click="showSettingsModal = false" class="btn btn-circle btn-ghost btn-sm text-brand-grayText hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-oswald uppercase text-brand-grayText mb-1">Web App API URL:</label>
+          <textarea v-model="configApiUrl" rows="3" placeholder="https://script.google.com/macros/s/.../exec" class="w-full bg-brand-black border border-brand-border rounded-xl p-2.5 text-xs text-white font-mono focus:border-brand-red"></textarea>
+          <p class="text-[10px] text-brand-grayText mt-1">Để trống để chạy chế độ <strong>DEMO_MODE</strong>.</p>
+        </div>
+      </div>
+
+      <div class="modal-action flex justify-between">
+        <button @click="resetToDemo" class="btn btn-sm btn-ghost text-xs text-brand-grayText font-oswald uppercase">Demo Mode</button>
+        <button @click="saveSettings" class="btn-red-cta px-4 py-1.5 rounded-xl text-xs font-oswald uppercase font-bold">Lưu Cấu Hình</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- TOAST NOTIFICATION -->
+  <div v-if="toastMessage" class="toast toast-top toast-center z-50">
+    <div class="alert shadow-2xl text-xs font-bold rounded-2xl py-2.5 px-5 border border-white/10 font-oswald uppercase tracking-wider flex items-center space-x-2" 
+         :class="toastType === 'success' ? 'bg-emerald-600 text-white' : (toastType === 'error' ? 'bg-brand-red text-white' : 'bg-slate-800 text-white')">
+      <i class="fa-solid" :class="toastType === 'success' ? 'fa-circle-check' : (toastType === 'error' ? 'fa-triangle-exclamation' : 'fa-circle-info')"></i>
+      <span>{{ toastMessage }}</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- VUE 3 APPLICATION LOGIC -->
+<script>
+const { createApp } = Vue;
+
+const DEMO_WHITELIST = [
+  { user_id: 'sv01', full_name: 'Nguyễn Văn An', phone: '0901234567', role: 'STUDENT', cohort: 'K68' },
+  { user_id: 'sv02', full_name: 'Trần Thị Bình', phone: '0918765432', role: 'STUDENT', cohort: 'K69' },
+  { user_id: '20210001', full_name: 'Lê Hoàng Cường', phone: '0988776655', role: 'STUDENT', cohort: 'K70' },
+  { user_id: '20210002', full_name: 'Phạm Minh Đức', phone: '0977112233', role: 'STUDENT', cohort: 'K70' }
+];
+
+const DEMO_STAFF_ACCOUNTS = [
+  { user_id: 'inspector', pin: '7777', full_name: 'KS. Nguyễn Văn Kiểm Định', role: 'INSPECTOR' },
+  { user_id: 'admin', pin: '9999', full_name: 'Thầy Quản Lý Lab', role: 'ADMIN' }
+];
+
+const DEMO_DEVICES = [
+  {
+    device_id: 'MCU-01',
+    name: 'Kit STM32F407 High-Performance ARM Cortex-M4',
+    category: 'MCU/SBC',
+    location: 'Tủ A - Khay 01',
+    accessories: 'Bo STM32F4, Cáp Type-C, 4 cọc đồng M3, Mạch nạp ST-Link V2',
+    golden_image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
+    specs_note: '3.3V/5V Type-C (ADC Max 3.3V - Cấm cấp 5V vào chân analog)',
+    pinout_link: 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=700&auto=format&fit=crop&q=80',
+    status: 'Trong kho',
+    holder_id: '',
+    holder_name: '',
+    project_tag: '',
+    updated_at: '2026-11-01 10:15:00',
+    recent_logs: [
+      {
+        tx_id: 'TX-1001',
+        timestamp: '2026-11-01 10:15:00',
+        user_name: 'Trần Thị Bình (sv02)',
+        action: 'Trả về kho',
+        return_condition: 'Hoạt động tốt - Đủ đồ',
+        note: 'Đã test nạp code và chạy bình thường.',
+        photo_url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&auto=format&fit=crop&q=80'
+      }
+    ]
+  },
+  {
+    device_id: 'MCU-02',
+    name: 'Nvidia Jetson Nano 4GB B01 Developer Kit',
+    category: 'MCU/SBC',
+    location: 'Tủ A - Khay 02',
+    accessories: 'Bo Jetson Nano, Nguồn DC 5V-4A Jack tròn, 2 Anten Wi-Fi, Quạt tản nhiệt PWM',
+    golden_image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&auto=format&fit=crop&q=80',
+    specs_note: 'DC 5V-4A (Jumper J48 cắm sẵn - Cấm cắm nguồn quá áp)',
+    pinout_link: 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=700&auto=format&fit=crop&q=80',
+    status: 'Đang mượn',
+    holder_id: 'sv02',
+    holder_name: 'Trần Thị Bình',
+    project_tag: 'Gắn cố định Robot WBR',
+    updated_at: '2026-11-02 14:30:00',
+    recent_logs: [
+      {
+        tx_id: 'TX-1002',
+        timestamp: '2026-11-02 14:30:00',
+        user_name: 'Trần Thị Bình (sv02)',
+        action: 'Mượn mới',
+        project_tag: 'Gắn cố định Robot WBR',
+        return_condition: 'N/A',
+        note: 'Mượn chạy model thị giác AI SLAM.',
+        photo_url: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=400&auto=format&fit=crop&q=80'
+      }
+    ]
+  },
+  {
+    device_id: 'SEN-01',
+    name: 'LiDAR RPLIDAR A1M8 360 Degree 12M Scanner',
+    category: 'Cảm biến',
+    location: 'Tủ B - Khay 01',
+    accessories: 'Cụm LiDAR xoay, Bo USB-UART, Cáp 7-pin Molex',
+    golden_image: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=600&auto=format&fit=crop&q=80',
+    specs_note: '5V PWM Động cơ quét (Tốc độ quét 2000-8000 Hz)',
+    pinout_link: 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=700&auto=format&fit=crop&q=80',
+    status: 'Trong kho',
+    holder_id: '',
+    holder_name: '',
+    project_tag: '',
+    updated_at: '2026-10-28 09:00:00',
+    recent_logs: []
+  },
+  {
+    device_id: 'SEN-02',
+    name: 'Cảm Biến IMU Xsens MTi-30 AHRS Industrial',
+    category: 'Cảm biến',
+    location: 'Tủ B - Khay 02',
+    accessories: 'Module Xsens vỏ nhôm, Cáp Hirose-to-USB chống nhiễu',
+    golden_image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80',
+    specs_note: 'USB 5V (Cảm biến nhạy - Tránh va đập cơ khí)',
+    pinout_link: 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=700&auto=format&fit=crop&q=80',
+    status: 'Báo lỗi/Khóa',
+    holder_id: '',
+    holder_name: '',
+    project_tag: '',
+    updated_at: '2026-11-02 16:20:00',
+    recent_logs: [
+      {
+        tx_id: 'TX-1003',
+        timestamp: '2026-11-02 16:20:00',
+        user_name: 'Nguyễn Văn An (sv01)',
+        action: 'Trả về kho',
+        return_condition: 'Báo lỗi/Hỏng',
+        note: 'Lỏng chân cắm số 3 cáp Hirose, cần kỹ thuật kiểm tra.',
+        photo_url: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=400&auto=format&fit=crop&q=80'
+      }
+    ]
+  },
+  {
+    device_id: 'DRV-01',
+    name: 'Động Cơ Thông Minh Dynamixel XM430-W350-T',
+    category: 'Động cơ/Driver',
+    location: 'Tủ C - Khay 01',
+    accessories: 'Động cơ XM430, Đĩa trục nhôm, Cáp RS485 3-pin',
+    golden_image: 'https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?w=600&auto=format&fit=crop&q=80',
+    specs_note: '11.1V - 14.8V DC (Chuẩn 12V - Tránh đấu ngược cực)',
+    pinout_link: 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=700&auto=format&fit=crop&q=80',
+    status: 'Trong kho',
+    holder_id: '',
+    holder_name: '',
+    project_tag: '',
+    updated_at: '2026-10-30 11:15:00',
+    recent_logs: []
+  },
+  {
+    device_id: 'COM-01',
+    name: 'Mạch Nạp & Debug Segger J-Link BASE Gốc',
+    category: 'Mạch giao tiếp',
+    location: 'Tủ D - Khay 01',
+    accessories: 'Cục nạp J-Link, Cáp dẹt 20-pin, Cáp USB-B bọc giáp',
+    golden_image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
+    specs_note: 'VTarget 1.8V - 5.0V SWD/JTAG',
+    pinout_link: 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=700&auto=format&fit=crop&q=80',
+    status: 'Trong kho',
+    holder_id: '',
+    holder_name: '',
+    project_tag: '',
+    updated_at: '2026-10-25 15:45:00',
+    recent_logs: []
+  }
+];
+
+const DEMO_AUDIT_QUEUE = [
+  {
+    tx_id: 'TX-1002',
+    timestamp: '2026-11-02 14:30:00',
+    user_name: 'Trần Thị Bình (sv02)',
+    action: 'Mượn mới',
+    device_ids: 'MCU-02',
+    project_tag: 'Gắn cố định Robot WBR',
+    checked_accessories: 'Bo Jetson Nano, Nguồn DC 5V-4A Jack tròn, 2 Anten Wi-Fi, Quạt tản nhiệt PWM',
+    return_condition: 'N/A',
+    note: 'Mượn chạy model thị giác AI SLAM.',
+    photo_url: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=500&auto=format&fit=crop&q=80',
+    audit_status: 'Chờ kiểm định',
+    audited_by: '',
+    audit_note: ''
+  },
+  {
+    tx_id: 'TX-1003',
+    timestamp: '2026-11-02 16:20:00',
+    user_name: 'Nguyễn Văn An (sv01)',
+    action: 'Trả về kho',
+    device_ids: 'SEN-02',
+    project_tag: '',
+    checked_accessories: 'Module Xsens vỏ nhôm, Cáp Hirose-to-USB chống nhiễu',
+    return_condition: 'Báo lỗi/Hỏng',
+    note: 'Lỏng chân cắm số 3 cáp Hirose, cần kỹ thuật kiểm tra.',
+    photo_url: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=500&auto=format&fit=crop&q=80',
+    audit_status: 'Báo vi phạm',
+    audited_by: 'KS. Nguyễn Văn Kiểm Định',
+    audit_note: 'Xác nhận cáp gãy ngầm chân jack cắm'
+  },
+  {
+    tx_id: 'TX-1001',
+    timestamp: '2026-11-01 10:15:00',
+    user_name: 'Trần Thị Bình (sv02)',
+    action: 'Trả về kho',
+    device_ids: 'MCU-01',
+    project_tag: '',
+    checked_accessories: 'Bo STM32F4, Cáp Type-C, 4 cọc đồng M3, Mạch nạp ST-Link V2',
+    return_condition: 'Hoạt động tốt - Đủ đồ',
+    note: 'Đã test nạp code và chạy bình thường.',
+    photo_url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=500&auto=format&fit=crop&q=80',
+    audit_status: 'Đã duyệt hợp lệ',
+    audited_by: 'Thầy Quản Lý Lab',
+    audit_note: 'Đầy đủ phụ kiện, mạch sáng đẹp'
+  }
+];
+
+const DEMO_EDIT_LOGS = [
+  {
+    timestamp: '2026-11-02 17:00:00',
+    user_name: 'Thầy Quản Lý Lab (admin)',
+    action: '[Admin] Sửa thiết bị',
+    device_ids: 'SEN-02',
+    note: 'Cập nhật cảnh báo: Cảm biến nhạy - Tránh va đập cơ khí'
+  },
+  {
+    timestamp: '2026-11-01 08:30:00',
+    user_name: 'Thầy Quản Lý Lab (admin)',
+    action: '[Admin] Thêm thiết bị mới',
+    device_ids: 'COM-01',
+    note: 'Thêm mới Mạch Nạp & Debug Segger J-Link BASE Gốc'
+  },
+  {
+    timestamp: '2026-10-30 14:10:00',
+    user_name: 'Thầy Quản Lý Lab (admin)',
+    action: '[Admin] Mở khóa thiết bị',
+    device_ids: 'MCU-01',
+    note: 'Đã thay thế ST-Link V2 mới và mở khóa về kho'
+  }
+];
+
+createApp({
+  data() {
+    return {
+      apiUrl: localStorage.getItem('slam_api_url') || '',
+      configApiUrl: localStorage.getItem('slam_api_url') || '',
+      
+      // Top Navigation View Mode: 'SHOWROOM' | 'INSPECTOR' | 'ADMIN'
+      currentViewMode: 'SHOWROOM',
+      adminSubTab: 'DEVICES', // 'DEVICES' | 'LOGS'
+      adminStudentSearch: '',
+
+      // Student Whitelist Auth
+      inputMssv: localStorage.getItem('slam_student_mssv') || 'sv01',
+      currentStudent: null,
+      studentsWhitelist: [],
+
+      // Staff Auth (Admin & Inspector)
+      adminUser: JSON.parse(localStorage.getItem('slam_staff_user') || 'null'),
+      showStaffLoginModal: false,
+      staffLoginForm: { user_id: 'admin', pin: '9999' },
+      staffLoginError: '',
+      isStaffLoggingIn: false,
+      showPasswordModal: false,
+      passwordForm: { target_id: '', admin_pin: '', new_pin: '', confirm_pin: '' },
+      passwordError: '',
+      isChangingPassword: false,
+
+      // Devices & Filter
+      devices: [],
+      searchQuery: '',
+      activeStatusFilter: 'ALL',
+      selectedCategory: 'Tất cả',
+      categories: ['Tất cả', 'MCU/SBC', 'Cảm biến', 'Động cơ/Driver', 'Mạch giao tiếp'],
+
+      // Admin CRUD
+      adminDeviceSearch: '',
+      showDeviceEditModal: false,
+      isEditingExistingDevice: false,
+      isSavingDevice: false,
+      deviceForm: {
+        device_id: '',
+        name: '',
+        category: 'MCU/SBC',
+        location: '',
+        accessories: '',
+        golden_image: '',
+        specs_note: '',
+        pinout_link: ''
+      },
+
+      // QA Inspector
+      auditFilter: 'ALL',
+      auditQueue: [],
+      auditNotes: {},
+
+      // Admin Edit Logs
+      editLogs: [],
+
+      // Modals
+      showSettingsModal: false,
+      pinoutModal: null,
+      documentImageFailed: false,
+      historyModal: null,
+      txModal: null,
+
+      // Transaction Flow
+      txType: 'Mượn mới',
+      checkedAccessories: {},
+      projectTag: 'Test trong ngày',
+      returnCondition: 'Hoạt động tốt - Đủ đồ',
+      returnConditionOptions: [
+        { val: 'Hoạt động tốt - Đủ đồ', label: '🟢 Hoạt động tốt - Đầy đủ cáp & phụ kiện' },
+        { val: 'Thiếu phụ kiện', label: '🟡 Thiếu phụ kiện (Ghi rõ chi tiết ở ghi chú)' },
+        { val: 'Báo lỗi/Hỏng', label: '🔴 Báo lỗi / Cháy hỏng thiết bị (Khóa cách ly kiểm tra)' }
+      ],
+      txNote: '',
+      photoBase64: null,
+      compressedKb: 0,
+      isSubmitting: false,
+
+      toastMessage: '',
+      toastType: 'info'
+    };
+  },
+  computed: {
+    adminStudentResults() {
+      const query = this.normalizeStudentSearch(this.adminStudentSearch);
+      const tokens = query.split(/\s+/).filter(Boolean);
+      return this.studentsWhitelist
+        .filter(user => String(user.role || 'STUDENT').toUpperCase() === 'STUDENT')
+        .filter(user => {
+          const text = this.normalizeStudentSearch(String(user.user_id || '') + ' ' + String(user.full_name || ''));
+          return tokens.every(token => text.includes(token));
+        })
+        .map(user => ({ ...user, borrowed_devices: this.devices.filter(device =>
+          device.status === 'Đang mượn' && String(device.holder_id || '').trim().toLowerCase() === String(user.user_id || '').trim().toLowerCase()) }));
+    },
+    canEditDevices() {
+      return !!this.adminUser && ['ADMIN', 'INSPECTOR'].includes(this.adminUser.role);
+    },
+    isDemoMode() { return !this.apiUrl.trim(); },
+    myHoldingCount() {
+      if (!this.currentStudent) return 0;
+      return this.devices.filter(d => d.status === 'Đang mượn' && d.holder_id === this.currentStudent.user_id).length;
+    },
+    inStockCount() {
+      return this.devices.filter(d => d.status === 'Trong kho').length;
+    },
+    borrowedCount() {
+      return this.devices.filter(d => d.status === 'Đang mượn').length;
+    },
+    faultyCount() {
+      return this.devices.filter(d => d.status === 'Báo lỗi/Khóa').length;
+    },
+    pendingAuditCount() {
+      return this.auditQueue.filter(a => !a.audit_status || a.audit_status === 'Chờ kiểm định').length;
+    },
+    passedAuditCount() {
+      return this.auditQueue.filter(a => a.audit_status && a.audit_status.includes('hợp lệ')).length;
+    },
+    failedAuditCount() {
+      return this.auditQueue.filter(a => a.audit_status && a.audit_status.includes('vi phạm')).length;
+    },
+    filteredDevices() {
+      return this.devices.filter(d => {
+        if (this.activeStatusFilter === 'MY_HOLDING') {
+          if (!this.currentStudent || d.status !== 'Đang mượn' || d.holder_id !== this.currentStudent.user_id) return false;
+        } else if (this.activeStatusFilter === 'IN_STOCK') {
+          if (d.status !== 'Trong kho') return false;
+        } else if (this.activeStatusFilter === 'FAULTY') {
+          if (d.status !== 'Báo lỗi/Khóa') return false;
+        }
+
+        if (this.selectedCategory !== 'Tất cả' && d.category !== this.selectedCategory) return false;
+
+        if (this.searchQuery.trim()) {
+          const q = this.searchQuery.toLowerCase().trim();
+          const matchId = d.device_id.toLowerCase().includes(q);
+          const matchName = d.name.toLowerCase().includes(q);
+          const matchLoc = d.location.toLowerCase().includes(q);
+          if (!matchId && !matchName && !matchLoc) return false;
+        }
+        return true;
+      });
+    },
+    adminFilteredDevices() {
+      if (!this.adminDeviceSearch.trim()) return this.devices;
+      const q = this.adminDeviceSearch.toLowerCase().trim();
+      return this.devices.filter(d => 
+        d.device_id.toLowerCase().includes(q) || 
+        d.name.toLowerCase().includes(q) || 
+        d.location.toLowerCase().includes(q) ||
+        d.category.toLowerCase().includes(q)
+      );
+    },
+    filteredAuditQueue() {
+      return this.auditQueue.filter(item => {
+        const st = item.audit_status || 'Chờ kiểm định';
+        if (this.auditFilter === 'PENDING') return st === 'Chờ kiểm định';
+        if (this.auditFilter === 'PASSED') return st.includes('hợp lệ');
+        if (this.auditFilter === 'FAILED') return st.includes('vi phạm');
+        return true;
+      });
+    },
+    accessoryList() {
+      if (!this.txModal || !this.txModal.accessories) return [];
+      return this.txModal.accessories.split(',').map(s => s.trim()).filter(s => s.length > 0);
+    },
+    checkedAccessoriesCount() {
+      return Object.values(this.checkedAccessories).filter(Boolean).length;
+    },
+    isAllAccessoriesChecked() {
+      if (this.accessoryList.length === 0) return true;
+      return this.accessoryList.every(item => this.checkedAccessories[item] === true);
+    },
+    isTxFormValid() {
+      if (!this.currentStudent) return false;
+      if (!this.isAllAccessoriesChecked) return false;
+      if (!this.photoBase64) return false;
+      if (this.txType === 'Trả về kho' && !this.returnCondition) return false;
+      return true;
+    }
+  },
+  mounted() {
+    this.fetchData();
+  },
+  methods: {
+    normalizeStudentSearch(value) {
+      return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[đĐ]/g, 'd').toLowerCase().trim();
+    },
+    showToast(msg, type = 'info') {
+      this.toastMessage = msg;
+      this.toastType = type;
+      setTimeout(() => { this.toastMessage = ''; }, 3500);
+    },
+    scrollToInventory() {
+      const el = document.getElementById('inventory-section');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    },
+    isHeldByCurrentStudent(device) {
+      return this.currentStudent && device.holder_id === this.currentStudent.user_id;
+    },
+    getHolderPhone(device) {
+      const holderId = String(device.holder_id || '').trim().toLowerCase();
+      if (!holderId) return '';
+      const holder = this.studentsWhitelist.find(user => String(user.user_id || '').trim().toLowerCase() === holderId);
+      const phone = String(holder && holder.phone || '').trim().replace(/[\s().-]/g, '');
+      return /^\+?\d{7,15}$/.test(phone) ? phone : '';
+    },
+    getHolderCohort(device) {
+      const holderId = String(device.holder_id || '').trim().toLowerCase();
+      if (!holderId) return '';
+      const holder = this.studentsWhitelist.find(user => String(user.user_id || '').trim().toLowerCase() === holderId);
+      const cohort = String(holder && holder.cohort || '').trim().toUpperCase();
+      return /^\d+$/.test(cohort) ? 'K' + cohort : cohort;
+    },
+    getFirstName(fullName) {
+      if (!fullName) return '';
+      const parts = fullName.trim().split(' ');
+      return parts[parts.length - 1];
+    },
+    getShortVoltage(spec) {
+      if (!spec) return '3.3V - 5V DC';
+      const m = spec.match(/\d+(\.\d+)?V/gi);
+      return m ? m.join(' / ') : spec.slice(0, 22);
+    },
+    getAccessoriesCount(acc) {
+      if (!acc) return 0;
+      return acc.split(',').length;
+    },
+    resetFilters() {
+      this.searchQuery = '';
+      this.activeStatusFilter = 'ALL';
+      this.selectedCategory = 'Tất cả';
+    },
+
+    // Mode Switchers with Security Gate
+    enterInspectionMode() {
+      this.currentViewMode = 'INSPECTOR';
+      if (!this.adminUser) {
+        this.showToast('Vui lòng đăng nhập tài khoản Cán bộ để kiểm định!', 'info');
+      } else {
+        this.showToast('Đang ở Bàn Kiểm Định (QA)!', 'success');
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+
+    enterAdminMode() {
+      this.currentViewMode = 'ADMIN';
+      this.adminSubTab = 'DEVICES';
+      if (!this.adminUser || this.adminUser.role !== 'ADMIN') {
+        this.showToast('Vui lòng đăng nhập tài khoản ADMIN!', 'info');
+      } else {
+        this.showToast('Đang ở Trung Tâm Quản Trị Admin!', 'success');
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+
+    // Staff Authentication
+    openPasswordModal() {
+      if (!this.adminUser || this.adminUser.role !== 'ADMIN') return;
+      this.passwordForm = { target_id: '', admin_pin: '', new_pin: '', confirm_pin: '' };
+      this.passwordError = '';
+      this.showPasswordModal = true;
+    },
+    closePasswordModal() {
+      this.showPasswordModal = false;
+      this.passwordForm = { target_id: '', admin_pin: '', new_pin: '', confirm_pin: '' };
+      this.passwordError = '';
+    },
+    async changeAccountPassword() {
+      if (!this.adminUser || this.adminUser.role !== 'ADMIN' || this.isChangingPassword) return;
+      this.passwordError = '';
+      const form = this.passwordForm;
+      if (!form.target_id || !form.admin_pin || form.new_pin.length < 8 || form.new_pin.length > 128 || form.new_pin !== form.new_pin.trim() || form.new_pin !== form.confirm_pin) {
+        this.passwordError = 'Kiểm tra tài khoản, mật khẩu Admin và hai mật khẩu mới (8–128 ký tự, không có khoảng trắng ở đầu/cuối).';
+        return;
+      }
+      this.isChangingPassword = true;
+      try {
+        if (this.isDemoMode) {
+          this.passwordError = 'Đổi mật khẩu cần kết nối cơ sở dữ liệu thật; chế độ demo không lưu mật khẩu.';
+          return;
+        }
+        const res = await fetch(this.apiUrl, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'admin_change_password', admin_id: this.adminUser.user_id,
+            admin_pin: form.admin_pin, target_id: form.target_id, new_pin: form.new_pin })
+        });
+        const result = await res.json();
+        if (!result.success) { this.passwordError = result.message || 'Không thể đổi mật khẩu.'; return; }
+        this.closePasswordModal();
+        this.showToast(result.message, 'success');
+      } catch (error) {
+        this.passwordError = 'Lỗi kết nối. Kiểm tra đăng nhập bằng mật khẩu mới trước khi thử lại.';
+      } finally {
+        this.passwordForm.admin_pin = '';
+        this.passwordForm.new_pin = '';
+        this.passwordForm.confirm_pin = '';
+        this.isChangingPassword = false;
+      }
+    },
+    openStaffLoginModal() {
+      this.staffLoginError = '';
+      this.showStaffLoginModal = true;
+    },
+    openStaffLoginModalWithRole(preferredRole) {
+      this.staffLoginError = '';
+      if (preferredRole === 'inspector') {
+        this.staffLoginForm.user_id = 'inspector';
+        this.staffLoginForm.pin = '7777';
+      } else {
+        this.staffLoginForm.user_id = 'admin';
+        this.staffLoginForm.pin = '9999';
+      }
+      this.showStaffLoginModal = true;
+    },
+    quickFillStaff(userId, pin) {
+      this.staffLoginForm.user_id = userId;
+      this.staffLoginForm.pin = pin;
+      this.handleStaffLogin();
+    },
+
+    async handleStaffLogin() {
+      this.staffLoginError = '';
+      const uid = this.staffLoginForm.user_id.trim();
+      const pin = this.staffLoginForm.pin.trim();
+      if (!uid || !pin) {
+        this.staffLoginError = 'Vui lòng nhập tài khoản và mã PIN!';
+        return;
+      }
+      this.isStaffLoggingIn = true;
+      try {
+        if (this.isDemoMode) {
+          await new Promise(r => setTimeout(r, 350));
+          const match = DEMO_STAFF_ACCOUNTS.find(s => s.user_id.toLowerCase() === uid.toLowerCase() && s.pin === pin);
+          if (match) {
+            this.adminUser = {
+              user_id: match.user_id,
+              full_name: match.full_name,
+              role: match.role
+            };
+            localStorage.setItem('slam_staff_user', JSON.stringify(this.adminUser));
+            this.showStaffLoginModal = false;
+            this.showToast(`Chào mừng ${match.full_name} (${match.role})!`, 'success');
+            
+            if (match.role === 'INSPECTOR') {
+              this.currentViewMode = 'INSPECTOR';
+            } else if (match.role === 'ADMIN') {
+              this.currentViewMode = 'ADMIN';
+            }
+          } else {
+            this.staffLoginError = 'Sai mã PIN hoặc tài khoản (Admin: 9999 | Kiểm định: 7777)!';
+          }
+        } else {
+          const res = await fetch(this.apiUrl, {
+            method: 'POST',
+            body: JSON.stringify({
+              action: 'admin_login',
+              user_id: uid,
+              pin: pin
+            })
+          });
+          const result = await res.json();
+          if (result.success && result.user) {
+            this.adminUser = result.user;
+            localStorage.setItem('slam_staff_user', JSON.stringify(this.adminUser));
+            this.showStaffLoginModal = false;
+            this.showToast(result.message || 'Đăng nhập Cán bộ thành công!', 'success');
+            if (result.user.role === 'INSPECTOR') {
+              this.currentViewMode = 'INSPECTOR';
+            } else if (result.user.role === 'ADMIN') {
+              this.currentViewMode = 'ADMIN';
+            }
+          } else {
+            this.staffLoginError = result.message || 'Sai thông tin đăng nhập!';
+          }
+        }
+      } catch (e) {
+        this.staffLoginError = 'Lỗi kết nối: ' + e.message;
+      } finally {
+        this.isStaffLoggingIn = false;
+      }
+    },
+    logoutStaff() {
+      this.adminUser = null;
+      localStorage.removeItem('slam_staff_user');
+      this.currentViewMode = 'SHOWROOM';
+      this.showToast('Đã đăng xuất tài khoản Cán bộ.', 'info');
+    },
+
+    async fetchData() {
+      if (this.isDemoMode) {
+        this.studentsWhitelist = DEMO_WHITELIST;
+        
+        const savedDemo = localStorage.getItem('slam_demo_devices');
+        if (savedDemo) {
+          this.devices = JSON.parse(savedDemo);
+        } else {
+          this.devices = JSON.parse(JSON.stringify(DEMO_DEVICES));
+          localStorage.setItem('slam_demo_devices', JSON.stringify(this.devices));
+        }
+
+        const savedAudits = localStorage.getItem('slam_demo_audits');
+        if (savedAudits) {
+          this.auditQueue = JSON.parse(savedAudits);
+        } else {
+          this.auditQueue = JSON.parse(JSON.stringify(DEMO_AUDIT_QUEUE));
+          localStorage.setItem('slam_demo_audits', JSON.stringify(this.auditQueue));
+        }
+
+        const savedLogs = localStorage.getItem('slam_demo_edit_logs');
+        if (savedLogs) {
+          this.editLogs = JSON.parse(savedLogs);
+        } else {
+          this.editLogs = JSON.parse(JSON.stringify(DEMO_EDIT_LOGS));
+          localStorage.setItem('slam_demo_edit_logs', JSON.stringify(this.editLogs));
+        }
+
+        this.checkStudentWhitelist();
+        return;
+      }
+
+      try {
+        const res = await fetch(this.apiUrl);
+        const data = await res.json();
+        if (data.success) {
+          this.devices = data.devices || [];
+          this.studentsWhitelist = data.whitelist || [];
+          this.auditQueue = data.audit_queue || [];
+          this.editLogs = data.edit_logs || [];
+          this.checkStudentWhitelist();
+        }
+      } catch (err) {
+        this.studentsWhitelist = DEMO_WHITELIST;
+        this.devices = JSON.parse(JSON.stringify(DEMO_DEVICES));
+        this.auditQueue = JSON.parse(JSON.stringify(DEMO_AUDIT_QUEUE));
+        this.editLogs = JSON.parse(JSON.stringify(DEMO_EDIT_LOGS));
+        this.checkStudentWhitelist();
+      }
+    },
+
+    checkStudentWhitelist() {
+      const q = this.inputMssv.trim().toLowerCase();
+      if (!q) {
+        this.currentStudent = null;
+        localStorage.removeItem('slam_student_mssv');
+        return;
+      }
+      const match = this.studentsWhitelist.find(s => s.user_id.toLowerCase() === q);
+      if (match) {
+        this.currentStudent = match;
+        localStorage.setItem('slam_student_mssv', match.user_id);
+      } else {
+        this.currentStudent = null;
+      }
+    },
+
+    // CRUD Device Methods (Admin)
+    openAddDeviceModal() {
+      if (!this.canEditDevices) return;
+      this.isEditingExistingDevice = false;
+      this.deviceForm = {
+        device_id: `MCU-0${this.devices.length + 1}`,
+        name: '',
+        category: 'MCU/SBC',
+        location: 'Tủ A - Khay 01',
+        accessories: '1x Bo mạch chính, 1x Cáp nạp, 1x Nguồn DC',
+        golden_image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
+        specs_note: '3.3V / 5V DC',
+        pinout_link: 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=700&auto=format&fit=crop&q=80'
+      };
+      this.showDeviceEditModal = true;
+    },
+    openEditDeviceModal(device) {
+      if (!this.canEditDevices) return;
+      this.isEditingExistingDevice = true;
+      this.deviceForm = {
+        device_id: device.device_id,
+        name: device.name,
+        category: device.category,
+        location: device.location,
+        accessories: device.accessories,
+        golden_image: device.golden_image,
+        specs_note: device.specs_note,
+        pinout_link: device.pinout_link
+      };
+      this.showDeviceEditModal = true;
+    },
+    async saveDeviceAsAdmin() {
+      if (!this.canEditDevices) return;
+      if (!this.deviceForm.device_id.trim() || !this.deviceForm.name.trim() || !this.deviceForm.accessories.trim()) {
+        this.showToast('Vui lòng điền đủ Mã, Tên và Phụ kiện bắt buộc!', 'error');
+        return;
+      }
+      this.isSavingDevice = true;
+      const adminName = this.adminUser ? `${this.adminUser.full_name} (${this.adminUser.role})` : 'Admin Lab';
+      const nowStr = new Date().toISOString().replace('T', ' ').substring(0, 19);
+
+      try {
+        if (this.isDemoMode) {
+          await new Promise(r => setTimeout(r, 400));
+          const existing = this.devices.find(d => d.device_id.toLowerCase() === this.deviceForm.device_id.toLowerCase());
+          
+          if (existing) {
+            existing.name = this.deviceForm.name;
+            existing.category = this.deviceForm.category;
+            existing.location = this.deviceForm.location;
+            existing.accessories = this.deviceForm.accessories;
+            existing.golden_image = this.deviceForm.golden_image;
+            existing.specs_note = this.deviceForm.specs_note;
+            existing.pinout_link = this.deviceForm.pinout_link;
+            existing.updated_at = nowStr;
+
+            this.editLogs.unshift({
+              timestamp: nowStr,
+              user_name: adminName,
+              action: '[Admin] Sửa thiết bị',
+              device_ids: this.deviceForm.device_id,
+              note: `Cập nhật thông số kỹ thuật & tài liệu cho ${this.deviceForm.name}`
+            });
+            this.showToast(`Đã cập nhật tài liệu cho [${this.deviceForm.device_id}]!`, 'success');
+          } else {
+            this.devices.unshift({
+              ...this.deviceForm,
+              status: 'Trong kho',
+              holder_id: '',
+              holder_name: '',
+              project_tag: '',
+              updated_at: nowStr,
+              recent_logs: []
+            });
+
+            this.editLogs.unshift({
+              timestamp: nowStr,
+              user_name: adminName,
+              action: '[Admin] Thêm thiết bị mới',
+              device_ids: this.deviceForm.device_id,
+              note: `Thêm thiết bị mới: ${this.deviceForm.name} (${this.deviceForm.category})`
+            });
+            this.showToast(`Đã thêm thiết bị mới [${this.deviceForm.device_id}]!`, 'success');
+          }
+
+          localStorage.setItem('slam_demo_devices', JSON.stringify(this.devices));
+          localStorage.setItem('slam_demo_edit_logs', JSON.stringify(this.editLogs));
+          this.showDeviceEditModal = false;
+        } else {
+          const res = await fetch(this.apiUrl, {
+            method: 'POST',
+            body: JSON.stringify({
+              action: 'admin_save_device',
+              admin_name: adminName,
+              ...this.deviceForm
+            })
+          });
+          const result = await res.json();
+          if (result.success) {
+            this.showToast(result.message || 'Lưu thiết bị thành công!', 'success');
+            this.showDeviceEditModal = false;
+            await this.fetchData();
+          } else {
+            this.showToast('Lỗi: ' + result.message, 'error');
+          }
+        }
+      } catch (e) {
+        this.showToast('Lỗi lưu thiết bị: ' + e.message, 'error');
+      } finally {
+        this.isSavingDevice = false;
+      }
+    },
+
+    async deleteDeviceAsAdmin(device) {
+      if (!confirm(`Bạn có chắc chắn muốn XÓA / BỚT thiết bị [${device.device_id}: ${device.name}] khỏi kho?`)) return;
+
+      const adminName = this.adminUser ? `${this.adminUser.full_name} (${this.adminUser.role})` : 'Admin Lab';
+      const nowStr = new Date().toISOString().replace('T', ' ').substring(0, 19);
+
+      if (this.isDemoMode) {
+        this.devices = this.devices.filter(d => d.device_id !== device.device_id);
+        this.editLogs.unshift({
+          timestamp: nowStr,
+          user_name: adminName,
+          action: '[Admin] Xóa thiết bị',
+          device_ids: device.device_id,
+          note: `Đã xóa thiết bị: ${device.name} khỏi kho`
+        });
+        localStorage.setItem('slam_demo_devices', JSON.stringify(this.devices));
+        localStorage.setItem('slam_demo_edit_logs', JSON.stringify(this.editLogs));
+        this.showToast(`Đã xóa thiết bị [${device.device_id}]!`, 'success');
+      } else {
+        try {
+          const res = await fetch(this.apiUrl, {
+            method: 'POST',
+            body: JSON.stringify({
+              action: 'admin_delete_device',
+              device_id: device.device_id,
+              admin_name: adminName
+            })
+          });
+          const result = await res.json();
+          if (result.success) {
+            this.showToast(result.message, 'success');
+            await this.fetchData();
+          } else {
+            this.showToast('Lỗi: ' + result.message, 'error');
+          }
+        } catch (e) {
+          this.showToast('Lỗi xóa: ' + e.message, 'error');
+        }
+      }
+    },
+
+    // QA Inspection Methods
+    getDeviceGoldenImage(deviceIds) {
+      if (!deviceIds) return '';
+      const firstId = deviceIds.split(',')[0].trim();
+      const dev = this.devices.find(d => d.device_id === firstId);
+      return dev ? dev.golden_image : 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=500&auto=format&fit=crop&q=80';
+    },
+    getAuditBadgeClass(st) {
+      if (!st || st === 'Chờ kiểm định') return 'bg-amber-500/20 text-amber-400 border border-amber-500/30';
+      if (st.includes('hợp lệ')) return 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+      return 'bg-rose-500/20 text-rose-400 border border-rose-500/30';
+    },
+    async submitAuditDecision(item, decision) {
+      const note = (this.auditNotes[item.tx_id] || '').trim();
+      const inspectorName = this.adminUser ? `${this.adminUser.full_name} (${this.adminUser.role})` : 'Cán bộ kiểm định';
+
+      if (this.isDemoMode) {
+        if (!['Đã duyệt hợp lệ', 'Báo vi phạm'].includes(decision) || (item.audit_status || 'Chờ kiểm định') !== 'Chờ kiểm định') {
+          this.showToast('Giao dịch đã được kiểm định hoặc kết luận không hợp lệ.', 'error');
+          return;
+        }
+        let returnedDevices = [];
+        if (item.action === 'Trả về kho') {
+          const ids = String(item.device_ids || '').split(',').map(id => id.trim());
+          returnedDevices = ids.map(id => this.devices.find(device => device.device_id === id));
+          const stale = ids.some(id => this.auditQueue.some((entry, index) => index < this.auditQueue.indexOf(item) && String(entry.device_ids || '').split(',').map(value => value.trim()).includes(id)));
+          if (stale || !returnedDevices.length || returnedDevices.some(device => !device || device.status !== 'Chờ kiểm định' || device.holder_id)) {
+            this.showToast('Thiết bị không còn chờ kiểm định cho giao dịch này.', 'error');
+            return;
+          }
+        }
+        item.audit_status = decision;
+        item.audited_by = inspectorName;
+        item.audit_note = note || (decision === 'Đã duyệt hợp lệ' ? 'Đủ phụ kiện, mạch nguyên vẹn' : 'Báo vi phạm / Thiếu đồ kiểm tra');
+
+        returnedDevices.forEach(device => {
+          device.status = decision === 'Đã duyệt hợp lệ' ? 'Trong kho' : 'Báo lỗi/Khóa';
+          device.updated_at = new Date().toISOString();
+        });
+        localStorage.setItem('slam_demo_devices', JSON.stringify(this.devices));
+
+        localStorage.setItem('slam_demo_audits', JSON.stringify(this.auditQueue));
+        this.showToast(`[${item.tx_id}] ${decision.toUpperCase()}!`, decision === 'Đã duyệt hợp lệ' ? 'success' : 'error');
+      } else {
+        try {
+          const res = await fetch(this.apiUrl, {
+            method: 'POST',
+            body: JSON.stringify({
+              action: 'audit_transaction',
+              tx_id: item.tx_id,
+              audit_status: decision,
+              inspector_name: inspectorName,
+              audit_note: note
+            })
+          });
+          const result = await res.json();
+          if (result.success) {
+            this.showToast(result.message, 'success');
+            await this.fetchData();
+          } else {
+            this.showToast('Lỗi: ' + result.message, 'error');
+          }
+        } catch (e) {
+          this.showToast('Lỗi kiểm định: ' + e.message, 'error');
+        }
+      }
+    },
+
+    // Unlock Device
+    async unlockDeviceAsAdmin(device) {
+      if (!confirm(`Mở khóa thiết bị [${device.device_id}] đưa về TRONG KHO?`)) return;
+
+      const adminName = this.adminUser ? `${this.adminUser.full_name} (${this.adminUser.role})` : 'Admin Lab';
+      const nowStr = new Date().toISOString().replace('T', ' ').substring(0, 19);
+
+      if (this.isDemoMode) {
+        device.status = 'Trong kho';
+        device.holder_id = '';
+        device.holder_name = '';
+        device.project_tag = '';
+        device.updated_at = nowStr;
+
+        this.editLogs.unshift({
+          timestamp: nowStr,
+          user_name: adminName,
+          action: '[Admin] Mở khóa thiết bị',
+          device_ids: device.device_id,
+          note: `Đã kiểm tra và mở khóa thiết bị đưa về TRONG KHO`
+        });
+
+        localStorage.setItem('slam_demo_devices', JSON.stringify(this.devices));
+        localStorage.setItem('slam_demo_edit_logs', JSON.stringify(this.editLogs));
+        this.showToast(`Đã mở khóa ${device.device_id}!`, 'success');
+      } else {
+        const res = await fetch(this.apiUrl, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'admin_unlock',
+            device_id: device.device_id,
+            admin_name: adminName
+          })
+        });
+        const resData = await res.json();
+        if (resData.success) {
+          this.showToast(resData.message, 'success');
+          await this.fetchData();
+        }
+      }
+    },
+
+    getDocumentUrl(device) {
+      const value = String(device && device.pinout_link || '').trim();
+      try {
+        const url = new URL(value);
+        return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+      } catch { return ''; }
+    },
+    openPinoutModal(device) {
+      this.documentImageFailed = false;
+      this.pinoutModal = device;
+    },
+    openHistoryModal(device) { this.historyModal = device; },
+    openTxModal(device, type) {
+      if (!this.currentStudent) {
+        this.showToast('Vui lòng nhập MSSV đã cấp phép ở thanh trên cùng trước!', 'error');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      this.txModal = device;
+      this.txType = type;
+      this.projectTag = device.project_tag || 'Test trong ngày';
+      this.returnCondition = 'Hoạt động tốt - Đủ đồ';
+      this.txNote = '';
+      this.photoBase64 = null;
+      this.compressedKb = 0;
+      this.checkedAccessories = {};
+      const list = device.accessories ? device.accessories.split(',').map(s => s.trim()) : [];
+      list.forEach(item => { this.checkedAccessories[item] = false; });
+    },
+    closeTxModal() { this.txModal = null; this.photoBase64 = null; },
+
+    handleCaptureImage(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (e) => {
+        const img = new Image();
+        img.src = e.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const maxWidth = 800;
+
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const compressed = canvas.toDataURL('image/jpeg', 0.7);
+          this.photoBase64 = compressed;
+          this.compressedKb = Math.round((compressed.length * 3 / 4) / 1024);
+        };
+      };
+    },
+
+    async submitTransaction() {
+      if (!this.isTxFormValid) return;
+
+      const device = this.devices.find(d => d.device_id === this.txModal.device_id);
+      if (!device || !this.currentStudent ||
+          !['Mượn mới', 'Trả về kho'].includes(this.txType) ||
+          (this.txType === 'Mượn mới' && (device.status !== 'Trong kho' || device.holder_id)) ||
+          (this.txType === 'Trả về kho' && (device.status !== 'Đang mượn' || device.holder_id !== this.currentStudent.user_id))) {
+        this.showToast('Không thể thực hiện: kiểm tra lại trạng thái và người đang giữ thiết bị. Bàn giao cần trả kho rồi mượn lại.', 'error');
+        return;
+      }
+
+      this.isSubmitting = true;
+      const checkedList = Object.keys(this.checkedAccessories).filter(k => this.checkedAccessories[k]);
+
+      const payload = {
+        action: 'transaction',
+        tx_type: this.txType,
+        user_id: this.currentStudent.user_id,
+        user_name: this.currentStudent.full_name,
+        device_ids: [this.txModal.device_id],
+        project_tag: (this.txType === 'Mượn mới' || this.txType === 'Nhận bàn giao tay đôi') ? this.projectTag : '',
+        checked_accessories: checkedList.join(', '),
+        return_condition: this.txType === 'Trả về kho' ? this.returnCondition : 'N/A',
+        note: this.txNote.trim(),
+        photo_base64: this.photoBase64
+      };
+
+      try {
+        if (this.isDemoMode) {
+          await new Promise(r => setTimeout(r, 800));
+          const dev = this.devices.find(d => d.device_id === this.txModal.device_id);
+          if (dev) {
+            const nowStr = new Date().toISOString().replace('T', ' ').substring(0, 19);
+            const newTxId = 'TX-' + Math.floor(1000 + Math.random() * 9000);
+
+            if (this.txType === 'Mượn mới' || this.txType === 'Nhận bàn giao tay đôi') {
+              dev.status = 'Đang mượn';
+              dev.holder_id = this.currentStudent.user_id;
+              dev.holder_name = this.currentStudent.full_name;
+              dev.project_tag = this.projectTag;
+            } else if (this.txType === 'Trả về kho') {
+              dev.status = 'Chờ kiểm định';
+              dev.holder_id = '';
+              dev.holder_name = '';
+              dev.project_tag = '';
+            }
+            dev.updated_at = nowStr;
+
+            const logEntry = {
+              tx_id: newTxId,
+              timestamp: nowStr,
+              user_name: `${this.currentStudent.full_name} (${this.currentStudent.user_id})`,
+              action: this.txType,
+              project_tag: payload.project_tag,
+              return_condition: payload.return_condition,
+              note: payload.note,
+              photo_url: this.photoBase64
+            };
+
+            if (!dev.recent_logs) dev.recent_logs = [];
+            dev.recent_logs.unshift(logEntry);
+            if (dev.recent_logs.length > 3) dev.recent_logs.pop();
+
+            this.auditQueue.unshift({
+              tx_id: newTxId,
+              timestamp: nowStr,
+              user_name: `${this.currentStudent.full_name} (${this.currentStudent.user_id})`,
+              action: this.txType,
+              device_ids: this.txModal.device_id,
+              project_tag: payload.project_tag,
+              checked_accessories: payload.checked_accessories,
+              return_condition: payload.return_condition,
+              note: payload.note,
+              photo_url: this.photoBase64,
+              audit_status: 'Chờ kiểm định',
+              audited_by: '',
+              audit_note: ''
+            });
+
+            localStorage.setItem('slam_demo_devices', JSON.stringify(this.devices));
+            localStorage.setItem('slam_demo_audits', JSON.stringify(this.auditQueue));
+          }
+          this.showToast(`[${this.txType}] hoàn tất thành công!`, 'success');
+          this.closeTxModal();
+        } else {
+          const res = await fetch(this.apiUrl, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+          const result = await res.json();
+          if (result.success) {
+            this.showToast(result.message || 'Thành công!', 'success');
+            this.closeTxModal();
+            await this.fetchData();
+          } else {
+            this.showToast('Lỗi: ' + result.message, 'error');
+          }
+        }
+      } catch (err) {
+        this.showToast('Lỗi gửi giao dịch: ' + err.message, 'error');
+      } finally {
+        this.isSubmitting = false;
+      }
+    },
+
+    saveSettings() {
+      const cleanUrl = this.configApiUrl.trim();
+      this.apiUrl = cleanUrl;
+      localStorage.setItem('slam_api_url', cleanUrl);
+      this.showSettingsModal = false;
+      this.fetchData();
+      this.showToast(cleanUrl ? 'Đã lưu Web App URL!' : 'Đã về chế độ DEMO!', 'info');
+    },
+    resetToDemo() {
+      this.configApiUrl = '';
+      this.saveSettings();
+    }
+  }
+}).mount('#app');
+</script>
+
+</body>
+</html>
