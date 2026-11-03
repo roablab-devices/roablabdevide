@@ -119,6 +119,10 @@
 <body class="min-h-screen flex flex-col antialiased selection:bg-brand-red selection:text-white">
 
 <div id="app" class="min-h-screen flex flex-col relative bg-brand-black text-slate-100">
+  <div v-if="connectionError" role="alert" class="p-4 bg-rose-950 text-rose-200 text-sm flex flex-wrap items-center justify-between gap-2">
+    <span>{{ connectionError }}</span>
+    <button @click="showSettingsModal = true" class="btn btn-sm">Cấu hình kết nối</button>
+  </div>
 
   <!-- ==================== 1. TOP TICKER STRIP ==================== -->
   <div class="bg-brand-red text-white py-1 px-4 text-[11px] font-bold tracking-wider uppercase flex items-center justify-between font-oswald shadow-md">
@@ -225,7 +229,7 @@
             v-model="inputMssv" 
             @input="checkStudentWhitelist"
             type="text" 
-            placeholder="MSSV (sv01, 20210001)..." 
+            placeholder="Nhập MSSV..." 
             class="w-32 sm:w-36 bg-brand-black border border-brand-border focus:border-brand-red rounded-lg px-2 py-0.5 text-xs font-mono font-bold text-white placeholder-slate-600 focus:outline-none">
           
           <span v-if="currentStudent" class="text-[10px] font-bold text-emerald-400 font-oswald uppercase truncate max-w-[80px]" :title="currentStudent.full_name">
@@ -445,7 +449,7 @@
             <!-- Image -->
             <div class="relative w-full h-48 bg-brand-black overflow-hidden cursor-pointer" @click="openPinoutModal(device)">
               <img 
-                :src="device.golden_image || 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80'" 
+                :src="device.golden_image || imagePlaceholder" @error="$event.target.src = imagePlaceholder"
                 :alt="device.name" 
                 class="w-full h-full object-cover group-hover:scale-105 transition duration-500 opacity-90 group-hover:opacity-100">
               
@@ -595,7 +599,6 @@
         </button>
 
         <div class="text-[10px] text-brand-grayText font-mono pt-2 border-t border-white/5">
-          Tài khoản Demo có sẵn: User <code>inspector</code> • PIN <code>7777</code>
         </div>
       </div>
 
@@ -821,7 +824,6 @@
         </button>
 
         <div class="text-[10px] text-brand-grayText font-mono pt-2 border-t border-white/5 flex items-center justify-between">
-          <span>Tài khoản Demo Admin: User <code>admin</code> • PIN <code>9999</code></span>
           <button @click="showSettingsModal = true" class="text-amber-400 hover:text-amber-300 underline font-sans flex items-center space-x-1">
             <i class="fa-solid fa-sliders text-xs"></i>
             <span>Cấu hình API</span>
@@ -1047,19 +1049,19 @@
                     <h3 class="font-oswald text-lg font-bold text-white uppercase tracking-wide">
                       Cấu Hình API Google Apps Script
                     </h3>
-                    <p class="text-xs text-brand-grayText">Kết nối cơ sở dữ liệu Google Sheets của Lab hoặc chạy chế độ Demo</p>
+                    <p class="text-xs text-brand-grayText">Kết nối cơ sở dữ liệu Google Sheets của Lab</p>
                   </div>
                 </div>
 
                 <!-- Status pill -->
                 <div class="flex items-center space-x-2">
-                  <span v-if="!isDemoMode" class="badge badge-success badge-sm font-oswald uppercase font-bold gap-1.5 py-3 px-3">
+                  <span v-if="hasApiUrl" class="badge badge-success badge-sm font-oswald uppercase font-bold gap-1.5 py-3 px-3">
                     <span class="w-2 h-2 rounded-full bg-black animate-ping"></span>
-                    API ĐANG KẾT NỐI
+                    ĐÃ CẤU HÌNH URL API
                   </span>
                   <span v-else class="badge badge-warning badge-sm font-oswald uppercase font-bold gap-1 py-3 px-3">
                     <i class="fa-solid fa-flask"></i>
-                    DEMO MODE
+                    CHƯA CẤU HÌNH API
                   </span>
                 </div>
               </div>
@@ -1078,7 +1080,7 @@
                     class="w-full bg-brand-black border border-brand-border rounded-2xl p-3.5 text-xs text-white font-mono focus:border-amber-400 focus:outline-none transition shadow-inner">
                   </textarea>
                   <p class="text-xs text-brand-grayText mt-1.5">
-                    Để trống URL này để hệ thống tự động quay về chế độ <strong>DEMO_MODE</strong> (chạy trên dữ liệu mẫu offline).
+                    Nhập URL triển khai Apps Script để tải dữ liệu thật của Lab.
                   </p>
                 </div>
 
@@ -1092,13 +1094,7 @@
                   </button>
 
                   <button 
-                    @click="resetToDemo" 
-                    class="btn btn-sm bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white rounded-xl font-oswald uppercase font-bold px-4">
-                    <i class="fa-solid fa-rotate-left mr-1"></i> Chuyển Về Demo Mode
-                  </button>
-
-                  <button 
-                    v-if="!isDemoMode"
+                    v-if="hasApiUrl"
                     @click="testApiConnection" 
                     :disabled="isTestingApi"
                     class="btn btn-sm bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-300 border border-cyan-500/40 rounded-xl font-oswald uppercase font-bold px-4">
@@ -1215,35 +1211,14 @@
         <button @click="showStaffLoginModal = false" class="btn btn-circle btn-ghost btn-sm text-brand-grayText hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
-      <!-- Quick 1-Click Fill Buttons for Demo -->
-      <div class="space-y-1.5">
-        <span class="text-[10px] font-oswald uppercase text-brand-grayText tracking-wider">Đăng nhập nhanh 1-Click:</span>
-        <div class="grid grid-cols-2 gap-2">
-          <button 
-            @click="quickFillStaff('inspector', '7777')" 
-            class="p-2.5 rounded-xl bg-cyan-950/40 border border-cyan-500/40 hover:bg-cyan-900/60 text-left transition">
-            <span class="font-oswald text-xs font-bold text-cyan-300 block"><i class="fa-solid fa-shield-halved mr-1"></i> KIỂM ĐỊNH (QA)</span>
-            <span class="text-[9px] text-cyan-400 font-mono">PIN: 7777</span>
-          </button>
-          <button 
-            @click="quickFillStaff('admin', '9999')" 
-            class="p-2.5 rounded-xl bg-amber-950/40 border border-amber-500/40 hover:bg-amber-900/60 text-left transition">
-            <span class="font-oswald text-xs font-bold text-amber-300 block"><i class="fa-solid fa-crown mr-1"></i> ADMIN LAB</span>
-            <span class="text-[9px] text-amber-400 font-mono">PIN: 9999</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="divider my-1 text-[10px] text-brand-grayText uppercase font-mono">Hoặc nhập thủ công</div>
-
       <div class="space-y-3">
         <div>
           <label class="block text-xs font-oswald uppercase text-brand-grayText mb-1">Tài khoản Cán bộ:</label>
-          <input v-model="staffLoginForm.user_id" type="text" placeholder="admin hoặc inspector" class="w-full bg-brand-black border border-brand-border rounded-xl px-3 py-2 text-xs text-white focus:border-brand-red font-mono">
+          <input v-model="staffLoginForm.user_id" type="text" placeholder="Nhập tài khoản cán bộ" class="w-full bg-brand-black border border-brand-border rounded-xl px-3 py-2 text-xs text-white focus:border-brand-red font-mono">
         </div>
         <div>
           <label class="block text-xs font-oswald uppercase text-brand-grayText mb-1">Mã PIN bảo mật:</label>
-          <input v-model="staffLoginForm.pin" type="password" placeholder="Admin: 9999 | Kiểm định: 7777" class="w-full bg-brand-black border border-brand-border rounded-xl px-3 py-2 text-xs text-white focus:border-brand-red font-mono">
+          <input v-model="staffLoginForm.pin" type="password" placeholder="Nhập mật khẩu/PIN" class="w-full bg-brand-black border border-brand-border rounded-xl px-3 py-2 text-xs text-white focus:border-brand-red font-mono">
         </div>
 
         <div v-if="staffLoginError" class="p-2.5 rounded-xl bg-rose-500/10 border border-brand-red/30 text-rose-400 text-xs font-mono">
@@ -1371,7 +1346,7 @@
           <span class="text-[10px] text-brand-red font-mono">Trải phẳng đồ theo mẫu</span>
         </div>
         <div class="rounded-lg overflow-hidden bg-black max-h-36 border border-white/10">
-          <img :src="txModal.golden_image || 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80'" class="w-full h-36 object-contain">
+          <img :src="txModal.golden_image || imagePlaceholder" @error="$event.target.src = imagePlaceholder" class="w-full h-36 object-contain">
         </div>
       </div>
 
@@ -1535,12 +1510,11 @@
         <div>
           <label class="block text-xs font-oswald uppercase text-brand-grayText mb-1">Web App API URL:</label>
           <textarea v-model="configApiUrl" rows="3" placeholder="https://script.google.com/macros/s/.../exec" class="w-full bg-brand-black border border-brand-border rounded-xl p-2.5 text-xs text-white font-mono focus:border-brand-red"></textarea>
-          <p class="text-[10px] text-brand-grayText mt-1">Để trống để chạy chế độ <strong>DEMO_MODE</strong>.</p>
+          <p class="text-[10px] text-brand-grayText mt-1">Cần nhập URL API để sử dụng hệ thống.</p>
         </div>
       </div>
 
       <div class="modal-action flex justify-between">
-        <button @click="resetToDemo" class="btn btn-sm btn-ghost text-xs text-brand-grayText font-oswald uppercase">Demo Mode</button>
         <button @click="saveSettings" class="btn-red-cta px-4 py-1.5 rounded-xl text-xs font-oswald uppercase font-bold">Lưu Cấu Hình</button>
       </div>
     </div>
@@ -1561,223 +1535,11 @@
 <script>
 const { createApp } = Vue;
 
-const DEMO_WHITELIST = [
-  { user_id: 'sv01', full_name: 'Nguyễn Văn An', phone: '0901234567', role: 'STUDENT', cohort: 'K68' },
-  { user_id: 'sv02', full_name: 'Trần Thị Bình', phone: '0918765432', role: 'STUDENT', cohort: 'K69' },
-  { user_id: '20210001', full_name: 'Lê Hoàng Cường', phone: '0988776655', role: 'STUDENT', cohort: 'K70' },
-  { user_id: '20210002', full_name: 'Phạm Minh Đức', phone: '0977112233', role: 'STUDENT', cohort: 'K70' }
-];
-
-const DEMO_STAFF_ACCOUNTS = [
-  { user_id: 'inspector', pin: '7777', full_name: 'KS. Nguyễn Văn Kiểm Định', role: 'INSPECTOR' },
-  { user_id: 'admin', pin: '9999', full_name: 'Thầy Quản Lý Lab', role: 'ADMIN' }
-];
-
-const DEMO_DEVICES = [
-  {
-    device_id: 'MCU-01',
-    name: 'Kit STM32F407 High-Performance ARM Cortex-M4',
-    category: 'MCU/SBC',
-    location: 'Tủ A - Khay 01',
-    accessories: 'Bo STM32F4, Cáp Type-C, 4 cọc đồng M3, Mạch nạp ST-Link V2',
-    golden_image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
-    specs_note: '3.3V/5V Type-C (ADC Max 3.3V - Cấm cấp 5V vào chân analog)',
-    pinout_link: 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=700&auto=format&fit=crop&q=80',
-    status: 'Trong kho',
-    holder_id: '',
-    holder_name: '',
-    project_tag: '',
-    updated_at: '2026-11-01 10:15:00',
-    recent_logs: [
-      {
-        tx_id: 'TX-1001',
-        timestamp: '2026-11-01 10:15:00',
-        user_name: 'Trần Thị Bình (sv02)',
-        action: 'Trả về kho',
-        return_condition: 'Hoạt động tốt - Đủ đồ',
-        note: 'Đã test nạp code và chạy bình thường.',
-        photo_url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&auto=format&fit=crop&q=80'
-      }
-    ]
-  },
-  {
-    device_id: 'MCU-02',
-    name: 'Nvidia Jetson Nano 4GB B01 Developer Kit',
-    category: 'MCU/SBC',
-    location: 'Tủ A - Khay 02',
-    accessories: 'Bo Jetson Nano, Nguồn DC 5V-4A Jack tròn, 2 Anten Wi-Fi, Quạt tản nhiệt PWM',
-    golden_image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&auto=format&fit=crop&q=80',
-    specs_note: 'DC 5V-4A (Jumper J48 cắm sẵn - Cấm cắm nguồn quá áp)',
-    pinout_link: 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=700&auto=format&fit=crop&q=80',
-    status: 'Đang mượn',
-    holder_id: 'sv02',
-    holder_name: 'Trần Thị Bình',
-    project_tag: 'Gắn cố định Robot WBR',
-    updated_at: '2026-11-02 14:30:00',
-    recent_logs: [
-      {
-        tx_id: 'TX-1002',
-        timestamp: '2026-11-02 14:30:00',
-        user_name: 'Trần Thị Bình (sv02)',
-        action: 'Mượn mới',
-        project_tag: 'Gắn cố định Robot WBR',
-        return_condition: 'N/A',
-        note: 'Mượn chạy model thị giác AI SLAM.',
-        photo_url: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=400&auto=format&fit=crop&q=80'
-      }
-    ]
-  },
-  {
-    device_id: 'SEN-01',
-    name: 'LiDAR RPLIDAR A1M8 360 Degree 12M Scanner',
-    category: 'Cảm biến',
-    location: 'Tủ B - Khay 01',
-    accessories: 'Cụm LiDAR xoay, Bo USB-UART, Cáp 7-pin Molex',
-    golden_image: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=600&auto=format&fit=crop&q=80',
-    specs_note: '5V PWM Động cơ quét (Tốc độ quét 2000-8000 Hz)',
-    pinout_link: 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=700&auto=format&fit=crop&q=80',
-    status: 'Trong kho',
-    holder_id: '',
-    holder_name: '',
-    project_tag: '',
-    updated_at: '2026-10-28 09:00:00',
-    recent_logs: []
-  },
-  {
-    device_id: 'SEN-02',
-    name: 'Cảm Biến IMU Xsens MTi-30 AHRS Industrial',
-    category: 'Cảm biến',
-    location: 'Tủ B - Khay 02',
-    accessories: 'Module Xsens vỏ nhôm, Cáp Hirose-to-USB chống nhiễu',
-    golden_image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80',
-    specs_note: 'USB 5V (Cảm biến nhạy - Tránh va đập cơ khí)',
-    pinout_link: 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=700&auto=format&fit=crop&q=80',
-    status: 'Báo lỗi/Khóa',
-    holder_id: '',
-    holder_name: '',
-    project_tag: '',
-    updated_at: '2026-11-02 16:20:00',
-    recent_logs: [
-      {
-        tx_id: 'TX-1003',
-        timestamp: '2026-11-02 16:20:00',
-        user_name: 'Nguyễn Văn An (sv01)',
-        action: 'Trả về kho',
-        return_condition: 'Báo lỗi/Hỏng',
-        note: 'Lỏng chân cắm số 3 cáp Hirose, cần kỹ thuật kiểm tra.',
-        photo_url: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=400&auto=format&fit=crop&q=80'
-      }
-    ]
-  },
-  {
-    device_id: 'DRV-01',
-    name: 'Động Cơ Thông Minh Dynamixel XM430-W350-T',
-    category: 'Động cơ/Driver',
-    location: 'Tủ C - Khay 01',
-    accessories: 'Động cơ XM430, Đĩa trục nhôm, Cáp RS485 3-pin',
-    golden_image: 'https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?w=600&auto=format&fit=crop&q=80',
-    specs_note: '11.1V - 14.8V DC (Chuẩn 12V - Tránh đấu ngược cực)',
-    pinout_link: 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=700&auto=format&fit=crop&q=80',
-    status: 'Trong kho',
-    holder_id: '',
-    holder_name: '',
-    project_tag: '',
-    updated_at: '2026-10-30 11:15:00',
-    recent_logs: []
-  },
-  {
-    device_id: 'COM-01',
-    name: 'Mạch Nạp & Debug Segger J-Link BASE Gốc',
-    category: 'Mạch giao tiếp',
-    location: 'Tủ D - Khay 01',
-    accessories: 'Cục nạp J-Link, Cáp dẹt 20-pin, Cáp USB-B bọc giáp',
-    golden_image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
-    specs_note: 'VTarget 1.8V - 5.0V SWD/JTAG',
-    pinout_link: 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=700&auto=format&fit=crop&q=80',
-    status: 'Trong kho',
-    holder_id: '',
-    holder_name: '',
-    project_tag: '',
-    updated_at: '2026-10-25 15:45:00',
-    recent_logs: []
-  }
-];
-
-const DEMO_AUDIT_QUEUE = [
-  {
-    tx_id: 'TX-1002',
-    timestamp: '2026-11-02 14:30:00',
-    user_name: 'Trần Thị Bình (sv02)',
-    action: 'Mượn mới',
-    device_ids: 'MCU-02',
-    project_tag: 'Gắn cố định Robot WBR',
-    checked_accessories: 'Bo Jetson Nano, Nguồn DC 5V-4A Jack tròn, 2 Anten Wi-Fi, Quạt tản nhiệt PWM',
-    return_condition: 'N/A',
-    note: 'Mượn chạy model thị giác AI SLAM.',
-    photo_url: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=500&auto=format&fit=crop&q=80',
-    audit_status: 'Chờ kiểm định',
-    audited_by: '',
-    audit_note: ''
-  },
-  {
-    tx_id: 'TX-1003',
-    timestamp: '2026-11-02 16:20:00',
-    user_name: 'Nguyễn Văn An (sv01)',
-    action: 'Trả về kho',
-    device_ids: 'SEN-02',
-    project_tag: '',
-    checked_accessories: 'Module Xsens vỏ nhôm, Cáp Hirose-to-USB chống nhiễu',
-    return_condition: 'Báo lỗi/Hỏng',
-    note: 'Lỏng chân cắm số 3 cáp Hirose, cần kỹ thuật kiểm tra.',
-    photo_url: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=500&auto=format&fit=crop&q=80',
-    audit_status: 'Báo vi phạm',
-    audited_by: 'KS. Nguyễn Văn Kiểm Định',
-    audit_note: 'Xác nhận cáp gãy ngầm chân jack cắm'
-  },
-  {
-    tx_id: 'TX-1001',
-    timestamp: '2026-11-01 10:15:00',
-    user_name: 'Trần Thị Bình (sv02)',
-    action: 'Trả về kho',
-    device_ids: 'MCU-01',
-    project_tag: '',
-    checked_accessories: 'Bo STM32F4, Cáp Type-C, 4 cọc đồng M3, Mạch nạp ST-Link V2',
-    return_condition: 'Hoạt động tốt - Đủ đồ',
-    note: 'Đã test nạp code và chạy bình thường.',
-    photo_url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=500&auto=format&fit=crop&q=80',
-    audit_status: 'Đã duyệt hợp lệ',
-    audited_by: 'Thầy Quản Lý Lab',
-    audit_note: 'Đầy đủ phụ kiện, mạch sáng đẹp'
-  }
-];
-
-const DEMO_EDIT_LOGS = [
-  {
-    timestamp: '2026-11-02 17:00:00',
-    user_name: 'Thầy Quản Lý Lab (admin)',
-    action: '[Admin] Sửa thiết bị',
-    device_ids: 'SEN-02',
-    note: 'Cập nhật cảnh báo: Cảm biến nhạy - Tránh va đập cơ khí'
-  },
-  {
-    timestamp: '2026-11-01 08:30:00',
-    user_name: 'Thầy Quản Lý Lab (admin)',
-    action: '[Admin] Thêm thiết bị mới',
-    device_ids: 'COM-01',
-    note: 'Thêm mới Mạch Nạp & Debug Segger J-Link BASE Gốc'
-  },
-  {
-    timestamp: '2026-10-30 14:10:00',
-    user_name: 'Thầy Quản Lý Lab (admin)',
-    action: '[Admin] Mở khóa thiết bị',
-    device_ids: 'MCU-01',
-    note: 'Đã thay thế ST-Link V2 mới và mở khóa về kho'
-  }
-];
-
 createApp({
   data() {
     return {
+      connectionError: '',
+      imagePlaceholder: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="240"%3E%3Crect width="100%25" height="100%25" fill="%23111827"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" fill="%239ca3af" font-family="sans-serif"%3ENo image%3C/text%3E%3C/svg%3E',
       apiUrl: localStorage.getItem('slam_api_url') || '',
       configApiUrl: localStorage.getItem('slam_api_url') || '',
       
@@ -1787,14 +1549,14 @@ createApp({
       adminStudentSearch: '',
 
       // Student Whitelist Auth
-      inputMssv: localStorage.getItem('slam_student_mssv') || 'sv01',
+      inputMssv: localStorage.getItem('slam_student_mssv') || '',
       currentStudent: null,
       studentsWhitelist: [],
 
       // Staff Auth (Admin & Inspector)
-      adminUser: JSON.parse(localStorage.getItem('slam_staff_user') || 'null'),
+      adminUser: null,
       showStaffLoginModal: false,
-      staffLoginForm: { user_id: 'admin', pin: '9999' },
+      staffLoginForm: { user_id: '', pin: '' },
       staffLoginError: '',
       isStaffLoggingIn: false,
       showPasswordModal: false,
@@ -1877,7 +1639,7 @@ createApp({
     canEditDevices() {
       return !!this.adminUser && ['ADMIN', 'INSPECTOR'].includes(this.adminUser.role);
     },
-    isDemoMode() { return !this.apiUrl.trim(); },
+    hasApiUrl() { return !!this.apiUrl.trim(); },
     myHoldingCount() {
       if (!this.currentStudent) return 0;
       return this.devices.filter(d => d.status === 'Đang mượn' && d.holder_id === this.currentStudent.user_id).length;
@@ -1964,6 +1726,17 @@ createApp({
     this.fetchData();
   },
   methods: {
+    clearLoadedData() {
+      this.devices = [];
+      this.studentsWhitelist = [];
+      this.auditQueue = [];
+      this.editLogs = [];
+      this.currentStudent = null;
+    },
+    requestApi(options) {
+      if (!this.apiUrl.trim()) throw new Error('Chưa cấu hình URL API.');
+      return fetch(this.apiUrl, options);
+    },
     normalizeStudentSearch(value) {
       return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[đĐ]/g, 'd').toLowerCase().trim();
     },
@@ -1999,7 +1772,7 @@ createApp({
       return parts[parts.length - 1];
     },
     getShortVoltage(spec) {
-      if (!spec) return '3.3V - 5V DC';
+      if (!spec) return 'Chưa cập nhật';
       const m = spec.match(/\d+(\.\d+)?V/gi);
       return m ? m.join(' / ') : spec.slice(0, 22);
     },
@@ -2057,11 +1830,8 @@ createApp({
       }
       this.isChangingPassword = true;
       try {
-        if (this.isDemoMode) {
-          this.passwordError = 'Đổi mật khẩu cần kết nối cơ sở dữ liệu thật; chế độ demo không lưu mật khẩu.';
-          return;
-        }
-        const res = await fetch(this.apiUrl, {
+        if (!this.apiUrl.trim()) { this.passwordError = 'Vui lòng cấu hình API trước.'; return; }
+        const res = await this.requestApi({
           method: 'POST',
           body: JSON.stringify({ action: 'admin_change_password', admin_id: this.adminUser.user_id,
             admin_pin: form.admin_pin, target_id: form.target_id, new_pin: form.new_pin })
@@ -2085,21 +1855,9 @@ createApp({
     },
     openStaffLoginModalWithRole(preferredRole) {
       this.staffLoginError = '';
-      if (preferredRole === 'inspector') {
-        this.staffLoginForm.user_id = 'inspector';
-        this.staffLoginForm.pin = '7777';
-      } else {
-        this.staffLoginForm.user_id = 'admin';
-        this.staffLoginForm.pin = '9999';
-      }
+      this.staffLoginForm = { user_id: '', pin: '' };
       this.showStaffLoginModal = true;
     },
-    quickFillStaff(userId, pin) {
-      this.staffLoginForm.user_id = userId;
-      this.staffLoginForm.pin = pin;
-      this.handleStaffLogin();
-    },
-
     async handleStaffLogin() {
       this.staffLoginError = '';
       const uid = this.staffLoginForm.user_id.trim();
@@ -2110,29 +1868,8 @@ createApp({
       }
       this.isStaffLoggingIn = true;
       try {
-        if (this.isDemoMode) {
-          await new Promise(r => setTimeout(r, 350));
-          const match = DEMO_STAFF_ACCOUNTS.find(s => s.user_id.toLowerCase() === uid.toLowerCase() && s.pin === pin);
-          if (match) {
-            this.adminUser = {
-              user_id: match.user_id,
-              full_name: match.full_name,
-              role: match.role
-            };
-            localStorage.setItem('slam_staff_user', JSON.stringify(this.adminUser));
-            this.showStaffLoginModal = false;
-            this.showToast(`Chào mừng ${match.full_name} (${match.role})!`, 'success');
-            
-            if (match.role === 'INSPECTOR') {
-              this.currentViewMode = 'INSPECTOR';
-            } else if (match.role === 'ADMIN') {
-              this.currentViewMode = 'ADMIN';
-            }
-          } else {
-            this.staffLoginError = 'Sai mã PIN hoặc tài khoản (Admin: 9999 | Kiểm định: 7777)!';
-          }
-        } else {
-          const res = await fetch(this.apiUrl, {
+        
+          const res = await this.requestApi({
             method: 'POST',
             body: JSON.stringify({
               action: 'admin_login',
@@ -2154,7 +1891,7 @@ createApp({
           } else {
             this.staffLoginError = result.message || 'Sai thông tin đăng nhập!';
           }
-        }
+        
       } catch (e) {
         this.staffLoginError = 'Lỗi kết nối: ' + e.message;
       } finally {
@@ -2169,40 +1906,13 @@ createApp({
     },
 
     async fetchData() {
-      if (this.isDemoMode) {
-        this.studentsWhitelist = DEMO_WHITELIST;
-        
-        const savedDemo = localStorage.getItem('slam_demo_devices');
-        if (savedDemo) {
-          this.devices = JSON.parse(savedDemo);
-        } else {
-          this.devices = JSON.parse(JSON.stringify(DEMO_DEVICES));
-          localStorage.setItem('slam_demo_devices', JSON.stringify(this.devices));
-        }
-
-        const savedAudits = localStorage.getItem('slam_demo_audits');
-        if (savedAudits) {
-          this.auditQueue = JSON.parse(savedAudits);
-        } else {
-          this.auditQueue = JSON.parse(JSON.stringify(DEMO_AUDIT_QUEUE));
-          localStorage.setItem('slam_demo_audits', JSON.stringify(this.auditQueue));
-        }
-
-        const savedLogs = localStorage.getItem('slam_demo_edit_logs');
-        if (savedLogs) {
-          this.editLogs = JSON.parse(savedLogs);
-        } else {
-          this.editLogs = JSON.parse(JSON.stringify(DEMO_EDIT_LOGS));
-          localStorage.setItem('slam_demo_edit_logs', JSON.stringify(this.editLogs));
-        }
-
-        this.checkStudentWhitelist();
-        return;
-      }
+      this.connectionError = '';
+      if (!this.apiUrl.trim()) { this.clearLoadedData(); this.connectionError = 'Chưa cấu hình API. Vào Cấu hình để kết nối cơ sở dữ liệu.'; return; }
 
       try {
-        const res = await fetch(this.apiUrl);
+        const res = await this.requestApi();
         const data = await res.json();
+        if (!data || !data.success) throw new Error(data && data.message || 'API không trả dữ liệu hợp lệ.');
         if (data.success) {
           this.devices = data.devices || [];
           this.studentsWhitelist = data.whitelist || [];
@@ -2211,11 +1921,9 @@ createApp({
           this.checkStudentWhitelist();
         }
       } catch (err) {
-        this.studentsWhitelist = DEMO_WHITELIST;
-        this.devices = JSON.parse(JSON.stringify(DEMO_DEVICES));
-        this.auditQueue = JSON.parse(JSON.stringify(DEMO_AUDIT_QUEUE));
-        this.editLogs = JSON.parse(JSON.stringify(DEMO_EDIT_LOGS));
-        this.checkStudentWhitelist();
+        this.clearLoadedData();
+        this.connectionError = 'Không tải được dữ liệu: ' + err.message;
+        this.showToast(this.connectionError, 'error');
       }
     },
 
@@ -2240,14 +1948,14 @@ createApp({
       if (!this.canEditDevices) return;
       this.isEditingExistingDevice = false;
       this.deviceForm = {
-        device_id: `MCU-0${this.devices.length + 1}`,
+        device_id: '',
         name: '',
         category: 'MCU/SBC',
-        location: 'Tủ A - Khay 01',
-        accessories: '1x Bo mạch chính, 1x Cáp nạp, 1x Nguồn DC',
-        golden_image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
-        specs_note: '3.3V / 5V DC',
-        pinout_link: 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=700&auto=format&fit=crop&q=80'
+        location: '',
+        accessories: '',
+        golden_image: '',
+        specs_note: '',
+        pinout_link: ''
       };
       this.showDeviceEditModal = true;
     },
@@ -2277,54 +1985,8 @@ createApp({
       const nowStr = new Date().toISOString().replace('T', ' ').substring(0, 19);
 
       try {
-        if (this.isDemoMode) {
-          await new Promise(r => setTimeout(r, 400));
-          const existing = this.devices.find(d => d.device_id.toLowerCase() === this.deviceForm.device_id.toLowerCase());
-          
-          if (existing) {
-            existing.name = this.deviceForm.name;
-            existing.category = this.deviceForm.category;
-            existing.location = this.deviceForm.location;
-            existing.accessories = this.deviceForm.accessories;
-            existing.golden_image = this.deviceForm.golden_image;
-            existing.specs_note = this.deviceForm.specs_note;
-            existing.pinout_link = this.deviceForm.pinout_link;
-            existing.updated_at = nowStr;
-
-            this.editLogs.unshift({
-              timestamp: nowStr,
-              user_name: adminName,
-              action: '[Admin] Sửa thiết bị',
-              device_ids: this.deviceForm.device_id,
-              note: `Cập nhật thông số kỹ thuật & tài liệu cho ${this.deviceForm.name}`
-            });
-            this.showToast(`Đã cập nhật tài liệu cho [${this.deviceForm.device_id}]!`, 'success');
-          } else {
-            this.devices.unshift({
-              ...this.deviceForm,
-              status: 'Trong kho',
-              holder_id: '',
-              holder_name: '',
-              project_tag: '',
-              updated_at: nowStr,
-              recent_logs: []
-            });
-
-            this.editLogs.unshift({
-              timestamp: nowStr,
-              user_name: adminName,
-              action: '[Admin] Thêm thiết bị mới',
-              device_ids: this.deviceForm.device_id,
-              note: `Thêm thiết bị mới: ${this.deviceForm.name} (${this.deviceForm.category})`
-            });
-            this.showToast(`Đã thêm thiết bị mới [${this.deviceForm.device_id}]!`, 'success');
-          }
-
-          localStorage.setItem('slam_demo_devices', JSON.stringify(this.devices));
-          localStorage.setItem('slam_demo_edit_logs', JSON.stringify(this.editLogs));
-          this.showDeviceEditModal = false;
-        } else {
-          const res = await fetch(this.apiUrl, {
+        
+          const res = await this.requestApi({
             method: 'POST',
             body: JSON.stringify({
               action: 'admin_save_device',
@@ -2340,7 +2002,7 @@ createApp({
           } else {
             this.showToast('Lỗi: ' + result.message, 'error');
           }
-        }
+        
       } catch (e) {
         this.showToast('Lỗi lưu thiết bị: ' + e.message, 'error');
       } finally {
@@ -2354,21 +2016,9 @@ createApp({
       const adminName = this.adminUser ? `${this.adminUser.full_name} (${this.adminUser.role})` : 'Admin Lab';
       const nowStr = new Date().toISOString().replace('T', ' ').substring(0, 19);
 
-      if (this.isDemoMode) {
-        this.devices = this.devices.filter(d => d.device_id !== device.device_id);
-        this.editLogs.unshift({
-          timestamp: nowStr,
-          user_name: adminName,
-          action: '[Admin] Xóa thiết bị',
-          device_ids: device.device_id,
-          note: `Đã xóa thiết bị: ${device.name} khỏi kho`
-        });
-        localStorage.setItem('slam_demo_devices', JSON.stringify(this.devices));
-        localStorage.setItem('slam_demo_edit_logs', JSON.stringify(this.editLogs));
-        this.showToast(`Đã xóa thiết bị [${device.device_id}]!`, 'success');
-      } else {
+      
         try {
-          const res = await fetch(this.apiUrl, {
+          const res = await this.requestApi({
             method: 'POST',
             body: JSON.stringify({
               action: 'admin_delete_device',
@@ -2386,7 +2036,7 @@ createApp({
         } catch (e) {
           this.showToast('Lỗi xóa: ' + e.message, 'error');
         }
-      }
+      
     },
 
     // QA Inspection Methods
@@ -2394,7 +2044,7 @@ createApp({
       if (!deviceIds) return '';
       const firstId = deviceIds.split(',')[0].trim();
       const dev = this.devices.find(d => d.device_id === firstId);
-      return dev ? dev.golden_image : 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=500&auto=format&fit=crop&q=80';
+      return dev && dev.golden_image || this.imagePlaceholder;
     },
     getAuditBadgeClass(st) {
       if (!st || st === 'Chờ kiểm định') return 'bg-amber-500/20 text-amber-400 border border-amber-500/30';
@@ -2405,36 +2055,9 @@ createApp({
       const note = (this.auditNotes[item.tx_id] || '').trim();
       const inspectorName = this.adminUser ? `${this.adminUser.full_name} (${this.adminUser.role})` : 'Cán bộ kiểm định';
 
-      if (this.isDemoMode) {
-        if (!['Đã duyệt hợp lệ', 'Báo vi phạm'].includes(decision) || (item.audit_status || 'Chờ kiểm định') !== 'Chờ kiểm định') {
-          this.showToast('Giao dịch đã được kiểm định hoặc kết luận không hợp lệ.', 'error');
-          return;
-        }
-        let returnedDevices = [];
-        if (item.action === 'Trả về kho') {
-          const ids = String(item.device_ids || '').split(',').map(id => id.trim());
-          returnedDevices = ids.map(id => this.devices.find(device => device.device_id === id));
-          const stale = ids.some(id => this.auditQueue.some((entry, index) => index < this.auditQueue.indexOf(item) && String(entry.device_ids || '').split(',').map(value => value.trim()).includes(id)));
-          if (stale || !returnedDevices.length || returnedDevices.some(device => !device || device.status !== 'Chờ kiểm định' || device.holder_id)) {
-            this.showToast('Thiết bị không còn chờ kiểm định cho giao dịch này.', 'error');
-            return;
-          }
-        }
-        item.audit_status = decision;
-        item.audited_by = inspectorName;
-        item.audit_note = note || (decision === 'Đã duyệt hợp lệ' ? 'Đủ phụ kiện, mạch nguyên vẹn' : 'Báo vi phạm / Thiếu đồ kiểm tra');
-
-        returnedDevices.forEach(device => {
-          device.status = decision === 'Đã duyệt hợp lệ' ? 'Trong kho' : 'Báo lỗi/Khóa';
-          device.updated_at = new Date().toISOString();
-        });
-        localStorage.setItem('slam_demo_devices', JSON.stringify(this.devices));
-
-        localStorage.setItem('slam_demo_audits', JSON.stringify(this.auditQueue));
-        this.showToast(`[${item.tx_id}] ${decision.toUpperCase()}!`, decision === 'Đã duyệt hợp lệ' ? 'success' : 'error');
-      } else {
+      
         try {
-          const res = await fetch(this.apiUrl, {
+          const res = await this.requestApi({
             method: 'POST',
             body: JSON.stringify({
               action: 'audit_transaction',
@@ -2454,7 +2077,7 @@ createApp({
         } catch (e) {
           this.showToast('Lỗi kiểm định: ' + e.message, 'error');
         }
-      }
+      
     },
 
     // Unlock Device
@@ -2464,26 +2087,8 @@ createApp({
       const adminName = this.adminUser ? `${this.adminUser.full_name} (${this.adminUser.role})` : 'Admin Lab';
       const nowStr = new Date().toISOString().replace('T', ' ').substring(0, 19);
 
-      if (this.isDemoMode) {
-        device.status = 'Trong kho';
-        device.holder_id = '';
-        device.holder_name = '';
-        device.project_tag = '';
-        device.updated_at = nowStr;
-
-        this.editLogs.unshift({
-          timestamp: nowStr,
-          user_name: adminName,
-          action: '[Admin] Mở khóa thiết bị',
-          device_ids: device.device_id,
-          note: `Đã kiểm tra và mở khóa thiết bị đưa về TRONG KHO`
-        });
-
-        localStorage.setItem('slam_demo_devices', JSON.stringify(this.devices));
-        localStorage.setItem('slam_demo_edit_logs', JSON.stringify(this.editLogs));
-        this.showToast(`Đã mở khóa ${device.device_id}!`, 'success');
-      } else {
-        const res = await fetch(this.apiUrl, {
+      
+        const res = await this.requestApi({
           method: 'POST',
           body: JSON.stringify({
             action: 'admin_unlock',
@@ -2496,7 +2101,7 @@ createApp({
           this.showToast(resData.message, 'success');
           await this.fetchData();
         }
-      }
+      
     },
 
     getDocumentUrl(device) {
@@ -2591,64 +2196,8 @@ createApp({
       };
 
       try {
-        if (this.isDemoMode) {
-          await new Promise(r => setTimeout(r, 800));
-          const dev = this.devices.find(d => d.device_id === this.txModal.device_id);
-          if (dev) {
-            const nowStr = new Date().toISOString().replace('T', ' ').substring(0, 19);
-            const newTxId = 'TX-' + Math.floor(1000 + Math.random() * 9000);
-
-            if (this.txType === 'Mượn mới' || this.txType === 'Nhận bàn giao tay đôi') {
-              dev.status = 'Đang mượn';
-              dev.holder_id = this.currentStudent.user_id;
-              dev.holder_name = this.currentStudent.full_name;
-              dev.project_tag = this.projectTag;
-            } else if (this.txType === 'Trả về kho') {
-              dev.status = 'Chờ kiểm định';
-              dev.holder_id = '';
-              dev.holder_name = '';
-              dev.project_tag = '';
-            }
-            dev.updated_at = nowStr;
-
-            const logEntry = {
-              tx_id: newTxId,
-              timestamp: nowStr,
-              user_name: `${this.currentStudent.full_name} (${this.currentStudent.user_id})`,
-              action: this.txType,
-              project_tag: payload.project_tag,
-              return_condition: payload.return_condition,
-              note: payload.note,
-              photo_url: this.photoBase64
-            };
-
-            if (!dev.recent_logs) dev.recent_logs = [];
-            dev.recent_logs.unshift(logEntry);
-            if (dev.recent_logs.length > 3) dev.recent_logs.pop();
-
-            this.auditQueue.unshift({
-              tx_id: newTxId,
-              timestamp: nowStr,
-              user_name: `${this.currentStudent.full_name} (${this.currentStudent.user_id})`,
-              action: this.txType,
-              device_ids: this.txModal.device_id,
-              project_tag: payload.project_tag,
-              checked_accessories: payload.checked_accessories,
-              return_condition: payload.return_condition,
-              note: payload.note,
-              photo_url: this.photoBase64,
-              audit_status: 'Chờ kiểm định',
-              audited_by: '',
-              audit_note: ''
-            });
-
-            localStorage.setItem('slam_demo_devices', JSON.stringify(this.devices));
-            localStorage.setItem('slam_demo_audits', JSON.stringify(this.auditQueue));
-          }
-          this.showToast(`[${this.txType}] hoàn tất thành công!`, 'success');
-          this.closeTxModal();
-        } else {
-          const res = await fetch(this.apiUrl, {
+        
+          const res = await this.requestApi({
             method: 'POST',
             body: JSON.stringify(payload)
           });
@@ -2660,7 +2209,7 @@ createApp({
           } else {
             this.showToast('Lỗi: ' + result.message, 'error');
           }
-        }
+        
       } catch (err) {
         this.showToast('Lỗi gửi giao dịch: ' + err.message, 'error');
       } finally {
@@ -2670,15 +2219,23 @@ createApp({
 
     saveSettings() {
       const cleanUrl = this.configApiUrl.trim();
+      try {
+        const url = new URL(cleanUrl);
+        if (url.protocol !== 'https:') throw new Error();
+      } catch {
+        this.showToast('Vui lòng nhập URL API https hợp lệ.', 'error');
+        return;
+      }
+      if (cleanUrl !== this.apiUrl) {
+        this.clearLoadedData();
+        this.adminUser = null;
+        localStorage.removeItem('slam_staff_user');
+      }
       this.apiUrl = cleanUrl;
       localStorage.setItem('slam_api_url', cleanUrl);
       this.showSettingsModal = false;
       this.fetchData();
-      this.showToast(cleanUrl ? 'Đã lưu Web App URL!' : 'Đã về chế độ DEMO!', 'info');
-    },
-    resetToDemo() {
-      this.configApiUrl = '';
-      this.saveSettings();
+      this.showToast('Đã lưu Web App URL!', 'info');
     },
     async testApiConnection() {
       const url = (this.configApiUrl || this.apiUrl).trim();
