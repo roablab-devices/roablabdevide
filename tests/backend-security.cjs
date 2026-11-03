@@ -11,6 +11,7 @@ function setup(status = 'Trong kho', holder = '') {
     ['admin','old-admin-pin','Admin','','ADMIN'],
     ['inspector','old-inspector-pin','Inspector','','INSPECTOR']];
   const cache = new Map();
+  const uploaded = [];
   function sheet(rows) {
     return {
       getDataRange: () => ({getValues: () => rows.map(r => [...r])}),
@@ -28,12 +29,18 @@ function setup(status = 'Trong kho', holder = '') {
     LockService: {getScriptLock: () => ({waitLock() {}, releaseLock() {}})},
     CacheService: {getScriptCache: () => ({get: k => cache.get(k), put: (k,v) => cache.set(k,v), remove: k => cache.delete(k)})},
     ContentService: {MimeType: {JSON: 'json'}, createTextOutput: text => ({setMimeType: () => JSON.parse(text)})},
-    Utilities: {formatDate: () => '2026-11-03'},
+    Utilities: {formatDate: () => '2026-11-03', getUuid: () => 'test-id',
+      base64Decode: text => Array.from(Buffer.from(text,'base64')),
+      newBlob: (bytes,type,name) => ({bytes,type,name})},
     // Invalid transactions must never reach an upload.
-    DriveApp: {getRootFolder: () => {throw Error('Unexpected upload');}}
+    DriveApp: {Access:{ANYONE_WITH_LINK:'link'},Permission:{VIEW:'view'},
+      getFolderById: () => ({createFile: blob => {
+        uploaded.push(blob);
+        return {getId:()=> 'file-' + uploaded.length, setSharing(){}, setTrashed(){}};
+      }}), getRootFolder: () => {throw Error('Unexpected upload');}}
   });
   vm.runInContext(source, ctx);
-  return {ctx, devices, logs, users, writes: () => writes,
+  return {ctx, devices, logs, users, uploaded, writes: () => writes,
     post: p => ctx.doPost({postData: {contents: JSON.stringify(p)}})};
 }
 const base = {action:'transaction', tx_type:'Mượn mới', user_id:'sv01', user_name:'An', device_ids:['D1']};
@@ -143,6 +150,35 @@ for (const decision of ['Đã duyệt hợp lệ','Báo vi phạm']) {
   assert.equal(s.writes(),0);
   assert.equal(s.post({action:'audit_transaction',tx_id:'NEW',audit_status:'invalid'}).success,false);
   assert.equal(s.writes(),0);
+  count++;
+}
+{
+  const s=setup();
+  const pdf={type:'application/pdf',base64:Buffer.from('%PDF-1.7\ncontent').toString('base64')};
+  const image={type:'image/jpeg',base64:Buffer.from([255,216,255,224,1,2]).toString('base64')};
+  const request={action:'admin_save_device',device_id:'D1',name:'Device',golden_upload:image,document_upload:pdf};
+  assert.equal(s.post(request).success,true);
+  assert.equal(s.uploaded.length,2);
+  assert.ok(s.devices[1][5].includes('thumbnail?id=file-1'));
+  assert.ok(s.devices[1][7].includes('/file-2/view'));
+  assert.equal(s.uploaded[1].type,'application/pdf');
+  count++;
+  for (const bad of [
+    {type:'text/html',base64:pdf.base64},
+    {type:'application/pdf',base64:Buffer.from('<script>').toString('base64')},
+    {type:'application/pdf',base64:'!invalid'},
+    {type:'application/pdf',base64:''},
+    {type:'application/pdf',base64:'A'.repeat(6990512)}
+  ]) {
+    const invalid=setup();
+    assert.equal(invalid.post({...request,document_upload:bad}).success,false);
+    assert.equal(invalid.uploaded.length,0,'Validate both files before creating either');
+    assert.equal(invalid.writes(),0);
+    count++;
+  }
+  const invalid=setup();
+  assert.equal(invalid.post({...request,golden_upload:pdf}).success,false);
+  assert.equal(invalid.uploaded.length,0);
   count++;
 }
 console.log(`PASS: ${count} backend security scenarios (offline Apps Script mocks)`);

@@ -982,7 +982,7 @@
                       <button v-if="dev.status === 'Báo lỗi/Khóa'" @click="unlockDeviceAsAdmin(dev)" class="btn btn-xs bg-amber-500 hover:bg-amber-600 text-black rounded-lg font-oswald uppercase font-bold" title="Mở khóa thiết bị">
                         <i class="fa-solid fa-lock-open text-[10px]"></i>
                       </button>
-                      <button @click="deleteDeviceAsAdmin(dev)" class="btn btn-xs bg-rose-950/40 hover:bg-rose-900 border border-rose-800 text-rose-400 hover:text-white rounded-lg font-oswald uppercase" title="Xóa thiết bị khỏi kho">
+                      <button @click="deleteDeviceAsAdmin(dev)" :disabled="deletingDeviceIds.includes(dev.device_id)" class="btn btn-xs bg-rose-950/40 hover:bg-rose-900 border border-rose-800 text-rose-400 hover:text-white rounded-lg font-oswald uppercase" :title="deletingDeviceIds.includes(dev.device_id) ? 'Đang xóa...' : 'Xóa thiết bị khỏi kho'">
                         <i class="fa-solid fa-trash text-[10px] mr-1"></i> Xóa
                       </button>
                     </div>
@@ -1476,11 +1476,17 @@
         <div>
           <label class="block font-oswald uppercase font-bold text-slate-300 mb-1">Link Ảnh Mẫu Chuẩn (Golden Image URL):</label>
           <input v-model="deviceForm.golden_image" type="text" placeholder="https://..." class="w-full bg-brand-black border border-brand-border rounded-xl px-3 py-2 text-white font-mono text-[11px] focus:border-brand-red">
+          <input :key="'photo-' + deviceUploadKey" @change="selectDeviceUpload($event, 'golden_upload')" :disabled="isSavingDevice" type="file" accept="image/jpeg,image/png,image/webp" class="file-input file-input-sm w-full mt-2">
+          <p class="text-[10px] text-brand-grayText mt-1">Chọn ảnh JPG, PNG hoặc WebP (tối đa 5 MB), hoặc dán link. File được tải lên Drive khi lưu.</p>
+          <button v-if="deviceUploads.golden_upload" @click="clearDeviceUpload('golden_upload')" type="button" class="text-xs text-amber-300">Bỏ ảnh đã chọn: {{ deviceUploads.golden_upload.name }}</button>
         </div>
 
         <div>
           <label class="block font-oswald uppercase font-bold text-slate-300 mb-1">Document (Link ảnh hoặc tài liệu):</label>
           <input v-model="deviceForm.pinout_link" type="text" placeholder="https://..." class="w-full bg-brand-black border border-brand-border rounded-xl px-3 py-2 text-white font-mono text-[11px] focus:border-brand-red">
+          <input :key="'document-' + deviceUploadKey" @change="selectDeviceUpload($event, 'document_upload')" :disabled="isSavingDevice" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" class="file-input file-input-sm w-full mt-2">
+          <p class="text-[10px] text-brand-grayText mt-1">Tải ảnh hoặc PDF (tối đa 5 MB) lên Drive; file đã chọn sẽ thay link ở trên. File được chia sẻ cho người có link.</p>
+          <button v-if="deviceUploads.document_upload" @click="clearDeviceUpload('document_upload')" type="button" class="text-xs text-amber-300">Bỏ tài liệu đã chọn: {{ deviceUploads.document_upload.name }}</button>
           <p class="text-[10px] text-brand-grayText mt-1">Dán link ảnh, PDF, Google Drive, datasheet hoặc trang hướng dẫn (http/https).</p>
         </div>
       </div>
@@ -1549,6 +1555,10 @@ createApp({
   data() {
     return {
       connectionError: '',
+      dataRequestId: 0,
+      deletingDeviceIds: [],
+      deviceUploads: { golden_upload: null, document_upload: null },
+      deviceUploadKey: 0,
       imagePlaceholder: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="240"%3E%3Crect width="100%25" height="100%25" fill="%23111827"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" fill="%239ca3af" font-family="sans-serif"%3ENo image%3C/text%3E%3C/svg%3E',
       apiUrl: localStorage.getItem('slam_api_url') || DEFAULT_API_URL,
       configApiUrl: localStorage.getItem('slam_api_url') || DEFAULT_API_URL,
@@ -1916,12 +1926,14 @@ createApp({
     },
 
     async fetchData() {
+      const requestId = ++this.dataRequestId;
       this.connectionError = '';
       if (!this.apiUrl.trim()) { this.clearLoadedData(); this.connectionError = 'Chưa cấu hình API. Vào Cấu hình để kết nối cơ sở dữ liệu.'; return; }
 
       try {
-        const res = await this.requestApi();
+        const res = await this.requestApi({ cache: 'no-store' });
         const data = await res.json();
+        if (requestId !== this.dataRequestId) return;
         if (!data || !data.success) throw new Error(data && data.message || 'API không trả dữ liệu hợp lệ.');
         if (data.success) {
           this.devices = data.devices || [];
@@ -1931,6 +1943,7 @@ createApp({
           this.checkStudentWhitelist();
         }
       } catch (err) {
+        if (requestId !== this.dataRequestId) return;
         this.clearLoadedData();
         this.connectionError = 'Không tải được dữ liệu: ' + err.message;
         this.showToast(this.connectionError, 'error');
@@ -1954,6 +1967,8 @@ createApp({
     // CRUD Device Methods (Admin)
     openAddDeviceModal() {
       if (!this.canEditDevices) return;
+      this.deviceUploads = { golden_upload: null, document_upload: null };
+      this.deviceUploadKey++;
       this.isEditingExistingDevice = false;
       this.deviceForm = {
         device_id: '',
@@ -1969,6 +1984,8 @@ createApp({
     },
     openEditDeviceModal(device) {
       if (!this.canEditDevices) return;
+      this.deviceUploads = { golden_upload: null, document_upload: null };
+      this.deviceUploadKey++;
       this.isEditingExistingDevice = true;
       this.deviceForm = {
         device_id: device.device_id,
@@ -1982,8 +1999,34 @@ createApp({
       };
       this.showDeviceEditModal = true;
     },
+    selectDeviceUpload(event, key) {
+      const file = event.target.files[0];
+      this.deviceUploads[key] = null;
+      if (!file) return;
+      const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+      if (key === 'document_upload') allowed.push('application/pdf');
+      if (!allowed.includes(file.type) || !file.size || file.size > 5 * 1024 * 1024) {
+        event.target.value = '';
+        this.showToast('Chọn đúng định dạng ảnh/PDF, tối đa 5 MB/file.', 'error');
+        return;
+      }
+      this.deviceUploads[key] = file;
+    },
+    clearDeviceUpload(key) {
+      this.deviceUploads[key] = null;
+      this.deviceUploadKey++;
+    },
+    readDeviceUpload(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve({type:file.type, base64:String(reader.result).split(',')[1]});
+        reader.onerror = () => reject(new Error('Không đọc được file. Vui lòng chọn lại.'));
+        reader.readAsDataURL(file);
+      });
+    },
     async saveDeviceAsAdmin() {
       if (!this.canEditDevices) return;
+      if (this.isSavingDevice) return;
       if (!this.deviceForm.device_id.trim() || !this.deviceForm.name.trim() || !this.deviceForm.accessories.trim()) {
         this.showToast('Vui lòng điền đủ Mã, Tên và Phụ kiện bắt buộc!', 'error');
         return;
@@ -1993,12 +2036,17 @@ createApp({
       const nowStr = new Date().toISOString().replace('T', ' ').substring(0, 19);
 
       try {
+        const uploads = {};
+        for (const key of ['golden_upload', 'document_upload']) {
+          if (this.deviceUploads[key]) uploads[key] = await this.readDeviceUpload(this.deviceUploads[key]);
+        }
         
           const res = await this.requestApi({
             method: 'POST',
             body: JSON.stringify({
               action: 'admin_save_device',
               admin_name: adminName,
+              ...uploads,
               ...this.deviceForm
             })
           });
@@ -2019,7 +2067,9 @@ createApp({
     },
 
     async deleteDeviceAsAdmin(device) {
+      if (this.deletingDeviceIds.includes(device.device_id)) return;
       if (!confirm(`Bạn có chắc chắn muốn XÓA / BỚT thiết bị [${device.device_id}: ${device.name}] khỏi kho?`)) return;
+      this.deletingDeviceIds.push(device.device_id);
 
       const adminName = this.adminUser ? `${this.adminUser.full_name} (${this.adminUser.role})` : 'Admin Lab';
       const nowStr = new Date().toISOString().replace('T', ' ').substring(0, 19);
@@ -2036,6 +2086,10 @@ createApp({
           });
           const result = await res.json();
           if (result.success) {
+            ++this.dataRequestId;
+            this.devices = this.devices.filter(item => item.device_id !== device.device_id);
+            if (this.pinoutModal && this.pinoutModal.device_id === device.device_id) this.pinoutModal = null;
+            if (this.txModal && this.txModal.device_id === device.device_id) this.txModal = null;
             this.showToast(result.message, 'success');
             await this.fetchData();
           } else {
@@ -2043,6 +2097,8 @@ createApp({
           }
         } catch (e) {
           this.showToast('Lỗi xóa: ' + e.message, 'error');
+        } finally {
+          this.deletingDeviceIds = this.deletingDeviceIds.filter(id => id !== device.device_id);
         }
       
     },

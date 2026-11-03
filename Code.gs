@@ -36,6 +36,47 @@ function appendTextRow(sheet, values) {
   sheet.appendRow(values.map(sheetText));
 }
 
+function uploadDeviceFiles(payload) {
+  const specs = [['golden_upload', 'golden_image', true], ['document_upload', 'pinout_link', false]];
+  const pending = [];
+  for (const [key, field, imageOnly] of specs) {
+    const upload = payload[key];
+    if (!upload) continue;
+    const allowed = imageOnly ? ['image/jpeg', 'image/png', 'image/webp'] : ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+    if (!allowed.includes(upload.type) || typeof upload.base64 !== 'string' ||
+        upload.base64.length > 6990508 || !/^[A-Za-z0-9+/]*={0,2}$/.test(upload.base64)) {
+      throw new Error('File không hợp lệ. Chỉ nhận JPG, PNG, WebP hoặc PDF, tối đa 5 MB/file.');
+    }
+    const bytes = Utilities.base64Decode(upload.base64);
+    const head = bytes.slice(0, 12).map(value => value & 255);
+    const starts = signature => signature.every((value, index) => head[index] === value);
+    const valid = upload.type === 'image/jpeg' ? starts([255,216,255]) :
+      upload.type === 'image/png' ? starts([137,80,78,71,13,10,26,10]) :
+      upload.type === 'image/webp' ? starts([82,73,70,70]) && head.slice(8,12).join(',') === '87,69,66,80' : starts([37,80,68,70,45]);
+    if (!bytes.length || bytes.length > 5 * 1024 * 1024 || !valid) throw new Error('Nội dung file không đúng định dạng hoặc vượt 5 MB.');
+    const ext = {'image/jpeg':'jpg','image/png':'png','image/webp':'webp','application/pdf':'pdf'}[upload.type];
+    pending.push({field, type:upload.type, bytes, ext});
+  }
+  if (!pending.length) return;
+  if (!CONFIG.FOLDER_ID || CONFIG.FOLDER_ID === 'YOUR_GOOGLE_DRIVE_FOLDER_ID_HERE') throw new Error('Chưa cấu hình thư mục Google Drive.');
+  const folder = DriveApp.getFolderById(CONFIG.FOLDER_ID);
+  const created = [];
+  try {
+    for (const entry of pending) {
+      const name = String(payload.device_id).replace(/[^a-zA-Z0-9_-]/g, '_') + '_' + entry.field + '_' + Utilities.getUuid() + '.' + entry.ext;
+      const file = folder.createFile(Utilities.newBlob(entry.bytes, entry.type, name));
+      created.push(file);
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      payload[entry.field] = entry.field === 'golden_image' ?
+        'https://drive.google.com/thumbnail?id=' + file.getId() + '&sz=w1200' :
+        'https://drive.google.com/file/d/' + file.getId() + '/view';
+    }
+  } catch (error) {
+    created.forEach(file => { try { file.setTrashed(true); } catch (_) {} });
+    throw error;
+  }
+}
+
 /**
  * ======================================================================================
  * 1. doGet(e): Trả về Devices, Whitelist, Hàng đợi Kiểm định QA và Nhật ký Chỉnh sửa Admin
@@ -251,6 +292,7 @@ function doPost(e) {
       const devId = String(payload.device_id || "").trim();
       const adminName = String(payload.admin_name || "Admin Lab").trim();
       if (!devId) return createJsonResponse({ success: false, message: "Mã thiết bị không được để trống!" });
+      uploadDeviceFiles(payload);
       
       const devValues = devSheet.getDataRange().getValues();
       const nowStr = Utilities.formatDate(new Date(), "GMT+7", "yyyy-MM-dd HH:mm:ss");
