@@ -764,3 +764,75 @@ function sendTextMessageFallback(text) {
     muteHttpExceptions: true
   });
 }
+
+/**
+ * ======================================================================================
+ * 3. initialSetup(): Khởi tạo tự động toàn bộ Sheet & dữ liệu mẫu (Chạy 1 lần duy nhất)
+ * ======================================================================================
+ */
+function initialSetup() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  
+  // 1. Tạo hoặc cấu hình Sheet Devices
+  let devSheet = ss.getSheetByName(CONFIG.SHEET_DEVICES);
+  if (!devSheet) {
+    devSheet = ss.insertSheet(CONFIG.SHEET_DEVICES);
+  }
+  if (devSheet.getLastRow() === 0) {
+    const devHeaders = [
+      "Mã thiết bị", "Tên thiết bị", "Danh mục", "Vị trí", "Phụ kiện đi kèm",
+      "Ảnh chuẩn bàn giao", "Cảnh báo nguồn & Lưu ý", "Link tài liệu / Pinout",
+      "Trạng thái", "MSSV giữ", "Họ tên người giữ", "Dự án / Mục đích", "Cập nhật lúc"
+    ];
+    appendTextRow(devSheet, devHeaders);
+    devSheet.getRange(1, 1, 1, devHeaders.length).setFontWeight("bold").setBackground("#1e293b").setFontColor("#ffffff");
+    devSheet.setFrozenRows(1);
+    
+    // Thêm dữ liệu mẫu
+    const nowStr = Utilities.formatDate(new Date(), "GMT+7", "yyyy-MM-dd HH:mm:ss");
+    const sampleDevices = [
+      ["DEV001", "Jetson Nano Developer Kit B01", "MCU/SBC", "Tủ A - Ngăn 1", "Nguồn 5V-4A, Thẻ nhớ 64GB, Cáp microUSB, Quạt tản nhiệt", "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600", "Nguồn 5V-4A DC Barrel Jack", "https://developer.nvidia.com/embedded/jetson-nano-developer-kit", "Trong kho", "", "", "", nowStr],
+      ["DEV002", "Raspberry Pi 4 Model B (4GB)", "MCU/SBC", "Tủ A - Ngăn 2", "Nguồn Type-C 5V-3A, Vỏ nhôm tản nhiệt, Thẻ nhớ 32GB", "https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=600", "Dùng nguồn Type-C 5V chuẩn", "https://www.raspberrypi.com/documentation/", "Trong kho", "", "", "", nowStr],
+      ["DEV003", "LiDAR Slamtec RPLIDAR A1M8", "Cảm biến", "Tủ B - Ngăn 1", "Board chuyển đổi USB, Cáp kết nối 7-pin", "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600", "5V-0.5A, tránh va đập mạnh gương quay", "https://www.slamtec.com/en/Support#rplidar-a-series", "Trong kho", "", "", "", nowStr]
+    ];
+    sampleDevices.forEach(row => appendTextRow(devSheet, row));
+  }
+  
+  // 2. Tạo hoặc cấu hình Sheet Users
+  let userSheet = ss.getSheetByName(CONFIG.SHEET_USERS);
+  if (!userSheet) {
+    userSheet = ss.insertSheet(CONFIG.SHEET_USERS);
+  }
+  if (userSheet.getLastRow() === 0) {
+    const userHeaders = ["MSSV / Mã cán bộ", "Mã PIN", "Họ và tên", "Số điện thoại", "Vai trò (ADMIN/INSPECTOR/STUDENT)", "Khóa"];
+    appendTextRow(userSheet, userHeaders);
+    userSheet.getRange(1, 1, 1, userHeaders.length).setFontWeight("bold").setBackground("#1e293b").setFontColor("#ffffff");
+    userSheet.setFrozenRows(1);
+    
+    const sampleUsers = [
+      ["admin", "9999", "Quản Trị Viên Lab", "0988888888", "ADMIN", "K68"],
+      ["inspector", "7777", "Cán Bộ Kiểm Định QA", "0977777777", "INSPECTOR", "K68"],
+      ["sv01", "1234", "Nguyễn Văn A", "0912345678", "STUDENT", "K68"],
+      ["sv02", "1234", "Trần Thị B", "0923456789", "STUDENT", "K69"]
+    ];
+    sampleUsers.forEach(row => appendTextRow(userSheet, row));
+  }
+  
+  // 3. Tạo hoặc cấu hình Sheet Logs
+  let logSheet = ss.getSheetByName(CONFIG.SHEET_LOGS);
+  if (!logSheet) {
+    logSheet = ss.insertSheet(CONFIG.SHEET_LOGS);
+  }
+  if (logSheet.getLastRow() === 0) {
+    const logHeaders = [
+      "Thời gian", "Mã giao dịch", "Người thực hiện", "Hành động", "Danh sách thiết bị",
+      "Dự án / Mục đích", "Phụ kiện kiểm tra", "Tình trạng", "Ghi chú sinh viên",
+      "Link ảnh Drive", "Xem trước ảnh", "Trạng thái kiểm định", "Cán bộ kiểm định", "Ghi chú QA"
+    ];
+    appendTextRow(logSheet, logHeaders);
+    logSheet.getRange(1, 1, 1, logHeaders.length).setFontWeight("bold").setBackground("#1e293b").setFontColor("#ffffff");
+    logSheet.setFrozenRows(1);
+  }
+  
+  Logger.log("Đã khởi tạo thành công toàn bộ hệ cơ sở dữ liệu ROAB LAB trên Google Sheets!");
+}
