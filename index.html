@@ -1534,14 +1534,24 @@
 <!-- VUE 3 APPLICATION LOGIC -->
 <script>
 const { createApp } = Vue;
+const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbxBFWGR5ZKr3xftHUVd0GY3p1MzITlFBXfh7PBVzNr1Xiu_7ozLLVWT9JX8_H3hECz-2A/exec';
+
+function loadSavedStaff() {
+  try {
+    const user = JSON.parse(localStorage.getItem('slam_staff_user') || 'null');
+    if (!user || typeof user.user_id !== 'string' || !user.user_id.trim() ||
+        !['ADMIN', 'INSPECTOR'].includes(user.role) || typeof user.full_name !== 'string') return null;
+    return { user_id: user.user_id, full_name: user.full_name, role: user.role };
+  } catch { return null; }
+}
 
 createApp({
   data() {
     return {
       connectionError: '',
       imagePlaceholder: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="240"%3E%3Crect width="100%25" height="100%25" fill="%23111827"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" fill="%239ca3af" font-family="sans-serif"%3ENo image%3C/text%3E%3C/svg%3E',
-      apiUrl: localStorage.getItem('slam_api_url') || '',
-      configApiUrl: localStorage.getItem('slam_api_url') || '',
+      apiUrl: localStorage.getItem('slam_api_url') || DEFAULT_API_URL,
+      configApiUrl: localStorage.getItem('slam_api_url') || DEFAULT_API_URL,
       
       // Top Navigation View Mode: 'SHOWROOM' | 'INSPECTOR' | 'ADMIN'
       currentViewMode: 'SHOWROOM',
@@ -1549,12 +1559,12 @@ createApp({
       adminStudentSearch: '',
 
       // Student Whitelist Auth
-      inputMssv: localStorage.getItem('slam_student_mssv') || '',
+      inputMssv: '',
       currentStudent: null,
       studentsWhitelist: [],
 
       // Staff Auth (Admin & Inspector)
-      adminUser: null,
+      adminUser: loadSavedStaff(),
       showStaffLoginModal: false,
       staffLoginForm: { user_id: '', pin: '' },
       staffLoginError: '',
@@ -1931,13 +1941,11 @@ createApp({
       const q = this.inputMssv.trim().toLowerCase();
       if (!q) {
         this.currentStudent = null;
-        localStorage.removeItem('slam_student_mssv');
         return;
       }
       const match = this.studentsWhitelist.find(s => s.user_id.toLowerCase() === q);
       if (match) {
         this.currentStudent = match;
-        localStorage.setItem('slam_student_mssv', match.user_id);
       } else {
         this.currentStudent = null;
       }
