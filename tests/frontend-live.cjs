@@ -55,6 +55,9 @@ for(const [name,fn] of Object.entries(config.computed)) Object.defineProperty(ap
   response={success:false,message:'Denied'};
   await app.fetchData();
   assert.ok(app.connectionError.includes('Denied'));
+  app.configApiUrl='https://malicious.com/api';
+  app.saveSettings();
+  assert.equal(app.apiUrl,'https://example.com/api', 'Non-admin cannot save API settings');
   app.configApiUrl='';
   app.saveSettings();
   assert.equal(app.apiUrl,'https://example.com/api');

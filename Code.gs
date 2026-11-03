@@ -52,12 +52,18 @@ function uploadDeviceFiles(payload) {
   for (const [key, field, imageOnly] of specs) {
     const upload = payload[key];
     if (!upload) continue;
+    let uploadType = String(upload.type || '').toLowerCase().trim();
+    if (uploadType === 'image/jpg' || uploadType === 'image/pjpeg') uploadType = 'image/jpeg';
+    upload.type = uploadType;
     const allowed = imageOnly ? ['image/jpeg', 'image/png', 'image/webp'] : ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
-    if (!allowed.includes(upload.type) || typeof upload.base64 !== 'string' ||
-        upload.base64.length > 6990508 || !/^[A-Za-z0-9+/]*={0,2}$/.test(upload.base64)) {
+    if (!allowed.includes(upload.type) || typeof upload.base64 !== 'string') {
       throw new Error('File không hợp lệ. Chỉ nhận JPG, PNG, WebP hoặc PDF, tối đa 5 MB/file.');
     }
-    const bytes = Utilities.base64Decode(upload.base64);
+    const cleanBase64 = upload.base64.replace(/\s+/g, '');
+    if (cleanBase64.length > 6990508 || !/^[A-Za-z0-9+/]*={0,2}$/.test(cleanBase64)) {
+      throw new Error('File không hợp lệ. Chỉ nhận JPG, PNG, WebP hoặc PDF, tối đa 5 MB/file.');
+    }
+    const bytes = Utilities.base64Decode(cleanBase64);
     if (!bytes || !bytes.length || bytes.length > 5 * 1024 * 1024) {
       throw new Error('Nội dung file không đúng định dạng hoặc vượt 5 MB.');
     }
@@ -83,7 +89,9 @@ function uploadDeviceFiles(payload) {
     if (CONFIG.FOLDER_ID && CONFIG.FOLDER_ID !== 'YOUR_GOOGLE_DRIVE_FOLDER_ID_HERE') {
       folder = DriveApp.getFolderById(CONFIG.FOLDER_ID);
     }
-  } catch (_) {}
+  } catch (folderErr) {
+    Logger.log("Không thể truy cập FOLDER_ID, fallback về Root: " + folderErr.toString());
+  }
   if (!folder) folder = DriveApp.getRootFolder();
   const created = [];
   try {
@@ -91,7 +99,11 @@ function uploadDeviceFiles(payload) {
       const name = String(payload.device_id).replace(/[^a-zA-Z0-9_-]/g, '_') + '_' + entry.field + '_' + Utilities.getUuid() + '.' + entry.ext;
       const file = folder.createFile(Utilities.newBlob(entry.bytes, entry.type, name));
       created.push(file);
-      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      try {
+        file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      } catch (sharingErr) {
+        Logger.log("Không thể setSharing ANYONE_WITH_LINK: " + sharingErr.toString());
+      }
       payload[entry.field] = entry.field === 'golden_image' ?
         'https://drive.google.com/thumbnail?id=' + file.getId() + '&sz=w1200' :
         'https://drive.google.com/file/d/' + file.getId() + '/view';
@@ -662,15 +674,22 @@ function doPost(e) {
           const blob = Utilities.newBlob(decodedBytes, "image/jpeg", fileName);
           
           let folder;
-          if (CONFIG.FOLDER_ID && CONFIG.FOLDER_ID !== "YOUR_GOOGLE_DRIVE_FOLDER_ID_HERE") {
-            folder = DriveApp.getFolderById(CONFIG.FOLDER_ID);
-          } else {
-            folder = DriveApp.getRootFolder();
+          try {
+            if (CONFIG.FOLDER_ID && CONFIG.FOLDER_ID !== "YOUR_GOOGLE_DRIVE_FOLDER_ID_HERE") {
+              folder = DriveApp.getFolderById(CONFIG.FOLDER_ID);
+            }
+          } catch (folderErr) {
+            Logger.log("Không thể truy cập FOLDER_ID, fallback về Root: " + folderErr.toString());
           }
+          if (!folder) folder = DriveApp.getRootFolder();
           
           const file = folder.createFile(blob);
-          file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-          directPhotoUrl = `https://drive.google.com/uc?export=view&id=${file.getId()}`;
+          try {
+            file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+          } catch (sharingErr) {
+            Logger.log("Không thể setSharing ANYONE_WITH_LINK: " + sharingErr.toString());
+          }
+          directPhotoUrl = `https://drive.google.com/thumbnail?id=${file.getId()}&sz=w1200`;
         } catch (uploadErr) {
           Logger.log("Lỗi upload Drive: " + uploadErr.toString());
           directPhotoUrl = "LỖI_UPLOAD: " + uploadErr.message;

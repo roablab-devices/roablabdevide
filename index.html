@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ROAB LAB // HIGH-PERFORMANCE HARDWARE MANAGEMENT</title>
+  <title>ROAB LAB // Quản Lý & Mượn Trả Thiết Bị</title>
   
   <!-- Tailwind CSS & DaisyUI CDN -->
   <link href="https://cdn.jsdelivr.net/npm/daisyui@4.10.1/dist/full.min.css" rel="stylesheet" type="text/css" />
@@ -121,7 +121,7 @@
 <div id="app" class="min-h-screen flex flex-col relative bg-brand-black text-slate-100">
   <div v-if="connectionError" role="alert" class="p-4 bg-rose-950 text-rose-200 text-sm flex flex-wrap items-center justify-between gap-2">
     <span>{{ connectionError }}</span>
-    <button @click="showSettingsModal = true" class="btn btn-sm">Cấu hình kết nối</button>
+    <button @click="openSettingsModal" class="btn btn-sm">Cấu hình kết nối</button>
   </div>
 
   <!-- ==================== HEADER NAVBAR ==================== -->
@@ -155,7 +155,7 @@
             @click="enterAdminMode" 
             class="btn btn-xs rounded-lg font-oswald uppercase"
             :class="currentViewMode === 'ADMIN' ? 'bg-amber-500 text-black' : 'bg-brand-card text-amber-400 border border-amber-500/30'">
-            <i class="fa-solid fa-gear"></i> Admin
+            <i class="fa-solid fa-user-gear"></i> Admin
           </button>
 
           <!-- Mobile Staff Auth button -->
@@ -196,7 +196,7 @@
             @click="enterAdminMode"
             :class="currentViewMode === 'ADMIN' ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/30' : 'text-brand-grayText hover:text-amber-400'"
             class="px-3.5 py-2 rounded-xl transition flex items-center space-x-1.5">
-            <i class="fa-solid fa-screwdriver-wrench"></i>
+            <i class="fa-solid fa-user-gear"></i>
             <span>Quản Trị Admin</span>
           </button>
 
@@ -242,7 +242,7 @@
             <span 
               class="px-2 py-0.5 rounded-lg text-xs font-oswald font-black uppercase tracking-wider flex items-center space-x-1"
               :class="adminUser.role === 'ADMIN' ? 'bg-amber-500 text-black' : 'bg-cyan-600 text-white'">
-              <i class="fa-solid" :class="adminUser.role === 'ADMIN' ? 'fa-crown' : 'fa-shield-halved'"></i>
+              <i class="fa-solid" :class="adminUser.role === 'ADMIN' ? 'fa-user-gear' : 'fa-shield-halved'"></i>
               <span>{{ adminUser.role }}</span>
             </span>
             <span class="text-xs text-slate-300 font-mono max-w-[110px] truncate" :title="adminUser.full_name">{{ getFirstName(adminUser.full_name) }}</span>
@@ -279,16 +279,16 @@
             <div class="lg:col-span-7 space-y-3">
               <div class="inline-flex items-center space-x-2 text-[10px] font-oswald uppercase tracking-widest text-brand-red font-bold px-3 py-1 rounded-full bg-brand-red/10 border border-brand-red/30">
                 <span class="w-1.5 h-1.5 rounded-full bg-brand-red"></span>
-                <span>ROBOTICS HARDWARE ARSENAL</span>
+                <span>KHO THIẾT BỊ NGHIÊN CỨU // ROAB LAB</span>
               </div>
 
               <h1 class="font-oswald text-3xl sm:text-4xl lg:text-5xl font-black uppercase tracking-tight text-white leading-tight">
-                GEAR UP YOUR ROBOT.<br>
-                <span class="text-brand-red">ENGINEER PROUD.</span>
+                QUẢN LÝ & MƯỢN TRẢ THIẾT BỊ.<br>
+                <span class="text-brand-red">PHỤC VỤ NGHIÊN CỨU.</span>
               </h1>
 
               <p class="text-xs sm:text-sm text-brand-grayText leading-relaxed max-w-xl">
-                Quản lý bo mạch Jetson Nano, STM32F4, LiDAR 360°, IMU công nghiệp & động cơ Dynamixel. Chụp ảnh trải phẳng linh kiện đối soát chống thất lạc.
+                Quản lý thiết bị phần cứng, máy tính nhúng, cảm biến, LiDAR & động cơ phục vụ nghiên cứu phòng Lab. Chụp ảnh linh kiện đối soát khi bàn giao đảm bảo tính minh bạch và an toàn thiết bị.
               </p>
 
               <div class="pt-2 flex flex-wrap items-center gap-2.5 font-oswald text-xs uppercase tracking-wider">
@@ -337,7 +337,7 @@
             <input 
               v-model="searchQuery"
               type="text" 
-              placeholder="Tìm theo tên mạch, mã hộp (MCU-01), vị trí tủ..." 
+              placeholder="Tìm theo tên thiết bị, mã hộp (MCU-01), vị trí tủ..." 
               class="w-full bg-brand-card border border-brand-border focus:border-brand-red rounded-xl pl-9 pr-8 py-2 text-xs text-white placeholder-slate-500 focus:outline-none">
             <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-brand-grayText">
               <i class="fa-solid fa-circle-xmark"></i>
@@ -795,7 +795,7 @@
       <!-- CHECK AUTHENTICATION FOR ADMIN -->
       <div v-if="!adminUser || adminUser.role !== 'ADMIN'" class="max-w-md mx-auto my-12 p-8 rounded-3xl bg-brand-card border border-amber-500/30 shadow-2xl space-y-5 text-center">
         <div class="w-16 h-16 rounded-2xl bg-amber-500/20 border border-amber-500/40 mx-auto flex items-center justify-center text-amber-400 text-2xl">
-          <i class="fa-solid fa-crown"></i>
+          <i class="fa-solid fa-user-gear"></i>
         </div>
         <div>
           <h3 class="font-oswald text-xl font-black uppercase text-white">YÊU CẦU QUYỀN QUẢN TRỊ VIÊN LAB</h3>
@@ -807,13 +807,6 @@
         <button @click="openStaffLoginModalWithRole('admin')" class="btn btn-red-cta btn-block py-3 rounded-xl font-oswald uppercase font-bold text-xs shadow-lg">
           <i class="fa-solid fa-lock mr-1.5"></i> Đăng Nhập Tài Khoản Admin Lab
         </button>
-
-        <div class="text-[10px] text-brand-grayText font-mono pt-2 border-t border-white/5 flex items-center justify-between">
-          <button @click="showSettingsModal = true" class="text-amber-400 hover:text-amber-300 underline font-sans flex items-center space-x-1">
-            <i class="fa-solid fa-sliders text-xs"></i>
-            <span>Cấu hình API</span>
-          </button>
-        </div>
       </div>
 
       <!-- MAIN ADMIN WORKSPACE (SHOWN ONLY WHEN LOGGED IN AS ADMIN) -->
@@ -830,7 +823,7 @@
               TRUNG TÂM QUẢN TRỊ THIẾT BỊ & TÀI LIỆU LAB
             </h2>
             <p class="text-xs text-brand-grayText mt-1 max-w-2xl">
-              Cán bộ: <strong>{{ adminUser.full_name }}</strong>. Thêm mới, bớt/xóa thiết bị, chỉnh sửa document (ảnh hoặc link tài liệu) và theo dõi toàn bộ nhật ký thay đổi của ban quản trị.
+              Thêm mới, bớt/xóa thiết bị, chỉnh sửa document (ảnh hoặc link tài liệu) và theo dõi toàn bộ nhật ký thay đổi của ban quản trị.
             </p>
           </div>
 
@@ -1156,14 +1149,6 @@
           <p class="text-brand-grayText text-xs leading-relaxed max-w-md">
             Hệ thống quản lý, cấp phát linh kiện & kiểm định đối soát hình ảnh thiết bị phòng Lab.
           </p>
-          <div class="pt-1 flex items-center space-x-2 text-xs font-mono text-slate-300">
-            <i class="fa-solid fa-code text-brand-red"></i>
-            <span class="text-brand-grayText">Tác giả phát triển:</span>
-            <a href="https://nguyenbinh-shark.github.io" target="_blank" rel="noopener noreferrer" class="text-white hover:text-brand-red font-bold underline underline-offset-2 transition flex items-center space-x-1">
-              <span>nguyenbinh-shark.github.io</span>
-              <i class="fa-solid fa-arrow-up-right-from-square text-[10px] ml-1 opacity-70"></i>
-            </a>
-          </div>
         </div>
 
         <!-- Cột 2: Thông tin Lab & Đề tài nghiên cứu HUST -->
@@ -1206,7 +1191,7 @@
               <span>Kiểm Định QA</span>
             </button>
             <button @click="enterAdminMode" class="text-left text-slate-300 hover:text-amber-400 transition flex items-center space-x-1.5">
-              <i class="fa-solid fa-screwdriver-wrench text-[10px] text-amber-400"></i>
+              <i class="fa-solid fa-user-gear text-[10px] text-amber-400"></i>
               <span>Quản Trị Admin</span>
             </button>
           </div>
@@ -1216,7 +1201,7 @@
       <!-- Dòng dưới cùng -->
       <div class="flex flex-col sm:flex-row items-center justify-between text-[11px] text-brand-grayText font-mono gap-2">
         <p>ROAB LAB // HIGH-PERFORMANCE HARDWARE MANAGEMENT</p>
-        <p>Tác giả: <a href="https://nguyenbinh-shark.github.io" target="_blank" rel="noopener noreferrer" class="text-slate-200 hover:text-brand-red font-bold underline transition">nguyenbinh-shark.github.io</a></p>
+        <p>Tác giả phát triển: <a href="https://nguyenbinh-shark.github.io" target="_blank" rel="noopener noreferrer" class="text-slate-200 hover:text-brand-red font-bold underline transition">Nguyên Bình</a></p>
       </div>
 
     </div>
@@ -1579,7 +1564,14 @@
       </div>
 
       <div class="space-y-3">
-        <div>
+        <div v-if="!adminUser || adminUser.role !== 'ADMIN'" class="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-300 text-xs space-y-1">
+          <p class="font-bold flex items-center space-x-1">
+            <i class="fa-solid fa-user-gear text-amber-400"></i>
+            <span>YÊU CẦU QUYỀN QUẢN TRỊ VIÊN</span>
+          </p>
+          <p class="text-[11px] text-slate-300">Chỉ tài khoản ADMIN mới có quyền xem và lưu cấu hình API kết nối Google Apps Script.</p>
+        </div>
+        <div v-else>
           <label class="block text-xs font-oswald uppercase text-brand-grayText mb-1">Web App API URL:</label>
           <textarea v-model="configApiUrl" rows="3" placeholder="https://script.google.com/macros/s/.../exec" class="w-full bg-brand-black border border-brand-border rounded-xl p-2.5 text-xs text-white font-mono focus:border-brand-red"></textarea>
           <p class="text-[10px] text-brand-grayText mt-1">Cần nhập URL API để sử dụng hệ thống.</p>
@@ -1587,7 +1579,10 @@
       </div>
 
       <div class="modal-action flex justify-between">
-        <button @click="saveSettings" class="btn-red-cta px-4 py-1.5 rounded-xl text-xs font-oswald uppercase font-bold">Lưu Cấu Hình</button>
+        <button v-if="!adminUser || adminUser.role !== 'ADMIN'" @click="showSettingsModal = false; openStaffLoginModalWithRole('admin')" class="btn-red-cta px-4 py-1.5 rounded-xl text-xs font-oswald uppercase font-bold">
+          <i class="fa-solid fa-lock mr-1"></i> Đăng Nhập Admin
+        </button>
+        <button v-else @click="saveSettings" class="btn-red-cta px-4 py-1.5 rounded-xl text-xs font-oswald uppercase font-bold">Lưu Cấu Hình</button>
       </div>
     </div>
   </dialog>
@@ -2126,14 +2121,17 @@ createApp({
     readDeviceUpload(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        let mime = file.type;
-        if (!mime) {
-          if (/\.jpe?g$/i.test(file.name)) mime = 'image/jpeg';
-          else if (/\.png$/i.test(file.name)) mime = 'image/png';
-          else if (/\.webp$/i.test(file.name)) mime = 'image/webp';
-          else if (/\.pdf$/i.test(file.name)) mime = 'application/pdf';
-        }
-        reader.onload = () => resolve({type:mime, base64:String(reader.result).split(',')[1]});
+        let mime = (file.type || '').toLowerCase();
+        if (mime === 'image/jpg' || mime === 'image/pjpeg' || (!mime && /\.jpe?g$/i.test(file.name))) mime = 'image/jpeg';
+        else if (mime === 'image/png' || (!mime && /\.png$/i.test(file.name))) mime = 'image/png';
+        else if (mime === 'image/webp' || (!mime && /\.webp$/i.test(file.name))) mime = 'image/webp';
+        else if (mime === 'application/pdf' || (!mime && /\.pdf$/i.test(file.name))) mime = 'application/pdf';
+
+        reader.onload = () => {
+          const res = String(reader.result || '');
+          const base64 = res.indexOf(',') !== -1 ? res.split(',')[1] : res;
+          resolve({ type: mime || 'image/jpeg', base64: base64.replace(/\s+/g, '') });
+        };
         reader.onerror = () => reject(new Error('Không đọc được file. Vui lòng chọn lại.'));
         reader.readAsDataURL(file);
       });
@@ -2402,7 +2400,21 @@ createApp({
       }
     },
 
+    openSettingsModal() {
+      if (!this.adminUser || this.adminUser.role !== 'ADMIN') {
+        this.showToast('Vui lòng đăng nhập tài khoản ADMIN để cấu hình API!', 'info');
+        this.openStaffLoginModalWithRole('admin');
+        return;
+      }
+      this.configApiUrl = this.apiUrl;
+      this.showSettingsModal = true;
+    },
+
     saveSettings() {
+      if (!this.adminUser || this.adminUser.role !== 'ADMIN') {
+        this.showToast('Chỉ Quản trị viên (ADMIN) mới có quyền lưu cấu hình API!', 'error');
+        return;
+      }
       const cleanUrl = this.configApiUrl.trim();
       try {
         const url = new URL(cleanUrl);
