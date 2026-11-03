@@ -263,8 +263,13 @@
             </button>
           </div>
 
-          <button @click="showSettingsModal = true" class="btn btn-ghost btn-circle btn-sm text-brand-grayText hover:text-white" title="Cấu hình Google Apps Script">
-            <i class="fa-solid fa-gear"></i>
+          <!-- Admin Settings Quick Button (Shown only when logged in as ADMIN) -->
+          <button 
+            v-if="adminUser && adminUser.role === 'ADMIN'" 
+            @click="currentViewMode = 'ADMIN'; adminSubTab = 'SETTINGS'" 
+            class="btn btn-ghost btn-circle btn-sm text-amber-400 hover:text-white hover:bg-amber-500/20" 
+            title="Cấu hình Hệ Thống & API (Admin)">
+            <i class="fa-solid fa-sliders"></i>
           </button>
         </div>
 
@@ -815,8 +820,12 @@
           <i class="fa-solid fa-lock mr-1.5"></i> Đăng Nhập Tài Khoản Admin Lab
         </button>
 
-        <div class="text-[10px] text-brand-grayText font-mono pt-2 border-t border-white/5">
-          Tài khoản Demo Admin: User <code>admin</code> • PIN <code>9999</code>
+        <div class="text-[10px] text-brand-grayText font-mono pt-2 border-t border-white/5 flex items-center justify-between">
+          <span>Tài khoản Demo Admin: User <code>admin</code> • PIN <code>9999</code></span>
+          <button @click="showSettingsModal = true" class="text-amber-400 hover:text-amber-300 underline font-sans flex items-center space-x-1">
+            <i class="fa-solid fa-sliders text-xs"></i>
+            <span>Cấu hình API</span>
+          </button>
         </div>
       </div>
 
@@ -839,6 +848,9 @@
           </div>
 
           <div class="flex items-center space-x-2.5">
+            <button @click="adminSubTab = 'SETTINGS'" class="btn btn-sm bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-xl font-oswald uppercase">
+              <i class="fa-solid fa-sliders mr-1 text-amber-400"></i> Cấu Hình API
+            </button>
             <button @click="openPasswordModal" class="btn btn-sm bg-white/10 text-white rounded-xl font-oswald uppercase">
               <i class="fa-solid fa-key mr-1"></i> Đổi mật khẩu tài khoản
             </button>
@@ -869,8 +881,15 @@
           </button>
           <button @click="adminSubTab = 'STUDENTS'"
             :class="adminSubTab === 'STUDENTS' ? 'bg-amber-500 text-black' : 'bg-brand-card text-brand-grayText hover:text-white'"
-            class="px-4 py-2 rounded-xl transition">
-            <i class="fa-solid fa-user-graduate mr-1"></i> 3. Tra cứu sinh viên
+            class="px-4 py-2 rounded-xl transition flex items-center space-x-1.5">
+            <i class="fa-solid fa-user-graduate"></i>
+            <span>3. Tra Cứu Sinh Viên</span>
+          </button>
+          <button @click="adminSubTab = 'SETTINGS'"
+            :class="adminSubTab === 'SETTINGS' ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' : 'bg-brand-card text-brand-grayText hover:text-white'"
+            class="px-4 py-2 rounded-xl transition flex items-center space-x-1.5">
+            <i class="fa-solid fa-sliders"></i>
+            <span>4. Cấu Hình Hệ Thống & API</span>
           </button>
         </div>
 
@@ -1011,6 +1030,130 @@
             </div>
           </div>
 
+        </div>
+
+        <!-- SUB-TAB 4: CẤU HÌNH HỆ THỐNG & API GOOGLE APPS SCRIPT -->
+        <div v-show="adminSubTab === 'SETTINGS'" class="space-y-6">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Left: API URL Configuration Card -->
+            <div class="lg:col-span-2 bg-brand-card border border-brand-border rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
+              <div class="flex items-center justify-between border-b border-brand-border pb-4">
+                <div class="flex items-center space-x-3">
+                  <div class="w-10 h-10 rounded-xl bg-brand-red/20 border border-brand-red/40 flex items-center justify-center text-brand-red text-lg">
+                    <i class="fa-solid fa-sliders"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-oswald text-lg font-bold text-white uppercase tracking-wide">
+                      Cấu Hình API Google Apps Script
+                    </h3>
+                    <p class="text-xs text-brand-grayText">Kết nối cơ sở dữ liệu Google Sheets của Lab hoặc chạy chế độ Demo</p>
+                  </div>
+                </div>
+
+                <!-- Status pill -->
+                <div class="flex items-center space-x-2">
+                  <span v-if="!isDemoMode" class="badge badge-success badge-sm font-oswald uppercase font-bold gap-1.5 py-3 px-3">
+                    <span class="w-2 h-2 rounded-full bg-black animate-ping"></span>
+                    API ĐANG KẾT NỐI
+                  </span>
+                  <span v-else class="badge badge-warning badge-sm font-oswald uppercase font-bold gap-1 py-3 px-3">
+                    <i class="fa-solid fa-flask"></i>
+                    DEMO MODE
+                  </span>
+                </div>
+              </div>
+
+              <!-- Form -->
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-xs font-oswald uppercase font-bold text-slate-300 mb-1.5 flex items-center justify-between">
+                    <span>Web App API Deployment URL:</span>
+                    <span class="text-[11px] font-mono text-brand-grayText normal-case font-normal">Cấp từ Apps Script Deploy</span>
+                  </label>
+                  <textarea 
+                    v-model="configApiUrl" 
+                    rows="3" 
+                    placeholder="https://script.google.com/macros/s/.../exec" 
+                    class="w-full bg-brand-black border border-brand-border rounded-2xl p-3.5 text-xs text-white font-mono focus:border-amber-400 focus:outline-none transition shadow-inner">
+                  </textarea>
+                  <p class="text-xs text-brand-grayText mt-1.5">
+                    Để trống URL này để hệ thống tự động quay về chế độ <strong>DEMO_MODE</strong> (chạy trên dữ liệu mẫu offline).
+                  </p>
+                </div>
+
+                <!-- Action buttons -->
+                <div class="flex flex-wrap items-center gap-3 pt-2">
+                  <button 
+                    @click="saveSettings" 
+                    class="btn btn-sm btn-red-cta font-oswald uppercase font-bold rounded-xl px-5 shadow-lg flex items-center space-x-2">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>Lưu Cấu Hình</span>
+                  </button>
+
+                  <button 
+                    @click="resetToDemo" 
+                    class="btn btn-sm bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white rounded-xl font-oswald uppercase font-bold px-4">
+                    <i class="fa-solid fa-rotate-left mr-1"></i> Chuyển Về Demo Mode
+                  </button>
+
+                  <button 
+                    v-if="!isDemoMode"
+                    @click="testApiConnection" 
+                    :disabled="isTestingApi"
+                    class="btn btn-sm bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-300 border border-cyan-500/40 rounded-xl font-oswald uppercase font-bold px-4">
+                    <i class="fa-solid" :class="isTestingApi ? 'fa-spinner fa-spin' : 'fa-plug'"></i>
+                    <span class="ml-1">Kiểm Tra Kết Nối</span>
+                  </button>
+                </div>
+
+                <!-- Test Connection Feedback -->
+                <div v-if="apiTestResult" class="p-4 rounded-2xl border text-xs font-mono transition mt-2"
+                  :class="apiTestResult.success ? 'bg-emerald-950/40 border-emerald-600/40 text-emerald-300' : 'bg-rose-950/40 border-rose-600/40 text-rose-300'">
+                  <div class="flex items-center space-x-2 font-bold font-oswald uppercase">
+                    <i class="fa-solid" :class="apiTestResult.success ? 'fa-circle-check text-emerald-400' : 'fa-triangle-exclamation text-rose-400'"></i>
+                    <span>{{ apiTestResult.title }}</span>
+                  </div>
+                  <div class="mt-1 text-slate-300">{{ apiTestResult.message }}</div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Right: Instructions & Deployment Info Card -->
+            <div class="space-y-4">
+              <div class="bg-brand-card border border-brand-border rounded-3xl p-6 space-y-4 shadow-xl">
+                <h4 class="font-oswald text-sm font-bold text-amber-400 uppercase tracking-wider flex items-center space-x-2">
+                  <i class="fa-solid fa-book-bookmark"></i>
+                  <span>Hướng dẫn triển khai backend</span>
+                </h4>
+                <ol class="text-xs text-slate-300 space-y-2.5 list-decimal list-inside leading-relaxed font-sans">
+                  <li>Mở file <code>Code.gs</code> trong Google Apps Script gắn với Google Sheets của Lab.</li>
+                  <li>Nhấn nút <strong>Deploy</strong> &rarr; <strong>New deployment</strong>.</li>
+                  <li>Chọn loại <strong>Web app</strong>:
+                    <ul class="list-disc list-inside ml-4 mt-1 text-slate-400 font-mono text-[11px] space-y-0.5">
+                      <li>Execute as: <strong>Me</strong></li>
+                      <li>Who has access: <strong>Anyone</strong></li>
+                    </ul>
+                  </li>
+                  <li>Copy link <code>.../exec</code> dán vào ô Web App API URL và bấm <strong>Lưu Cấu Hình</strong>.</li>
+                </ol>
+              </div>
+
+              <div class="bg-brand-black/60 border border-brand-border rounded-2xl p-4 text-xs font-mono space-y-2">
+                <div class="text-[10px] uppercase text-brand-grayText font-oswald">Thông tin xuất bản GitHub Pages</div>
+                <div class="flex items-center justify-between text-slate-300">
+                  <span>Trạng thái:</span>
+                  <span class="text-emerald-400 font-bold">Online</span>
+                </div>
+                <div class="flex items-center justify-between text-slate-300 truncate">
+                  <span>URL Web:</span>
+                  <a href="https://roablab-devices.github.io/roablabdevide/" target="_blank" class="text-cyan-400 underline truncate max-w-[170px]">roablab-devices.github.io...</a>
+                </div>
+              </div>
+            </div>
+
+          </div>
         </div>
 
       </div>
@@ -1692,6 +1835,8 @@ createApp({
 
       // Modals
       showSettingsModal: false,
+      isTestingApi: false,
+      apiTestResult: null,
       pinoutModal: null,
       documentImageFailed: false,
       historyModal: null,
@@ -2534,6 +2679,41 @@ createApp({
     resetToDemo() {
       this.configApiUrl = '';
       this.saveSettings();
+    },
+    async testApiConnection() {
+      const url = (this.configApiUrl || this.apiUrl).trim();
+      if (!url) {
+        this.apiTestResult = { success: false, title: 'Chưa nhập URL', message: 'Vui lòng nhập Web App API URL trước khi kiểm tra.' };
+        return;
+      }
+      this.isTestingApi = true;
+      this.apiTestResult = null;
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data && data.success) {
+          this.apiTestResult = {
+            success: true,
+            title: 'Kết nối thành công!',
+            message: 'API phản hồi tốt (' + ((data.devices || []).length) + ' thiết bị, ' + ((data.whitelist || []).length) + ' sinh viên).'
+          };
+          this.showToast('Kết nối Google Apps Script thành công!', 'success');
+        } else {
+          this.apiTestResult = {
+            success: false,
+            title: 'Phản hồi không hợp lệ',
+            message: data.message || 'API không trả về success: true. Vui lòng kiểm tra lại Code.gs.'
+          };
+        }
+      } catch (err) {
+        this.apiTestResult = {
+          success: false,
+          title: 'Lỗi kết nối',
+          message: 'Không thể kết nối đến Web App: ' + err.message + '. Hãy chắc chắn đã deploy với quyền "Anyone".'
+        };
+      } finally {
+        this.isTestingApi = false;
+      }
     }
   }
 }).mount('#app');
