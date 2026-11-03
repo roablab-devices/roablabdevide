@@ -36,6 +36,16 @@ function appendTextRow(sheet, values) {
   sheet.appendRow(values.map(sheetText));
 }
 
+function formatDriveImageUrl(url) {
+  if (!url || typeof url !== 'string') return '';
+  const trimmed = url.trim();
+  const match = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (match && match[1]) {
+    return 'https://drive.google.com/thumbnail?id=' + match[1] + '&sz=w1200';
+  }
+  return trimmed;
+}
+
 function uploadDeviceFiles(payload) {
   const specs = [['golden_upload', 'golden_image', true], ['document_upload', 'pinout_link', false]];
   const pending = [];
@@ -48,18 +58,33 @@ function uploadDeviceFiles(payload) {
       throw new Error('File không hợp lệ. Chỉ nhận JPG, PNG, WebP hoặc PDF, tối đa 5 MB/file.');
     }
     const bytes = Utilities.base64Decode(upload.base64);
-    const head = bytes.slice(0, 12).map(value => value & 255);
-    const starts = signature => signature.every((value, index) => head[index] === value);
-    const valid = upload.type === 'image/jpeg' ? starts([255,216,255]) :
-      upload.type === 'image/png' ? starts([137,80,78,71,13,10,26,10]) :
-      upload.type === 'image/webp' ? starts([82,73,70,70]) && head.slice(8,12).join(',') === '87,69,66,80' : starts([37,80,68,70,45]);
-    if (!bytes.length || bytes.length > 5 * 1024 * 1024 || !valid) throw new Error('Nội dung file không đúng định dạng hoặc vượt 5 MB.');
+    if (!bytes || !bytes.length || bytes.length > 5 * 1024 * 1024) {
+      throw new Error('Nội dung file không đúng định dạng hoặc vượt 5 MB.');
+    }
+    const byteAt = index => (bytes[index] & 255);
+    const checkSig = (offset, sig) => {
+      if (bytes.length < offset + sig.length) return false;
+      for (let i = 0; i < sig.length; i++) {
+        if (byteAt(offset + i) !== sig[i]) return false;
+      }
+      return true;
+    };
+    const valid = upload.type === 'image/jpeg' ? checkSig(0, [255, 216, 255]) :
+      upload.type === 'image/png' ? checkSig(0, [137, 80, 78, 71, 13, 10, 26, 10]) :
+      upload.type === 'image/webp' ? (checkSig(0, [82, 73, 70, 70]) && checkSig(8, [87, 69, 66, 80])) :
+      checkSig(0, [37, 80, 68, 70, 45]);
+    if (!valid) throw new Error('Nội dung file không đúng định dạng hoặc vượt 5 MB.');
     const ext = {'image/jpeg':'jpg','image/png':'png','image/webp':'webp','application/pdf':'pdf'}[upload.type];
     pending.push({field, type:upload.type, bytes, ext});
   }
   if (!pending.length) return;
-  if (!CONFIG.FOLDER_ID || CONFIG.FOLDER_ID === 'YOUR_GOOGLE_DRIVE_FOLDER_ID_HERE') throw new Error('Chưa cấu hình thư mục Google Drive.');
-  const folder = DriveApp.getFolderById(CONFIG.FOLDER_ID);
+  let folder;
+  try {
+    if (CONFIG.FOLDER_ID && CONFIG.FOLDER_ID !== 'YOUR_GOOGLE_DRIVE_FOLDER_ID_HERE') {
+      folder = DriveApp.getFolderById(CONFIG.FOLDER_ID);
+    }
+  } catch (_) {}
+  if (!folder) folder = DriveApp.getRootFolder();
   const created = [];
   try {
     for (const entry of pending) {
@@ -248,7 +273,7 @@ function doPost(e) {
     }
 
     // -------------------------------------------------------------
-    // LUỒNG 1: ĐĂNG NHẬP CÁN BỘ (ADMIN & CÁN BỘ KIỂM ĐỊNH INSPECTOR)
+    // LUỒNG 1: ĐĂNG NHẬP QUẢN TRỊ VIÊN (ADMIN & CÁN BỘ KIỂM ĐỊNH INSPECTOR)
     // -------------------------------------------------------------
     if (action === "admin_login") {
       const userSheet = ss.getSheetByName(CONFIG.SHEET_USERS);
@@ -267,7 +292,7 @@ function doPost(e) {
         if ((rowRole === "ADMIN" || rowRole === "INSPECTOR") && rowId.toLowerCase() === inputId.toLowerCase() && rowPin === inputPin) {
           matchedStaff = {
             user_id: rowId,
-            full_name: String(userRows[i][2] || "Cán bộ Lab"),
+            full_name: String(userRows[i][2] || "Quản trị viên Lab"),
             phone: String(userRows[i][3] || ""),
             role: rowRole
           };
@@ -293,6 +318,9 @@ function doPost(e) {
       const adminName = String(payload.admin_name || "Admin Lab").trim();
       if (!devId) return createJsonResponse({ success: false, message: "Mã thiết bị không được để trống!" });
       uploadDeviceFiles(payload);
+      if (payload.golden_image) {
+        payload.golden_image = formatDriveImageUrl(payload.golden_image);
+      }
       
       const devValues = devSheet.getDataRange().getValues();
       const nowStr = Utilities.formatDate(new Date(), "GMT+7", "yyyy-MM-dd HH:mm:ss");

@@ -30,7 +30,12 @@ function setup(status = 'Trong kho', holder = '') {
     CacheService: {getScriptCache: () => ({get: k => cache.get(k), put: (k,v) => cache.set(k,v), remove: k => cache.delete(k)})},
     ContentService: {MimeType: {JSON: 'json'}, createTextOutput: text => ({setMimeType: () => JSON.parse(text)})},
     Utilities: {formatDate: () => '2026-11-03', getUuid: () => 'test-id',
-      base64Decode: text => Array.from(Buffer.from(text,'base64')),
+      base64Decode: text => {
+        const buf = Buffer.from(text, 'base64');
+        const obj = { length: buf.length };
+        for (let i = 0; i < buf.length; i++) obj[i] = buf[i];
+        return obj;
+      },
       newBlob: (bytes,type,name) => ({bytes,type,name})},
     // Invalid transactions must never reach an upload.
     DriveApp: {Access:{ANYONE_WITH_LINK:'link'},Permission:{VIEW:'view'},
@@ -179,6 +184,10 @@ for (const decision of ['Đã duyệt hợp lệ','Báo vi phạm']) {
   const invalid=setup();
   assert.equal(invalid.post({...request,golden_upload:pdf}).success,false);
   assert.equal(invalid.uploaded.length,0);
+  count++;
+  const driveLink = setup();
+  assert.equal(driveLink.post({action:'admin_save_device',device_id:'D1',name:'Device',golden_image:'https://drive.google.com/file/d/test-drive-id/view?usp=sharing'}).success, true);
+  assert.equal(driveLink.devices[1][5], 'https://drive.google.com/thumbnail?id=test-drive-id&sz=w1200');
   count++;
 }
 console.log(`PASS: ${count} backend security scenarios (offline Apps Script mocks)`);
