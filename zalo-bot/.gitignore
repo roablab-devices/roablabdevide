@@ -1,4 +1,5 @@
 node_modules/
 cookies.json
 qr.png
+notified_tx.json
 .DS_Store

@@ -9,11 +9,73 @@ const PORT = process.env.PORT || 3000;
 // ID nhóm Zalo mặc định nhận thông báo QA
 const DEFAULT_GROUP_ID = "3454929219339921562";
 
+// URL hệ thống Smart Lab Asset Manager (Code.gs)
+const API_URL = "https://script.google.com/macros/s/AKfycbxBFWGR5ZKr3xftHUVd0GY3p1MzITlFBXfh7PBVzNr1Xiu_7ozLLVWT9JX8_H3hECz-2A/exec";
+const NOTIFIED_CACHE_PATH = path.join(__dirname, "notified_tx.json");
+const CHECK_INTERVAL_MS = 30000; // Quét mỗi 30 giây để tìm lượt mới
+
 // Khởi tạo Express Server để nhận lệnh gửi tin từ Google Apps Script / Tool
 const app = express();
 app.use(express.json());
 
 let zaloApi = null;
+
+// Hàm đọc danh sách các mã giao dịch đã thông báo (để không báo lại)
+function getNotifiedTxIds() {
+  if (fs.existsSync(NOTIFIED_CACHE_PATH)) {
+    try {
+      return new Set(JSON.parse(fs.readFileSync(NOTIFIED_CACHE_PATH, "utf8")));
+    } catch (e) {
+      return new Set();
+    }
+  }
+  return new Set();
+}
+
+// Lưu các mã giao dịch đã thông báo
+function saveNotifiedTxIds(set) {
+  const arr = Array.from(set).slice(-200);
+  fs.writeFileSync(NOTIFIED_CACHE_PATH, JSON.stringify(arr, null, 2), "utf8");
+}
+
+// Tự động kiểm tra hệ thống: CHỈ THÔNG BÁO ĐÚNG 1 LẦN KHI CÓ LƯỢT MỚI
+let isChecking = false;
+async function checkNewQARequests() {
+  if (!zaloApi || isChecking) return;
+  isChecking = true;
+  try {
+    const res = await fetch(API_URL);
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!data.success || !Array.isArray(data.audit_queue)) return;
+
+    // Lọc các giao dịch đang 'Chờ kiểm định'
+    const pendingItems = data.audit_queue.filter(
+      item => item.audit_status === "Chờ kiểm định" && item.tx_id
+    );
+
+    const notifiedSet = getNotifiedTxIds();
+    // Chỉ lấy các lượt mới tinh mà bot CHƯA TỪNG thông báo
+    const newItems = pendingItems.filter(item => !notifiedSet.has(item.tx_id));
+
+    if (newItems.length > 0) {
+      console.log(`\n🔔 [PHÁT HIỆN MỚI] Có ${newItems.length} lượt bàn giao mới cần QA phê duyệt!`);
+      const msg = `🔔 Có ${newItems.length} lượt cần kiểm định phê duyệt mới. Nhờ các bạn QA vào check nhé!`;
+      await zaloApi.sendMessage(msg, String(DEFAULT_GROUP_ID), ThreadType.Group);
+      console.log(`📤 Đã gửi thông báo vào nhóm [${DEFAULT_GROUP_ID}]: ${msg}`);
+
+      // Ghi nhớ các mã giao dịch này để TUYỆT ĐỐI KHÔNG BÁO LẠI
+      for (const item of newItems) {
+        notifiedSet.add(item.tx_id);
+      }
+      saveNotifiedTxIds(notifiedSet);
+    }
+  } catch (err) {
+    // Bỏ qua lỗi kết nối mạng tạm thời
+  } finally {
+    isChecking = false;
+  }
+}
 
 // Hàm mở ảnh QR tự động trên cả Windows và Ubuntu
 function openImage(filePath) {
@@ -111,6 +173,11 @@ function setupBotFeatures() {
     console.log(`- Bắn thông báo QA:   POST http://localhost:${PORT}/notify-qa`);
     console.log(`- Gửi tin nhắn tự do: POST http://localhost:${PORT}/send-message`);
   });
+
+  // Tự động kiểm tra danh sách QA từ hệ thống: CHỈ BÁO KHI CÓ LƯỢT MỚI
+  setInterval(checkNewQARequests, CHECK_INTERVAL_MS);
+  checkNewQARequests();
+  console.log(`👀 Đã kích hoạt giám sát tự động: Chỉ báo đúng 1 lần khi có lượt mới!`);
 }
 
 // 1. Endpoint kiểm tra trạng thái bot

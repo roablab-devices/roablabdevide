@@ -3,7 +3,7 @@
  * ROAB LAB - SMART LAB ASSET MANAGER (GOOGLE APPS SCRIPT BACKEND)
  * Hỗ trợ:
  * 1. Quản Trị Viên (Thêm, Bớt/Xóa thiết bị, Sửa thông số & tài liệu, Log chỉnh sửa)
- * 2. Cán Bộ Kiểm Định (QA Audit đối soát ảnh song song & phê duyệt/báo vi phạm)
+ * 2. Kiểm Định (QA Audit đối soát ảnh song song & phê duyệt/báo vi phạm)
  * 3. Sinh Viên (Zero-Password Whitelist, Chụp ảnh trải phẳng linh kiện nén Drive)
  * ======================================================================================
  */
@@ -298,7 +298,7 @@ function doPost(e) {
     }
 
     // -------------------------------------------------------------
-    // LUỒNG 1: ĐĂNG NHẬP QUẢN TRỊ VIÊN (ADMIN & CÁN BỘ KIỂM ĐỊNH INSPECTOR)
+    // LUỒNG 1: ĐĂNG NHẬP QUẢN TRỊ VIÊN (ADMIN & KIỂM ĐỊNH VIÊN INSPECTOR)
     // -------------------------------------------------------------
     if (action === "admin_login") {
       const userSheet = ss.getSheetByName(CONFIG.SHEET_USERS);
@@ -490,7 +490,7 @@ function doPost(e) {
     }
 
     // -------------------------------------------------------------
-    // LUỒNG 4: CÁN BỘ KIỂM ĐỊNH (QA) PHÊ DUYỆT / BÁO CẢNH BÁO ẢNH BÀN GIAO
+    // LUỒNG 4: KIỂM ĐỊNH VIÊN (QA) PHÊ DUYỆT / BÁO CẢNH BÁO ẢNH BÀN GIAO
     // -------------------------------------------------------------
     if (action === "audit_transaction") {
       const logSheet = ss.getSheetByName(CONFIG.SHEET_LOGS);
@@ -498,7 +498,7 @@ function doPost(e) {
       
       const targetTxId = String(payload.tx_id || "").trim();
       const auditStatus = String(payload.audit_status || "Đã duyệt hợp lệ").trim();
-      const inspectorName = String(payload.inspector_name || "Cán bộ kiểm định").trim();
+      const inspectorName = String(payload.inspector_name || "Kiểm định viên").trim();
       const auditNote = String(payload.audit_note || "").trim();
       const logValues = logSheet.getDataRange().getValues();
       if (!["Đã duyệt hợp lệ", "Báo vi phạm"].includes(auditStatus)) {
@@ -910,14 +910,14 @@ function initialSetup() {
     userSheet = ss.insertSheet(CONFIG.SHEET_USERS);
   }
   if (userSheet.getLastRow() === 0) {
-    const userHeaders = ["MSSV / Mã cán bộ", "Mã PIN", "Họ và tên", "Số điện thoại", "Vai trò (ADMIN/INSPECTOR/STUDENT)", "Khóa"];
+    const userHeaders = ["MSSV / Mã nhân sự", "Mã PIN", "Họ và tên", "Số điện thoại", "Vai trò (ADMIN/INSPECTOR/STUDENT)", "Khóa"];
     appendTextRow(userSheet, userHeaders);
     userSheet.getRange(1, 1, 1, userHeaders.length).setFontWeight("bold").setBackground("#1e293b").setFontColor("#ffffff");
     userSheet.setFrozenRows(1);
     
     const sampleUsers = [
       ["admin", "9999", "Quản Trị Viên Lab", "0988888888", "ADMIN", "K68"],
-      ["inspector", "7777", "Cán Bộ Kiểm Định QA", "0977777777", "INSPECTOR", "K68"],
+      ["inspector", "7777", "Kiểm Định Viên QA", "0977777777", "INSPECTOR", "K68"],
       ["sv01", "1234", "Nguyễn Văn A", "0912345678", "STUDENT", "K68"],
       ["sv02", "1234", "Trần Thị B", "0923456789", "STUDENT", "K69"]
     ];
@@ -933,7 +933,7 @@ function initialSetup() {
     const logHeaders = [
       "Thời gian", "Mã giao dịch", "Người thực hiện", "Hành động", "Danh sách thiết bị",
       "Dự án / Mục đích", "Phụ kiện kiểm tra", "Tình trạng", "Ghi chú sinh viên",
-      "Link ảnh Drive", "Xem trước ảnh", "Trạng thái kiểm định", "Cán bộ kiểm định", "Ghi chú QA"
+      "Link ảnh Drive", "Xem trước ảnh", "Trạng thái kiểm định", "Người kiểm định", "Ghi chú QA"
     ];
     appendTextRow(logSheet, logHeaders);
     logSheet.getRange(1, 1, 1, logHeaders.length).setFontWeight("bold").setBackground("#1e293b").setFontColor("#ffffff");
