@@ -1277,6 +1277,9 @@
                 class="w-full bg-brand-black border border-brand-border rounded-xl pl-9 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-400">
             </div>
 
+            <button @click="adminSubTab = 'GUIDE'; adminGuideFilter = 'CRUD'" class="btn btn-xs sm:btn-sm btn-ghost border border-amber-500/30 text-amber-300 hover:bg-amber-500/10 rounded-xl font-oswald uppercase font-bold">
+              <i class="fa-solid fa-book-bookmark mr-1"></i> SOP Thêm Thiết Bị
+            </button>
             <button @click="openAddDeviceModal" class="btn btn-xs sm:btn-sm btn-red-cta rounded-xl font-oswald uppercase font-bold">
               <i class="fa-solid fa-plus mr-1"></i> Thêm Thiết Bị
             </button>
@@ -1658,68 +1661,626 @@
           </div>
 
           <!-- Section 1: Quản Trị Thiết Bị & Kho CRUD -->
-          <div v-show="adminGuideFilter === 'ALL' || adminGuideFilter === 'CRUD'" class="p-6 rounded-3xl bg-brand-card border border-brand-border space-y-4">
-            <div class="flex items-center justify-between border-b border-white/5 pb-3">
-              <h4 class="font-oswald text-base uppercase font-bold text-white flex items-center space-x-2">
-                <i class="fa-solid fa-boxes-stacked text-amber-400"></i>
-                <span>1. Hướng Dẫn Quản Trị Thiết Bị (Thêm, Sửa, Xóa & Mở Khóa)</span>
-              </h4>
-              <span class="badge badge-sm bg-amber-500/20 text-amber-300 font-mono text-[10px]">MODULE 01</span>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <!-- Item 1: Thêm mới -->
-              <div class="p-4 rounded-2xl bg-brand-black border border-white/5 space-y-2">
-                <div class="font-oswald text-sm font-bold text-amber-300 uppercase flex items-center space-x-2">
-                  <i class="fa-solid fa-plus-circle"></i>
-                  <span>A. Thêm Thiết Bị Mới Vào Kho</span>
+          <div v-show="adminGuideFilter === 'ALL' || adminGuideFilter === 'CRUD'" class="p-6 sm:p-8 rounded-3xl bg-brand-card border border-amber-500/30 shadow-2xl space-y-6">
+            
+            <!-- Section Title & Meta -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-4">
+              <div class="space-y-1">
+                <div class="flex items-center space-x-2">
+                  <span class="badge badge-sm bg-amber-500 text-black font-mono font-bold text-[10px]">SOP-DEV-01</span>
+                  <span class="text-xs font-oswald uppercase tracking-wider text-amber-400 font-bold">CẨM NANG ONBOARDING CHO CÁN BỘ / NHÂN VIÊN MỚI</span>
                 </div>
-                <p class="text-xs text-slate-300 font-sans leading-relaxed">
-                  Bấm nút <strong>"Thêm Thiết Bị Mới"</strong> trên thanh công cụ Admin và hoàn thành các trường:
+                <h4 class="font-oswald text-lg sm:text-2xl uppercase font-black text-white flex items-center space-x-2.5">
+                  <i class="fa-solid fa-boxes-stacked text-amber-400"></i>
+                  <span>QUY TRÌNH THÊM & QUẢN TRỊ THIẾT BỊ MỚI VÀO PHÒNG LAB</span>
+                </h4>
+                <p class="text-xs text-brand-grayText">
+                  Hướng dẫn chi tiết 6 bước nhập kho, quy chuẩn đặt mã, an toàn cấp nguồn, quy tắc dấu phẩy phụ kiện và tiêu chuẩn chụp ảnh Golden Image
                 </p>
-                <ul class="text-xs text-slate-300 space-y-1.5 list-disc list-inside font-sans">
-                  <li><strong>Mã Hộp (Device ID):</strong> Bắt buộc duy nhất, viết hoa không dấu (ví dụ: <code class="text-amber-300 font-mono">ESP32-S3-01</code>, <code class="text-amber-300 font-mono">STM32-VET6-01</code>).</li>
-                  <li><strong>Tên thiết bị & Vị trí:</strong> Ghi rõ model và vị trí lưu trữ cụ thể (ví dụ: <code class="text-slate-200">Tủ A - Tầng 2 - Hộp 05</code>) để sinh viên dễ lấy.</li>
-                  <li><strong>Danh mục:</strong> Chọn chuẩn: <code class="text-cyan-300">MCU/SBC</code>, <code class="text-cyan-300">Cảm biến</code>, <code class="text-cyan-300">Động cơ/Driver</code>, <code class="text-cyan-300">Mạch giao tiếp</code>.</li>
-                  <li><strong>Cảnh báo nguồn (Specs):</strong> Cực kỳ quan trọng để chống cháy nổ! Ghi rõ mức điện áp (ví dụ: <code class="text-rose-400 font-mono">Chỉ cấp 5V qua Type-C, mức logic 3.3V</code>).</li>
-                  <li><strong>Danh sách phụ kiện:</strong> Phân tách từng món bằng dấu phẩy <code class="text-amber-300">,</code> (ví dụ: <code class="text-slate-200">1x Bo mạch, 1x Cáp USB-C, 1x Anten, 4x Dây cắm</code>). Hệ thống tự tách thành checklist checkbox cho sinh viên khi trả.</li>
-                  <li><strong>Golden Image & Pinout:</strong> Tải ảnh mẫu chuẩn 100% linh kiện và dán link Google Drive sơ đồ chân (chế độ Public "Ai có liên kết đều xem được").</li>
-                </ul>
               </div>
 
-              <!-- Item 2: Sửa, Xóa, Mở khóa -->
-              <div class="p-4 rounded-2xl bg-brand-black border border-white/5 space-y-3">
-                <div class="space-y-1.5">
-                  <div class="font-oswald text-sm font-bold text-cyan-300 uppercase flex items-center space-x-2">
-                    <i class="fa-solid fa-pen-to-square"></i>
-                    <span>B. Chỉnh Sửa Thông Tin Thiết Bị</span>
+              <div class="flex items-center space-x-2 self-start md:self-center">
+                <button @click="openAddDeviceModal" class="btn btn-sm btn-red-cta rounded-xl font-oswald uppercase font-bold text-xs shadow-lg">
+                  <i class="fa-solid fa-plus mr-1"></i> Mở Form Thêm Thiết Bị
+                </button>
+              </div>
+            </div>
+
+            <!-- PHẦN 1: QUY TRÌNH 6 BƯỚC NHẬP KHO THIẾT BỊ (STEP-BY-STEP FLOW) -->
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <h5 class="font-oswald text-sm uppercase font-bold text-white flex items-center space-x-2">
+                  <span class="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs">1</span>
+                  <span>Quy Trình 6 Bước Chuẩn Hóa Nhập Kho Thiết Bị</span>
+                </h5>
+                <span class="text-[11px] text-brand-grayText font-mono">Bắt buộc tuân thủ 100% trước khi đưa lên Showroom</span>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 text-xs">
+                <!-- Step 1 -->
+                <div class="p-3.5 rounded-2xl bg-brand-black border border-white/5 space-y-1.5 relative overflow-hidden flex flex-col justify-between">
+                  <div class="space-y-1">
+                    <div class="flex items-center justify-between">
+                      <span class="w-6 h-6 rounded-xl bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center font-oswald text-xs">01</span>
+                      <i class="fa-solid fa-box-open text-amber-400 text-sm"></i>
+                    </div>
+                    <p class="font-bold text-white uppercase text-[11px] font-oswald pt-1">Tiếp Nhận & Đếm Phụ Kiện</p>
+                    <p class="text-[11px] text-slate-300 leading-snug">Kiểm tra ngoại quan, đếm đủ bo mạch, cáp, anten, ốc vít. Đảm bảo chân cắm không bị gãy hoặc gỉ sét.</p>
                   </div>
-                  <p class="text-xs text-slate-300 font-sans leading-relaxed">
-                    Bấm biểu tượng cây bút ✏️ ở hàng thiết bị trong bảng Quản lý hoặc trên thẻ ở Showroom. Dùng khi bổ sung linh kiện, đổi vị trí ngăn tủ hoặc cập nhật link Pinout mới. Mọi chỉnh sửa đều được ghi nhận vào Logs.
+                  <span class="text-[10px] text-amber-400/90 font-mono">Kiểm tra vật lý</span>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="p-3.5 rounded-2xl bg-brand-black border border-white/5 space-y-1.5 relative overflow-hidden flex flex-col justify-between">
+                  <div class="space-y-1">
+                    <div class="flex items-center justify-between">
+                      <span class="w-6 h-6 rounded-xl bg-rose-500/20 text-rose-400 font-bold flex items-center justify-center font-oswald text-xs">02</span>
+                      <i class="fa-solid fa-bolt text-rose-400 text-sm"></i>
+                    </div>
+                    <p class="font-bold text-white uppercase text-[11px] font-oswald pt-1">Cấp Nguồn Thử Nghiệm</p>
+                    <p class="text-[11px] text-slate-300 leading-snug">Cấp điện áp chuẩn (5V Type-C hoặc 12V DC), kiểm tra đèn LED nguồn sáng, nạp thử code Blink mẫu.</p>
+                  </div>
+                  <span class="text-[10px] text-rose-400/90 font-mono">An toàn điện áp</span>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="p-3.5 rounded-2xl bg-brand-black border border-white/5 space-y-1.5 relative overflow-hidden flex flex-col justify-between">
+                  <div class="space-y-1">
+                    <div class="flex items-center justify-between">
+                      <span class="w-6 h-6 rounded-xl bg-cyan-500/20 text-cyan-400 font-bold flex items-center justify-center font-oswald text-xs">03</span>
+                      <i class="fa-solid fa-tag text-cyan-400 text-sm"></i>
+                    </div>
+                    <p class="font-bold text-white uppercase text-[11px] font-oswald pt-1">Dán Nhãn Định Danh</p>
+                    <p class="text-[11px] text-slate-300 leading-snug">Xác định tiền tố Device ID (<code class="text-white font-mono">MCU-</code>, <code class="text-white font-mono">SEN-</code>...). Dán nhãn lên hộp nhựa và mặt sau bo mạch.</p>
+                  </div>
+                  <span class="text-[10px] text-cyan-400/90 font-mono">Mã hóa chuẩn</span>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="p-3.5 rounded-2xl bg-brand-black border border-white/5 space-y-1.5 relative overflow-hidden flex flex-col justify-between">
+                  <div class="space-y-1">
+                    <div class="flex items-center justify-between">
+                      <span class="w-6 h-6 rounded-xl bg-indigo-500/20 text-indigo-400 font-bold flex items-center justify-center font-oswald text-xs">04</span>
+                      <i class="fa-solid fa-camera text-indigo-400 text-sm"></i>
+                    </div>
+                    <p class="font-bold text-white uppercase text-[11px] font-oswald pt-1">Chụp Golden Image</p>
+                    <p class="text-[11px] text-slate-300 leading-snug">Đặt trên bàn sáng/thảm ESD, xếp phẳng 100% phụ kiện, chụp góc 90° từ trên xuống, đủ sáng không bóng mờ.</p>
+                  </div>
+                  <span class="text-[10px] text-indigo-400/90 font-mono">Ảnh đối soát QA</span>
+                </div>
+
+                <!-- Step 5 -->
+                <div class="p-3.5 rounded-2xl bg-brand-black border border-white/5 space-y-1.5 relative overflow-hidden flex flex-col justify-between">
+                  <div class="space-y-1">
+                    <div class="flex items-center justify-between">
+                      <span class="w-6 h-6 rounded-xl bg-amber-500/20 text-amber-300 font-bold flex items-center justify-center font-oswald text-xs">05</span>
+                      <i class="fa-solid fa-keyboard text-amber-300 text-sm"></i>
+                    </div>
+                    <p class="font-bold text-white uppercase text-[11px] font-oswald pt-1">Nhập Dữ Liệu Lên Web</p>
+                    <p class="text-[11px] text-slate-300 leading-snug">Mở form thêm mới: điền mã, danh mục, vị trí 3 cấp, cảnh báo nguồn, phụ kiện ngăn cách dấu phẩy <code class="text-amber-300 font-mono">,</code>.</p>
+                  </div>
+                  <span class="text-[10px] text-amber-300/90 font-mono">Đồng bộ Cloud</span>
+                </div>
+
+                <!-- Step 6 -->
+                <div class="p-3.5 rounded-2xl bg-brand-black border border-white/5 space-y-1.5 relative overflow-hidden flex flex-col justify-between">
+                  <div class="space-y-1">
+                    <div class="flex items-center justify-between">
+                      <span class="w-6 h-6 rounded-xl bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center font-oswald text-xs">06</span>
+                      <i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
+                    </div>
+                    <p class="font-bold text-white uppercase text-[11px] font-oswald pt-1">Lưu Kho & Nghiệm Thu</p>
+                    <p class="text-[11px] text-slate-300 leading-snug">Bấm Lưu, ra Showroom kiểm tra thẻ thiết bị, kiểm tra link Pinout rồi cất máy vào đúng ngăn tủ đã đăng ký.</p>
+                  </div>
+                  <span class="text-[10px] text-emerald-400/90 font-mono">Sẵn sàng mượn</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- PHẦN 2: HƯỚNG DẪN CHI TIẾT TỪNG TRƯỜNG DỮ LIỆU (FIELD-BY-FIELD GUIDELINE) -->
+            <div class="space-y-3">
+              <h5 class="font-oswald text-sm uppercase font-bold text-white flex items-center space-x-2">
+                <span class="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xs">2</span>
+                <span>Chi Tiết Quy Chuẩn Điền Từng Trường Thông Tin Trên Form</span>
+              </h5>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs font-sans">
+                <!-- Field 1: Device ID -->
+                <div class="p-4 rounded-2xl bg-brand-black border border-white/5 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="font-oswald font-bold text-amber-400 uppercase text-xs flex items-center space-x-1.5">
+                      <i class="fa-solid fa-barcode text-cyan-400"></i>
+                      <span>Mã Thiết Bị (Device ID) *</span>
+                    </span>
+                    <span class="badge badge-xs bg-rose-500/20 text-rose-300 font-mono text-[9px]">KHÓA CHÍNH</span>
+                  </div>
+                  <p class="text-slate-300 leading-relaxed">
+                    Cú pháp chuẩn: <code class="text-amber-300 font-mono font-bold">&lt;TIỀN_TỐ&gt;-&lt;SỐ_THỨ_TỰ&gt;</code>. Viết HOA toàn bộ, không dấu tiếng Việt, không khoảng trắng, nối bằng dấu gạch ngang <code class="text-white font-mono">-</code>.
+                  </p>
+                  <div class="p-2 rounded-xl bg-white/5 font-mono text-[11px] space-y-1 text-slate-300">
+                    <div><span class="text-cyan-400">MCU/SBC:</span> MCU-01, ESP32-S3-01, STM32-01</div>
+                    <div><span class="text-emerald-400">Cảm biến:</span> SEN-01, SEN-TEMP-01, SEN-IMU-01</div>
+                    <div><span class="text-amber-400">Động cơ/Driver:</span> DRV-01, MTR-01, SERVO-01</div>
+                    <div><span class="text-indigo-400">Giao tiếp:</span> COM-01, LORA-01, CAN-01</div>
+                  </div>
+                  <p class="text-[10px] text-rose-400 font-mono">
+                    ⚠️ LƯU Ý SỐNG CÒN: Device ID là ID duy nhất. Sau khi đã tạo sẽ không thể sửa để bảo toàn lịch sử mượn trả và kiểm định!
                   </p>
                 </div>
 
-                <div class="space-y-1.5 border-t border-white/5 pt-2">
-                  <div class="font-oswald text-sm font-bold text-rose-400 uppercase flex items-center space-x-2">
-                    <i class="fa-solid fa-trash-can"></i>
-                    <span>C. Xóa Thiết Bị Khỏi Kho</span>
+                <!-- Field 2: Name -->
+                <div class="p-4 rounded-2xl bg-brand-black border border-white/5 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="font-oswald font-bold text-amber-400 uppercase text-xs flex items-center space-x-1.5">
+                      <i class="fa-solid fa-heading text-cyan-400"></i>
+                      <span>Tên Thiết Bị Đầy Đủ *</span>
+                    </span>
+                    <span class="badge badge-xs bg-cyan-500/20 text-cyan-300 font-mono text-[9px]">BẮT BUỘC</span>
                   </div>
-                  <p class="text-xs text-slate-300 font-sans leading-relaxed">
-                    Bấm nút "Xóa" trên bảng thiết bị. Hệ thống sẽ hiển thị hộp thoại xác nhận. Thao tác xóa được lưu vết kiểm toán với tên Admin để giải trình tài sản.
+                  <p class="text-slate-300 leading-relaxed">
+                    Phải ghi rõ ràng: <strong>Loại thiết bị + Model cụ thể + Phiên bản / Chipset / Bộ nhớ</strong>. Không ghi tên quá vắn tắt khiến sinh viên và cán bộ nhầm lẫn.
+                  </p>
+                  <div class="space-y-1 text-[11px]">
+                    <div class="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 leading-snug">
+                      <strong>✓ ĐÚNG:</strong> Kit ESP32-S3 WROOM-1 N16R8 Màn Hình IPS 1.9 inch
+                    </div>
+                    <div class="p-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 leading-snug">
+                      <strong>✗ SAI:</strong> Kit esp, Mạch vi điều khiển, esp32 (Quá chung chung)
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Field 3: Category & Location -->
+                <div class="p-4 rounded-2xl bg-brand-black border border-white/5 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="font-oswald font-bold text-amber-400 uppercase text-xs flex items-center space-x-1.5">
+                      <i class="fa-solid fa-location-dot text-cyan-400"></i>
+                      <span>Danh Mục & Vị Trí Ngăn Tủ *</span>
+                    </span>
+                    <span class="badge badge-xs bg-amber-500/20 text-amber-300 font-mono text-[9px]">TÌM KIẾM</span>
+                  </div>
+                  <p class="text-slate-300 leading-relaxed">
+                    <strong>Danh mục:</strong> Chọn đúng 1 trong 4 nhóm (<code class="text-cyan-300">MCU/SBC</code>, <code class="text-emerald-300">Cảm biến</code>, <code class="text-amber-300">Động cơ/Driver</code>, <code class="text-indigo-300">Mạch giao tiếp</code>).
+                  </p>
+                  <p class="text-slate-300 leading-relaxed">
+                    <strong>Vị trí (Location):</strong> Định dạng chuẩn 3 cấp:
+                    <br><code class="text-amber-300 font-mono font-bold">Tủ [X] - Ngăn [Y] - Khay/Hộp [Z]</code>
+                    <br><span class="text-slate-400 text-[11px]">Ví dụ: <code class="text-slate-200">Tủ A - Ngăn 02 - Khay 05</code></span>
+                  </p>
+                  <p class="text-[10px] text-brand-grayText">
+                    Giúp sinh viên và cán bộ tìm thấy thiết bị chỉ trong vòng 10 giây khi nhận đơn.
                   </p>
                 </div>
 
-                <div class="space-y-1.5 border-t border-white/5 pt-2">
-                  <div class="font-oswald text-sm font-bold text-amber-400 uppercase flex items-center space-x-2">
-                    <i class="fa-solid fa-lock-open"></i>
-                    <span>D. Mở Khóa Thiết Bị Bị Báo Lỗi</span>
+                <!-- Field 4: Specs & Power Warning -->
+                <div class="p-4 rounded-2xl bg-brand-black border border-white/5 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="font-oswald font-bold text-rose-400 uppercase text-xs flex items-center space-x-1.5">
+                      <i class="fa-solid fa-triangle-exclamation text-rose-400"></i>
+                      <span>Cảnh Báo Nguồn & Mức Logic *</span>
+                    </span>
+                    <span class="badge badge-xs bg-rose-500/20 text-rose-300 font-mono text-[9px]">CHỐNG CHÁY MẠCH</span>
                   </div>
-                  <p class="text-xs text-slate-300 font-sans leading-relaxed">
-                    Khi thiết bị ở trạng thái "Báo lỗi/Khóa" (do QA báo vi phạm), nút màu vàng <strong class="text-amber-400">"MỞ KHÓA"</strong> sẽ xuất hiện. Sau khi sinh viên hoàn tất đền bù hoặc kỹ thuật viên đã sửa mạch xong, Admin bấm mở khóa để đưa thiết bị trở về kho Sẵn sàng.
+                  <p class="text-slate-300 leading-relaxed">
+                    ⚡ <strong>AN TOÀN PHẦN CỨNG SỐNG CÒN:</strong> Ghi rõ điện áp cấp, cổng cắm, dòng điện và đặc biệt là <strong>Mức Logic IO (3.3V hay 5V)</strong>.
+                  </p>
+                  <div class="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-[11px] text-rose-200 font-mono space-y-1">
+                    <div><strong>Mẫu MCU:</strong> 5V-3A Type-C (IO logic 3.3V, TUYỆT ĐỐI CẤM cấp 5V vào GPIO)</div>
+                    <div><strong>Mẫu Driver:</strong> Logic 5V, Động lực DC 12V-24V Jack 5.5mm (CHÚ Ý ngược cực)</div>
+                  </div>
+                  <p class="text-[10px] text-slate-400">
+                    90% sự cố hỏng bo mạch tại phòng Lab là do sinh viên cấp nhầm 5V vào chân IO 3.3V!
+                  </p>
+                </div>
+
+                <!-- Field 5: Accessories Checklist -->
+                <div class="p-4 rounded-2xl bg-brand-black border border-white/5 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="font-oswald font-bold text-emerald-400 uppercase text-xs flex items-center space-x-1.5">
+                      <i class="fa-solid fa-list-check text-emerald-400"></i>
+                      <span>Phụ Kiện (Dấu Phẩy ',') *</span>
+                    </span>
+                    <span class="badge badge-xs bg-emerald-500/20 text-emerald-300 font-mono text-[9px]">TỰ TẠO CHECKBOX</span>
+                  </div>
+                  <p class="text-slate-300 leading-relaxed">
+                    🔑 <strong>QUY TẮC BẮT BUỘC:</strong> Phân tách từng món phụ kiện bằng <strong>dấu phẩy <code class="text-amber-300 font-bold">,</code></strong>.
+                  </p>
+                  <div class="p-2 rounded-xl bg-white/5 text-[11px] font-mono text-emerald-300 space-y-1">
+                    <div>1x Bo mạch ESP32-S3,</div>
+                    <div>1x Cáp nạp USB-C 1m,</div>
+                    <div>1x Anten rời 2.4GHz kèm cáp IPEX,</div>
+                    <div>10x Dây cắm đực-cái 20cm</div>
+                  </div>
+                  <p class="text-[10px] text-brand-grayText">
+                    Hệ thống web tự động phân tích dấu phẩy <code class="text-white font-mono">,</code> thành các ô Checkbox cho Sinh viên tích xác nhận khi trả và QA đối soát khi duyệt!
+                  </p>
+                </div>
+
+                <!-- Field 6: Golden Image & Pinout -->
+                <div class="p-4 rounded-2xl bg-brand-black border border-white/5 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="font-oswald font-bold text-indigo-400 uppercase text-xs flex items-center space-x-1.5">
+                      <i class="fa-solid fa-cloud-arrow-up text-indigo-400"></i>
+                      <span>Ảnh Mẫu Chuẩn & Tài Liệu</span>
+                    </span>
+                    <span class="badge badge-xs bg-indigo-500/20 text-indigo-300 font-mono text-[9px]">GOOGLE DRIVE</span>
+                  </div>
+                  <p class="text-slate-300 leading-relaxed">
+                    <strong>Golden Image:</strong> Chọn tệp ảnh JPG, PNG hoặc WebP (&lt; 5MB). Hệ thống sẽ tự động nén và tải lên Google Drive của Lab khi bấm Lưu.
+                  </p>
+                  <p class="text-slate-300 leading-relaxed">
+                    <strong>Document / Pinout:</strong> Tải file ảnh sơ đồ chân hoặc file PDF datasheet lên Drive.
+                  </p>
+                  <p class="text-[10px] text-amber-300 font-mono">
+                    ⚠️ Link Google Drive tự dán bắt buộc phải để quyền "Bất kỳ ai có liên kết đều có thể xem" (Public).
                   </p>
                 </div>
               </div>
             </div>
+
+            <!-- PHẦN 3: TIÊU CHUẨN CHỤP ẢNH MẪU CHUẨN (GOLDEN IMAGE PHOTOGRAPHY STANDARD - DO vs DON'T) -->
+            <div class="space-y-4 pt-2">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-t border-white/10 pt-4">
+                <div>
+                  <h5 class="font-oswald text-sm uppercase font-bold text-white flex items-center space-x-2">
+                    <span class="w-6 h-6 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xs">3</span>
+                    <span>Tiêu Chuẩn Chụp Ảnh Mẫu Chuẩn (Golden Image Photography Guide)</span>
+                  </h5>
+                  <p class="text-xs text-brand-grayText mt-0.5">
+                    Ảnh Golden Image là "thước đo chuẩn" để QA đối soát khi sinh viên hoàn trả đồ. Tuyệt đối không chụp cẩu thả!
+                  </p>
+                </div>
+                <span class="badge badge-sm bg-indigo-500/20 text-indigo-300 font-mono text-[10px]">ĐỐI SOÁT QA 100%</span>
+              </div>
+
+              <!-- Side-by-side DO vs DON'T Cards -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                
+                <!-- CARD DO: ẢNH ĐẠT TIÊU CHUẨN -->
+                <div class="p-5 rounded-3xl bg-brand-black border border-emerald-500/40 shadow-xl space-y-4">
+                  <div class="flex items-center justify-between border-b border-emerald-500/20 pb-3">
+                    <div class="flex items-center space-x-2">
+                      <span class="w-7 h-7 rounded-xl bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center text-sm">
+                        <i class="fa-solid fa-check"></i>
+                      </span>
+                      <div>
+                        <span class="font-oswald uppercase font-black text-emerald-400 text-sm tracking-wide">ẢNH CHUẨN (DO) - ĐẠT TIÊU CHUẨN KHO 100%</span>
+                        <p class="text-[10px] text-slate-400 font-mono">Bố cục phẳng, đủ phụ kiện, sáng rõ, đúng góc 90°</p>
+                      </div>
+                    </div>
+                    <span class="badge badge-sm bg-emerald-500/20 text-emerald-300 font-mono text-[10px]">KHUYÊN DÙNG</span>
+                  </div>
+
+                  <!-- Visual SVG Diagram of DO Layout -->
+                  <div class="rounded-2xl border border-emerald-500/20 bg-slate-950 p-3 relative overflow-hidden">
+                    <svg viewBox="0 0 380 220" class="w-full h-auto rounded-xl select-none" xmlns="http://www.w3.org/2000/svg">
+                      <!-- Workbench ESD Grid -->
+                      <rect width="100%" height="100%" fill="#0a101f"/>
+                      <pattern id="esd-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#1e293b" stroke-width="0.8"/>
+                      </pattern>
+                      <rect width="100%" height="100%" fill="url(#esd-grid)"/>
+
+                      <!-- Top-Down Camera Indicator -->
+                      <g transform="translate(190, 22)">
+                        <rect x="-60" y="-12" width="120" height="20" rx="10" fill="#064e3b" stroke="#10b981" stroke-width="1"/>
+                        <text x="0" y="2" text-anchor="middle" fill="#6ee7b7" font-size="9" font-family="monospace" font-weight="bold">📷 GÓC CHỤP 90° THẲNG ĐỨNG</text>
+                      </g>
+
+                      <!-- Microcontroller Board (Center) -->
+                      <g transform="translate(140, 50)">
+                        <!-- PCB body -->
+                        <rect width="100" height="120" rx="8" fill="#047857" stroke="#10b981" stroke-width="1.5"/>
+                        <!-- Gold Pin headers left & right -->
+                        <rect x="3" y="10" width="8" height="100" fill="#fbbf24" rx="2"/>
+                        <rect x="89" y="10" width="8" height="100" fill="#fbbf24" rx="2"/>
+                        <!-- SoC Chip -->
+                        <rect x="25" y="35" width="50" height="50" rx="4" fill="#0f172a" stroke="#334155" stroke-width="1"/>
+                        <text x="50" y="60" text-anchor="middle" fill="#f8fafc" font-size="9" font-family="monospace" font-weight="bold">ESP32-S3</text>
+                        <text x="50" y="72" text-anchor="middle" fill="#94a3b8" font-size="7" font-family="sans-serif">ROAB LAB</text>
+                        <!-- USB-C Port -->
+                        <rect x="38" y="114" width="24" height="8" rx="2" fill="#94a3b8"/>
+                        <!-- Status LED -->
+                        <circle cx="32" cy="22" r="3" fill="#10b981"/>
+                        <circle cx="42" cy="22" r="3" fill="#ef4444"/>
+                      </g>
+
+                      <!-- Neatly Coiled USB-C Cable (Right) -->
+                      <g transform="translate(260, 60)">
+                        <ellipse cx="50" cy="55" rx="40" ry="45" fill="none" stroke="#64748b" stroke-width="5" stroke-dasharray="100 8"/>
+                        <rect x="35" y="100" width="30" height="12" rx="4" fill="#475569" stroke="#94a3b8" stroke-width="1"/>
+                        <text x="50" y="109" text-anchor="middle" fill="#e2e8f0" font-size="7" font-family="sans-serif">Cáp USB-C</text>
+                      </g>
+
+                      <!-- Straight Rubber Duck Antenna (Top/Left) -->
+                      <g transform="translate(25, 45)">
+                        <rect x="30" y="10" width="12" height="90" rx="5" fill="#334155" stroke="#64748b" stroke-width="1"/>
+                        <rect x="28" y="95" width="16" height="15" fill="#fbbf24" rx="2"/>
+                        <text x="36" y="125" text-anchor="middle" fill="#cbd5e1" font-size="7" font-family="sans-serif">Anten 2.4G</text>
+                      </g>
+
+                      <!-- Aligned Dupont Wires (Left bottom) -->
+                      <g transform="translate(20, 145)">
+                        <rect x="0" y="0" width="80" height="4" fill="#ef4444" rx="1"/>
+                        <rect x="0" y="6" width="80" height="4" fill="#3b82f6" rx="1"/>
+                        <rect x="0" y="12" width="80" height="4" fill="#10b981" rx="1"/>
+                        <rect x="0" y="18" width="80" height="4" fill="#f59e0b" rx="1"/>
+                        <text x="40" y="34" text-anchor="middle" fill="#94a3b8" font-size="7" font-family="sans-serif">Dây Dupont cắm</text>
+                      </g>
+
+                      <!-- Inspection Check Badge -->
+                      <g transform="translate(190, 195)">
+                        <rect x="-85" y="-12" width="170" height="20" rx="10" fill="#064e3b" stroke="#10b981" stroke-width="1"/>
+                        <text x="0" y="2" text-anchor="middle" fill="#34d399" font-size="8.5" font-family="monospace" font-weight="bold">✓ ĐỦ 100% PHỤ KIỆN TÁCH RỜI</text>
+                      </g>
+                    </svg>
+                  </div>
+
+                  <!-- Checklist of DOs -->
+                  <div class="space-y-2 text-xs">
+                    <div class="flex items-start space-x-2 text-slate-300">
+                      <i class="fa-solid fa-circle-check text-emerald-400 text-sm mt-0.5"></i>
+                      <span><strong>Góc chụp 90° thẳng đứng (Top-Down):</strong> Đứng thẳng hoặc dùng chân máy chụp vuông góc với mặt bàn để thấy rõ toàn bộ chân cắm và chữ in.</span>
+                    </div>
+                    <div class="flex items-start space-x-2 text-slate-300">
+                      <i class="fa-solid fa-circle-check text-emerald-400 text-sm mt-0.5"></i>
+                      <span><strong>Trải phẳng 100% phụ kiện:</strong> Đặt bo mạch ở giữa, cáp nguồn, anten, thẻ nhớ xếp xung quanh, không để phụ kiện đè khuất bo mạch.</span>
+                    </div>
+                    <div class="flex items-start space-x-2 text-slate-300">
+                      <i class="fa-solid fa-circle-check text-emerald-400 text-sm mt-0.5"></i>
+                      <span><strong>Ánh sáng trắng đồng đều:</strong> Bật đèn bàn làm việc phòng Lab, không để sấp bóng tay hoặc bóng điện thoại đổ lên bo mạch.</span>
+                    </div>
+                    <div class="flex items-start space-x-2 text-slate-300">
+                      <i class="fa-solid fa-circle-check text-emerald-400 text-sm mt-0.5"></i>
+                      <span><strong>Nền phẳng đơn sắc tương phản:</strong> Sử dụng thảm chống tĩnh điện ESD màu xanh/xám hoặc mặt bàn thí nghiệm màu sáng sạch sẽ.</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- CARD DON'T: ẢNH KHÔNG CHẤP NHẬN -->
+                <div class="p-5 rounded-3xl bg-brand-black border border-rose-500/40 shadow-xl space-y-4">
+                  <div class="flex items-center justify-between border-b border-rose-500/20 pb-3">
+                    <div class="flex items-center space-x-2">
+                      <span class="w-7 h-7 rounded-xl bg-rose-500/20 text-rose-400 font-bold flex items-center justify-center text-sm">
+                        <i class="fa-solid fa-xmark"></i>
+                      </span>
+                      <div>
+                        <span class="font-oswald uppercase font-black text-rose-400 text-sm tracking-wide">ẢNH LỖI (DON'T) - KHÔNG CHẤP NHẬN / BỊ TỪ CHỐI</span>
+                        <p class="text-[10px] text-slate-400 font-mono">Góc xiên, thiếu cáp, để trong bọc nilon, nhòe mờ</p>
+                      </div>
+                    </div>
+                    <span class="badge badge-sm bg-rose-500/20 text-rose-300 font-mono text-[10px]">CẤM VI PHẠM</span>
+                  </div>
+
+                  <!-- Visual SVG Diagram of DON'T Layout -->
+                  <div class="rounded-2xl border border-rose-500/20 bg-slate-950 p-3 relative overflow-hidden">
+                    <svg viewBox="0 0 380 220" class="w-full h-auto rounded-xl select-none" xmlns="http://www.w3.org/2000/svg">
+                      <!-- Gloomy dark shadowy background -->
+                      <rect width="100%" height="100%" fill="#0b080b"/>
+                      <ellipse cx="280" cy="160" rx="100" ry="60" fill="#180c10" opacity="0.6"/>
+
+                      <!-- Slanted / Crooked Camera Angle Indicator -->
+                      <g transform="translate(190, 22)">
+                        <rect x="-70" y="-12" width="140" height="20" rx="10" fill="#4c0519" stroke="#f43f5e" stroke-width="1"/>
+                        <text x="0" y="2" text-anchor="middle" fill="#fda4af" font-size="9" font-family="monospace" font-weight="bold">✗ GÓC XIÊN 45° KHUẤT CHÂN CẮM</text>
+                      </g>
+
+                      <!-- Slanted Obscured Board with Shadows -->
+                      <g transform="translate(120, 60) rotate(15)">
+                        <rect width="90" height="110" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+                        <rect x="25" y="30" width="40" height="40" rx="3" fill="#0f172a"/>
+                        <!-- Flash Glare Flare (Obscuring chip) -->
+                        <ellipse cx="45" cy="48" rx="28" ry="18" fill="#fef08a" opacity="0.5"/>
+                        <circle cx="45" cy="48" r="8" fill="#ffffff"/>
+                        <!-- Plastic bag wrinkles overlay -->
+                        <path d="M 5 10 Q 30 50 15 90 Q 70 80 85 100" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.4"/>
+                      </g>
+
+                      <!-- Tangled Jumper Mess Covering Board -->
+                      <g transform="translate(150, 90)">
+                        <path d="M -20 10 Q 40 -30 20 40 Q 60 70 -10 50 Q 80 20 50 -10" fill="none" stroke="#ef4444" stroke-width="2.5"/>
+                        <path d="M 0 30 Q 30 10 60 40 Q -10 60 30 80" fill="none" stroke="#3b82f6" stroke-width="2.5"/>
+                      </g>
+
+                      <!-- Missing Cable Indicator with Red Alert -->
+                      <g transform="translate(265, 80)">
+                        <rect width="80" height="70" rx="12" fill="#2d060e" stroke="#e11d48" stroke-dasharray="4 4" stroke-width="1.5"/>
+                        <text x="40" y="35" text-anchor="middle" fill="#fb7185" font-size="20">❓</text>
+                        <text x="40" y="55" text-anchor="middle" fill="#fda4af" font-size="8" font-family="monospace" font-weight="bold">THIẾU CÁP NẠP!</text>
+                      </g>
+
+                      <!-- Bottom Alert Badge -->
+                      <g transform="translate(190, 195)">
+                        <rect x="-95" y="-12" width="190" height="20" rx="10" fill="#4c0519" stroke="#f43f5e" stroke-width="1"/>
+                        <text x="0" y="2" text-anchor="middle" fill="#f43f5e" font-size="8.5" font-family="monospace" font-weight="bold">✗ KHÔNG THỂ ĐỐI SOÁT KIỂM ĐỊNH</text>
+                      </g>
+                    </svg>
+                  </div>
+
+                  <!-- Checklist of DON'Ts -->
+                  <div class="space-y-2 text-xs">
+                    <div class="flex items-start space-x-2 text-slate-300">
+                      <i class="fa-solid fa-circle-xmark text-rose-400 text-sm mt-0.5"></i>
+                      <span><strong>Chụp góc nghiêng xiên 45°:</strong> Làm khuất các cổng I/O và tem dán phía sau, QA không thể nhận diện được tình trạng bo mạch.</span>
+                    </div>
+                    <div class="flex items-start space-x-2 text-slate-300">
+                      <i class="fa-solid fa-circle-xmark text-rose-400 text-sm mt-0.5"></i>
+                      <span><strong>Quên không chụp phụ kiện (Cáp, Anten):</strong> Khi sinh viên làm mất cáp Type-C hoặc anten, QA không có cơ sở ảnh mẫu để bắt đền bù!</span>
+                    </div>
+                    <div class="flex items-start space-x-2 text-slate-300">
+                      <i class="fa-solid fa-circle-xmark text-rose-400 text-sm mt-0.5"></i>
+                      <span><strong>Để trong bọc nilon mờ / Hộp xốp:</strong> Đèn flash gây lóa sáng chói, bóng phản chiếu che mất chữ trên chip vi điều khiển.</span>
+                    </div>
+                    <div class="flex items-start space-x-2 text-slate-300">
+                      <i class="fa-solid fa-circle-xmark text-rose-400 text-sm mt-0.5"></i>
+                      <span><strong>Chụp rung tay / Thiếu sáng:</strong> Ảnh bị nhòe vỡ nét, không thể phóng to kiểm tra vết xước hoặc dấu hiệu cháy chập chân linh kiện.</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- PHẦN 4: MINH HỌA MẪU THẺ THIẾT BỊ HOÀN CHỈNH TRÊN SHOWROOM (OUTPUT PREVIEW) -->
+            <div class="space-y-3 pt-2">
+              <div class="flex items-center justify-between border-t border-white/10 pt-4">
+                <h5 class="font-oswald text-sm uppercase font-bold text-white flex items-center space-x-2">
+                  <span class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs">4</span>
+                  <span>Mẫu Thẻ Thiết Bị Chuẩn Sau Khi Nhân Viên Thêm Mới Thành Công</span>
+                </h5>
+                <span class="text-[11px] text-brand-grayText font-mono">Dữ liệu hiển thị trực tiếp cho Sinh viên & Giảng viên</span>
+              </div>
+
+              <!-- Interactive Mockup Card -->
+              <div class="p-5 rounded-3xl bg-brand-black/80 border border-white/10 max-w-2xl mx-auto space-y-4 shadow-2xl">
+                <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                  <div class="flex items-center space-x-2">
+                    <span class="px-2.5 py-1 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 font-mono font-bold text-xs">MCU-01</span>
+                    <span class="badge badge-sm bg-cyan-500/20 text-cyan-300 font-mono text-[10px]">MCU/SBC</span>
+                  </div>
+                  <span class="badge badge-sm bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-oswald uppercase text-[10px] font-bold">
+                    <i class="fa-solid fa-circle mr-1 text-[8px] animate-pulse"></i> Sẵn Sàng Mượn
+                  </span>
+                </div>
+
+                <div class="space-y-2">
+                  <h6 class="font-oswald text-base font-bold text-white uppercase tracking-tight">
+                    Kit Phát Triển ESP32-S3 WROOM-1 N16R8 Màn Hình IPS 1.9"
+                  </h6>
+                  <div class="flex flex-wrap gap-2 text-[11px] font-mono">
+                    <span class="px-2 py-0.5 rounded-md bg-white/5 text-slate-300 border border-white/5">
+                      📍 Tủ A - Ngăn 02 - Khay 05
+                    </span>
+                    <span class="px-2 py-0.5 rounded-md bg-rose-500/10 text-rose-300 border border-rose-500/20">
+                      ⚡ 5V-3A Type-C (IO logic 3.3V, CẤM 5V vào GPIO)
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Checklist Preview -->
+                <div class="p-3 rounded-2xl bg-white/5 border border-white/5 space-y-1.5 text-xs">
+                  <span class="text-[10px] font-oswald uppercase font-bold text-slate-400 tracking-wider block">
+                    Phụ Kiện Đi Kèm (Sinh Viên Phải Tick Khi Trả):
+                  </span>
+                  <div class="grid grid-cols-2 gap-1.5 text-[11px] text-slate-300">
+                    <div class="flex items-center space-x-1.5"><i class="fa-solid fa-square-check text-emerald-400"></i> <span>1x Bo mạch ESP32-S3</span></div>
+                    <div class="flex items-center space-x-1.5"><i class="fa-solid fa-square-check text-emerald-400"></i> <span>1x Cáp Type-C 1m</span></div>
+                    <div class="flex items-center space-x-1.5"><i class="fa-solid fa-square-check text-emerald-400"></i> <span>1x Anten rời 2.4GHz</span></div>
+                    <div class="flex items-center space-x-1.5"><i class="fa-solid fa-square-check text-emerald-400"></i> <span>10x Dây cắm đực-cái</span></div>
+                  </div>
+                </div>
+
+                <!-- Action Button Preview -->
+                <div class="flex items-center justify-between pt-1">
+                  <span class="btn btn-xs btn-ghost text-cyan-400 font-mono text-[10px] border border-cyan-500/30">
+                    <i class="fa-solid fa-file-pdf mr-1"></i> Xem Sơ Đồ Chân (Pinout)
+                  </span>
+                  <span class="btn btn-xs btn-cyan-cta rounded-lg font-oswald uppercase font-bold text-[11px]">
+                    <i class="fa-solid fa-hand-holding mr-1"></i> Đăng Ký Mượn
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- PHẦN 5: BẢNG LỖI PHỔ BIẾN & CÁCH KHẮC PHỤC DÀNH CHO NHÂN VIÊN MỚI -->
+            <div class="space-y-3 pt-2">
+              <div class="flex items-center justify-between border-t border-white/10 pt-4">
+                <h5 class="font-oswald text-sm uppercase font-bold text-white flex items-center space-x-2">
+                  <span class="w-6 h-6 rounded-lg bg-rose-500/20 text-rose-400 flex items-center justify-center text-xs">5</span>
+                  <span>Bảng Tổng Hợp Những Lỗi Thường Gặp & Cách Khắc Phục</span>
+                </h5>
+                <span class="text-[11px] text-brand-grayText font-mono">Dành cho nhân viên mới tự kiểm tra (Self-Check)</span>
+              </div>
+
+              <div class="overflow-x-auto rounded-2xl border border-white/5 bg-brand-black/60">
+                <table class="table table-xs w-full text-left font-sans">
+                  <thead class="text-brand-grayText font-oswald uppercase border-b border-white/5 text-[11px]">
+                    <tr>
+                      <th class="w-1/4">Lỗi Thường Gặp</th>
+                      <th class="w-1/3">Hậu Quả Xảy Ra</th>
+                      <th class="w-5/12">Cách Thao Tác Đúng Chuẩn</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-white/5 text-xs text-slate-300">
+                    <tr>
+                      <td class="font-bold text-rose-400">Dùng dấu chấm phẩy hoặc xuống dòng cho phụ kiện</td>
+                      <td class="text-slate-400">Hệ thống không phân tách được các ô Checkbox độc lập khi sinh viên hoàn trả.</td>
+                      <td class="text-emerald-300 font-mono">Bắt buộc dùng dấu phẩy <code class="text-amber-300 font-bold">,</code> (VD: <code class="text-slate-200">1x Bo mạch, 1x Cáp USB, 2x Dây cắm</code>).</td>
+                    </tr>
+                    <tr>
+                      <td class="font-bold text-rose-400">Không ghi cảnh báo điện áp logic (IO 3.3V)</td>
+                      <td class="text-slate-400">Sinh viên vô tình cắm nguồn hoặc cảm biến 5V vào GPIO gây nổ/cháy cổng vi điều khiển.</td>
+                      <td class="text-emerald-300">Luôn ghi rõ: <code class="text-rose-400 font-mono">Nguồn 5V Type-C, Logic IO 3.3V (CẤM cấp 5V vào GPIO)</code>.</td>
+                    </tr>
+                    <tr>
+                      <td class="font-bold text-rose-400">Dán link Drive ở chế độ riêng tư (Chỉ mình tôi)</td>
+                      <td class="text-slate-400">Sinh viên và QA bấm vào xem sơ đồ chân bị báo lỗi 403 Access Denied.</td>
+                      <td class="text-emerald-300">Vào Google Drive > Chia sẻ > Chuyển sang "Bất kỳ ai có đường liên kết đều có thể xem".</td>
+                    </tr>
+                    <tr>
+                      <td class="font-bold text-rose-400">Chụp ảnh mẫu thiếu cáp nạp / thiếu anten</td>
+                      <td class="text-slate-400">Khi sinh viên trả thiếu cáp nạp, QA không có ảnh làm bằng chứng để yêu cầu bồi hoàn.</td>
+                      <td class="text-emerald-300">Luôn bày đủ 100% linh kiện & phụ kiện lên bàn phẳng trước khi chụp Golden Image.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- PHẦN 6: HƯỚNG DẪN SỬA, XÓA & MỞ KHÓA THIẾT BỊ BÁO LỖI -->
+            <div class="space-y-3 pt-2">
+              <div class="flex items-center justify-between border-t border-white/10 pt-4">
+                <h5 class="font-oswald text-sm uppercase font-bold text-white flex items-center space-x-2">
+                  <span class="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs">6</span>
+                  <span>Hướng Dẫn Sửa Thông Tin, Xóa & Mở Khóa Thiết Bị Bị Báo Lỗi</span>
+                </h5>
+                <span class="badge badge-sm bg-white/10 text-slate-300 font-mono text-[10px]">THAO TÁC QUẢN TRỊ</span>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-sans">
+                <!-- Sửa -->
+                <div class="p-4 rounded-2xl bg-brand-black border border-white/5 space-y-2">
+                  <div class="font-oswald text-xs font-bold text-cyan-300 uppercase flex items-center space-x-1.5">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    <span>A. Chỉnh Sửa Thông Tin Thiết Bị</span>
+                  </div>
+                  <p class="text-slate-300 leading-relaxed">
+                    Bấm biểu tượng cây bút ✏️ ở hàng thiết bị trong bảng Quản lý hoặc trên thẻ ngoài Showroom.
+                  </p>
+                  <p class="text-slate-400 leading-snug">
+                    Dùng khi: Bổ sung phụ kiện, chuyển vị trí ngăn tủ mới, cập nhật link Datasheet/Pinout mới hoặc đổi ảnh mẫu. Thao tác được ghi nhận vào Nhật ký (Logs).
+                  </p>
+                </div>
+
+                <!-- Xóa -->
+                <div class="p-4 rounded-2xl bg-brand-black border border-white/5 space-y-2">
+                  <div class="font-oswald text-xs font-bold text-rose-400 uppercase flex items-center space-x-1.5">
+                    <i class="fa-solid fa-trash-can"></i>
+                    <span>B. Xóa Thiết Bị Khỏi Kho</span>
+                  </div>
+                  <p class="text-slate-300 leading-relaxed">
+                    Bấm nút "Xóa" trên bảng thiết bị. Hệ thống sẽ hiển thị hộp thoại xác nhận bảo mật.
+                  </p>
+                  <p class="text-slate-400 leading-snug">
+                    Chỉ dùng khi thiết bị đã thanh lý hoàn toàn hoặc hư hỏng không thể phục hồi. Thao tác xóa ghi rõ tên Admin thực hiện để kiểm toán tài sản.
+                  </p>
+                </div>
+
+                <!-- Mở khóa -->
+                <div class="p-4 rounded-2xl bg-brand-black border border-white/5 space-y-2">
+                  <div class="font-oswald text-xs font-bold text-amber-400 uppercase flex items-center space-x-1.5">
+                    <i class="fa-solid fa-lock-open"></i>
+                    <span>C. Mở Khóa Thiết Bị Bị Báo Lỗi</span>
+                  </div>
+                  <p class="text-slate-300 leading-relaxed">
+                    Khi QA báo vi phạm (thiếu đồ hoặc hư hỏng), thiết bị chuyển sang trạng thái "Báo lỗi/Khóa".
+                  </p>
+                  <p class="text-slate-400 leading-snug">
+                    Sau khi sinh viên hoàn tất bồi hoàn hoặc kỹ thuật viên đã sửa xong bo mạch, Admin bấm nút màu vàng <strong class="text-amber-400">"MỞ KHÓA"</strong> để đưa thiết bị trở về trạng thái "Trong kho (Sẵn sàng)".
+                  </p>
+                </div>
+              </div>
+            </div>
+
           </div>
 
           <!-- Section 2: Tra Cứu Sinh Viên -->
@@ -2245,6 +2806,63 @@
         <button @click="showDeviceEditModal = false" class="btn btn-circle btn-ghost btn-sm text-brand-grayText hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
+      <!-- Quick Guide Accordion for New Staff -->
+      <div class="rounded-2xl border border-amber-500/40 bg-amber-500/10 overflow-hidden shadow-lg">
+        <button 
+          type="button" 
+          @click="showDeviceFormGuide = !showDeviceFormGuide" 
+          class="w-full flex items-center justify-between px-4 py-2.5 text-left text-xs font-oswald uppercase tracking-wider text-amber-300 hover:bg-amber-500/15 transition">
+          <span class="flex items-center space-x-2">
+            <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+            <i class="fa-solid fa-lightbulb text-amber-400 text-sm"></i>
+            <span class="font-bold">HƯỚNG DẪN NHẬP LIỆU CHUẨN (DÀNH CHO NHÂN VIÊN MỚI)</span>
+          </span>
+          <span class="flex items-center space-x-1.5 text-[11px] text-amber-400/90 font-mono">
+            <span>{{ showDeviceFormGuide ? 'Thu gọn' : 'Xem quy tắc & ví dụ' }}</span>
+            <i class="fa-solid" :class="showDeviceFormGuide ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+          </span>
+        </button>
+        
+        <div v-show="showDeviceFormGuide" class="p-3.5 text-xs border-t border-amber-500/20 bg-brand-black/90 space-y-2.5 text-slate-300">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+            <div class="p-2.5 rounded-xl bg-white/5 border border-white/5 space-y-1">
+              <span class="font-oswald uppercase font-bold text-amber-300 flex items-center space-x-1">
+                <i class="fa-solid fa-barcode text-cyan-400"></i>
+                <span>1. Mã Thiết Bị (Device ID)</span>
+              </span>
+              <p class="text-slate-400 leading-snug">Cú pháp: <code class="text-white font-mono">MCU-01</code>, <code class="text-white font-mono">SEN-02</code>, <code class="text-white font-mono">DRV-03</code>. Viết HOA, không dấu. <em>(Cố định sau khi tạo, không được sửa)</em>.</p>
+            </div>
+            <div class="p-2.5 rounded-xl bg-white/5 border border-white/5 space-y-1">
+              <span class="font-oswald uppercase font-bold text-rose-400 flex items-center space-x-1">
+                <i class="fa-solid fa-bolt text-rose-400"></i>
+                <span>2. Cảnh Báo Nguồn & Logic IO</span>
+              </span>
+              <p class="text-slate-400 leading-snug">Ghi rõ cổng & điện áp logic: <code class="text-rose-400 font-mono">5V Type-C, Logic 3.3V (CẤM 5V vào GPIO)</code> để chống cháy bo mạch.</p>
+            </div>
+            <div class="p-2.5 rounded-xl bg-white/5 border border-white/5 space-y-1 sm:col-span-2">
+              <span class="font-oswald uppercase font-bold text-emerald-400 flex items-center space-x-1">
+                <i class="fa-solid fa-list-check text-emerald-400"></i>
+                <span>3. Danh Sách Phụ Kiện (Bắt buộc phân tách bằng dấu phẩy ',')</span>
+              </span>
+              <p class="text-slate-400 leading-snug">
+                Hệ thống tự động tách dấu phẩy <code class="text-amber-300 font-bold">,</code> thành từng ô Checkbox khi sinh viên trả và QA duyệt:
+                <br><span class="text-emerald-300 font-mono">1x Bo mạch chính, 1x Cáp nạp Type-C 1m, 1x Anten rời 2.4GHz, 10x Dây cắm Dupont</span>
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center justify-between pt-2 border-t border-white/10 text-[11px]">
+            <span class="text-slate-400">Xem ảnh mẫu Golden Image chuẩn & quy trình 6 bước?</span>
+            <button 
+              type="button" 
+              @click="showDeviceEditModal = false; adminSubTab = 'GUIDE'; adminGuideFilter = 'CRUD'" 
+              class="text-amber-400 hover:text-amber-300 hover:underline font-oswald uppercase font-bold flex items-center space-x-1">
+              <span>Mở Sổ Tay SOP Chi Tiết</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div class="space-y-3 max-h-[70vh] overflow-y-auto pr-1 text-xs">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
@@ -2431,6 +3049,7 @@ createApp({
       // Admin CRUD
       adminDeviceSearch: '',
       showDeviceEditModal: false,
+      showDeviceFormGuide: false,
       isEditingExistingDevice: false,
       isSavingDevice: false,
       savingDeviceStatus: '',

@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>TÀI LIỆU GIỚI THIỆU SẢN PHẨM & TÍNH NĂNG - ROAB LAB</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+    @page {
+      size: A4;
+      margin: 12mm 14mm 12mm 14mm;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #1e293b;
+      background: #ffffff;
+      line-height: 1.5;
+      font-size: 9pt;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1, h2, h3, h4, .font-heading {
+      font-family: 'Montserrat', sans-serif;
+      color: #0f172a;
+      letter-spacing: -0.02em;
+    }
+
+    .page {
+      width: 100%;
+      height: 273mm;
+      max-height: 273mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      page-break-after: always;
+      page-break-inside: avoid;
+      overflow: hidden;
+      background: #ffffff;
+    }
+
+    .page:last-child {
+      page-break-after: avoid;
+    }
+
+    /* Header & Footer */
+    .doc-header {
+      flex-shrink: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 7px;
+      margin-bottom: 12px;
+      border-bottom: 1.5px solid #e2e8f0;
+      font-size: 7.5pt;
+      color: #64748b;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .doc-header .brand-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #dc2626;
+      font-weight: 800;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .doc-header .brand-icon {
+      width: 17px;
+      height: 17px;
+      background: #dc2626;
+      color: white;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 7.5pt;
+      font-weight: 900;
+    }
+
+    .doc-footer {
+      flex-shrink: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 6px;
+      margin-top: 6px;
+      border-top: 1px solid #e2e8f0;
+      font-size: 7.2pt;
+      color: #94a3b8;
+    }
+
+    .page-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      overflow: hidden;
+    }
+
+    /* COVER PAGE STYLES */
+    .cover-container {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 10mm 8mm;
+      background: linear-gradient(135deg, #090d16 0%, #111827 50%, #1e111a 100%);
+      color: #ffffff;
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cover-container::before {
+      content: "";
+      position: absolute;
+      top: -120px;
+      right: -120px;
+      width: 420px;
+      height: 420px;
+      background: radial-gradient(circle, rgba(220, 38, 38, 0.28) 0%, rgba(220, 38, 38, 0) 70%);
+      border-radius: 50%;
+    }
+
+    .cover-container::after {
+      content: "";
+      position: absolute;
+      bottom: -150px;
+      left: -150px;
+      width: 480px;
+      height: 480px;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.2) 0%, rgba(6, 182, 212, 0) 70%);
+      border-radius: 50%;
+    }
+
+    .cover-top {
+      position: relative;
+      z-index: 2;
+    }
+
+    .cover-badge-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .pill-tag {
+      background: rgba(220, 38, 38, 0.2);
+      border: 1px solid rgba(220, 38, 38, 0.5);
+      color: #fca5a5;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 8pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .pill-sub {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #cbd5e1;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 8pt;
+      font-weight: 600;
+    }
+
+    .cover-title {
+      font-size: 27pt;
+      font-weight: 900;
+      line-height: 1.15;
+      text-transform: uppercase;
+      color: #ffffff;
+      margin: 0 0 10px 0;
+    }
+
+    .cover-title span.highlight {
+      color: #ef4444;
+      display: inline-block;
+    }
+
+    .cover-subtitle {
+      font-size: 13pt;
+      font-weight: 600;
+      color: #93c5fd;
+      margin-bottom: 16px;
+      line-height: 1.35;
+    }
+
+    .cover-desc {
+      font-size: 9.5pt;
+      color: #94a3b8;
+      line-height: 1.6;
+      border-left: 3px solid #ef4444;
+      padding-left: 14px;
+      margin-bottom: 26px;
+    }
+
+    .cover-highlights-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      position: relative;
+      z-index: 2;
+      margin-top: 10px;
+    }
+
+    .cover-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 14px 14px;
+      border-radius: 10px;
+      backdrop-filter: blur(8px);
+    }
+
+    .cover-card-num {
+      font-size: 18pt;
+      font-weight: 900;
+      font-family: 'Montserrat', sans-serif;
+      color: #f87171;
+      margin-bottom: 3px;
+    }
+
+    .cover-card-title {
+      font-size: 8.5pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+
+    .cover-card-desc {
+      font-size: 7.5pt;
+      color: #94a3b8;
+      line-height: 1.4;
+    }
+
+    .cover-bottom {
+      position: relative;
+      z-index: 2;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      padding-top: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .cover-meta {
+      font-size: 8pt;
+      color: #cbd5e1;
+      line-height: 1.6;
+    }
+
+    .cover-meta strong {
+      color: #ffffff;
+    }
+
+    /* SECTION HEADERS */
+    .section-title {
+      font-size: 12.5pt;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 10px 0;
+      padding-bottom: 4px;
+      border-bottom: 2px solid #ef4444;
+    }
+
+    .section-num {
+      background: #ef4444;
+      color: white;
+      width: 20px;
+      height: 20px;
+      border-radius: 5px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 8.5pt;
+      font-weight: 800;
+    }
+
+    .section-sub {
+      font-size: 8.2pt;
+      color: #64748b;
+      margin: -6px 0 10px 0;
+    }
+
+    /* PROBLEM VS SOLUTION */
+    .compare-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .compare-box {
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 8.2pt;
+      line-height: 1.45;
+    }
+
+    .compare-box.bad {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 3.5px solid #ef4444;
+    }
+
+    .compare-box.good {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-left: 3.5px solid #16a34a;
+    }
+
+    .compare-header {
+      font-weight: 800;
+      text-transform: uppercase;
+      font-size: 8.2pt;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .compare-box.bad .compare-header { color: #b91c1c; }
+    .compare-box.good .compare-header { color: #15803d; }
+
+    .compare-list {
+      margin: 0;
+      padding-left: 14px;
+    }
+
+    .compare-list li {
+      margin-bottom: 3px;
+    }
+
+    /* STEP FLOW DIAGRAM */
+    .workflow-container {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 6px;
+      background: #0f172a;
+      padding: 10px 8px;
+      border-radius: 8px;
+      color: white;
+      margin-bottom: 12px;
+      border: 1px solid #1e293b;
+    }
+
+    .flow-step {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 7px 5px;
+      text-align: center;
+    }
+
+    .flow-step-num {
+      width: 17px;
+      height: 17px;
+      border-radius: 50%;
+      background: #ef4444;
+      color: white;
+      font-size: 7pt;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 3px;
+    }
+
+    .flow-step-title {
+      font-size: 7.2pt;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: #f1f5f9;
+      margin-bottom: 2px;
+    }
+
+    .flow-step-desc {
+      font-size: 6.6pt;
+      color: #94a3b8;
+      line-height: 1.25;
+    }
+
+    /* TABLES */
+    .table-custom {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 7.8pt;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+    }
+
+    .table-custom thead th {
+      background: #0f172a;
+      color: #f8fafc;
+      font-family: 'Montserrat', sans-serif;
+      text-transform: uppercase;
+      font-size: 7.2pt;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      padding: 6px 8px;
+      text-align: left;
+    }
+
+    .table-custom tbody td {
+      padding: 6px 8px;
+      border-bottom: 1px solid #f1f5f9;
+      color: #334155;
+      vertical-align: top;
+    }
+
+    .table-custom tbody tr:nth-child(even) {
+      background: #f8fafc;
+    }
+
+    .status-pill {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 6.8pt;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .pill-green { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .pill-blue { background: #e0f2fe; color: #0369a1; border: 1px solid #7dd3fc; }
+    .pill-red { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+    .pill-orange { background: #ffedd5; color: #c2410c; border: 1px solid #fdba74; }
+
+    /* CALLOUT BOX */
+    .callout-box {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-left: 3.5px solid #0284c7;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 8pt;
+      line-height: 1.45;
+      margin-bottom: 4px;
+    }
+
+    .callout-title {
+      font-weight: 800;
+      font-size: 8pt;
+      color: #0369a1;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* GRID CARDS */
+    .feature-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .feature-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+
+    .feature-card-header {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 4px;
+    }
+
+    .feature-icon-badge {
+      width: 22px;
+      height: 22px;
+      border-radius: 5px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 8pt;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .badge-red { background: #fee2e2; color: #dc2626; }
+    .badge-blue { background: #e0f2fe; color: #0284c7; }
+    .badge-emerald { background: #dcfce7; color: #16a34a; }
+    .badge-amber { background: #fef3c7; color: #d97706; }
+    .badge-purple { background: #f3e8ff; color: #9333ea; }
+    .badge-cyan { background: #cffafe; color: #0891b2; }
+
+    .feature-title {
+      font-size: 8.5pt;
+      font-weight: 800;
+      color: #0f172a;
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+    }
+
+    .feature-desc {
+      font-size: 7.6pt;
+      color: #475569;
+      line-height: 1.45;
+      margin: 0;
+    }
+
+    .feature-desc strong {
+      color: #1e293b;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========================================== -->
+  <!-- TRANG 1: TRANG BÌA GIỚI THIỆU SẢN PHẨM -->
+  <!-- ========================================== -->
+  <div class="page">
+    <div class="cover-container">
+      
+      <div class="cover-top">
+        <div class="cover-badge-row">
+          <div class="pill-tag">GIỚI THIỆU SẢN PHẨM // PRODUCT OVERVIEW</div>
+          <div class="pill-sub">HỆ THỐNG QUẢN LÝ THIẾT BỊ PHẦN CỨNG</div>
+          <div class="pill-sub">PHIÊN BẢN v2.4</div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+          <div style="width: 46px; height: 46px; background: #dc2626; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22pt; font-weight: 900; color: white; font-family: 'Montserrat', sans-serif; box-shadow: 0 4px 18px rgba(220, 38, 38, 0.45);">R</div>
+          <div>
+            <div style="font-family: 'Montserrat', sans-serif; font-size: 14pt; font-weight: 900; letter-spacing: 0.15em; color: white;">ROAB LAB</div>
+            <div style="font-size: 7.5pt; color: #94a3b8; letter-spacing: 0.2em; text-transform: uppercase;">Hardware Asset Management & QA System</div>
+          </div>
+        </div>
+
+        <h1 class="cover-title">
+          HỆ THỐNG QUẢN LÝ & KIỂM ĐỊNH<br>
+          <span class="highlight">THIẾT BỊ PHÒNG NGHIÊN CỨU</span><br>
+          VÀ ĐÀO TẠO THỰC HÀNH
+        </h1>
+
+        <div class="cover-subtitle">
+          Giải pháp số hóa toàn diện quy trình mượn - trả, chống thất thoát linh kiện & đối soát chất lượng độc lập bằng công nghệ ảnh mẫu Golden Image
+        </div>
+
+        <div class="cover-desc">
+          <strong>ROAB LAB</strong> là nền tảng quản trị tài sản phần cứng chuyên sâu, được thiết kế tối ưu cho các phòng nghiên cứu vi điện tử, phòng thí nghiệm IoT, Robotics, Cơ điện tử và AI. Hệ thống chuẩn hóa chu trình mượn - trả thông minh, đối soát thị giác độc lập và bảo vệ thiết bị chống chập cháy linh kiện.
+        </div>
+
+        <!-- 3 Điểm Nổi Bật -->
+        <div class="cover-highlights-grid">
+          <div class="cover-card">
+            <div class="cover-card-num">100%</div>
+            <div class="cover-card-title">Minh Bạch Bằng Chứng</div>
+            <div class="cover-card-desc">Lưu vết hình ảnh thực tế mỗi lần hoàn trả, đối soát trực quan loại bỏ hoàn toàn tranh chấp hỏng hóc hoặc thiếu linh kiện.</div>
+          </div>
+          <div class="cover-card">
+            <div class="cover-card-num">&lt; 30s</div>
+            <div class="cover-card-title">Thao Tác Siêu Tốc</div>
+            <div class="cover-card-desc">Sinh viên tự phục vụ mượn/trả qua mã định danh cá nhân (MSSV), loại bỏ hoàn toàn sổ sách ghi chép thủ công.</div>
+          </div>
+          <div class="cover-card">
+            <div class="cover-card-num">0 VNĐ</div>
+            <div class="cover-card-title">Vận Hành Tiện Lợi</div>
+            <div class="cover-card-desc">Hoạt động mượt mà trên nền tảng Cloud hiện đại, sử dụng trực tiếp trên điện thoại và máy tính không cần cài đặt.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cover-bottom">
+        <div class="cover-meta">
+          <div><strong>ĐƠN VỊ PHÁT TRIỂN:</strong> Nhóm Giải Pháp Công Nghệ ROAB LAB</div>
+          <div><strong>ỨNG DỤNG PHÙ HỢP:</strong> Phòng Lab Vi Điều Khiển, IoT, Robotics, AI, Cơ Điện Tử, Mạng Máy Tính</div>
+          <div><strong>NỀN TẢNG HỖ TRỢ:</strong> Web Cloud Responsive (Điện thoại iOS/Android, Máy tính bảng, Laptop, PC)</div>
+        </div>
+        <div style="text-align: right;">
+          <span style="font-size: 8pt; color: #94a3b8; font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-weight: 700; letter-spacing: 0.1em;">PRODUCT BROCHURE</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- TRANG 2: TỔNG QUAN, BÀI TOÁN & VÒNG ĐỜI -->
+  <!-- ========================================== -->
+  <div class="page">
+    <div class="doc-header">
+      <div class="brand-badge"><span class="brand-icon">R</span> ROAB LAB - TÀI LIỆU GIỚI THIỆU SẢN PHẨM</div>
+      <div>PHẦN 1: TỔNG QUAN & MÔ HÌNH VẬN HÀNH</div>
+    </div>
+
+    <div class="page-content">
+      <h2 class="section-title"><span class="section-num">1</span> BÀI TOÁN QUẢN TRỊ & GIẢI PHÁP ĐỘT PHÁ CỦA ROAB LAB</h2>
+      <p class="section-sub">Khắc phục triệt để các tồn tại cố hữu trong việc quản lý thiết bị phần cứng tại các phòng thực hành, phòng Lab</p>
+
+      <!-- So sánh Thực trạng vs Giải pháp -->
+      <div class="compare-container">
+        <div class="compare-box bad">
+          <div class="compare-header">⚠️ KHÓ KHĂN KHI QUẢN LÝ THỦ CÔNG</div>
+          <ul class="compare-list">
+            <li><strong>Thất lạc linh kiện phụ trợ:</strong> Cáp nạp, anten, adapter nguồn, dây cắm jumper thường xuyên bị mất sau mỗi lượt mượn.</li>
+            <li><strong>Chập cháy do cấp sai nguồn:</strong> Người dùng cắm nhầm điện áp (3.3V vs 5V vs 12V) làm chết vi điều khiển, chip IC đắt tiền.</li>
+            <li><strong>Tranh cãi khi xảy ra hư hỏng:</strong> Không có bằng chứng đối chứng hiện trạng trước và sau khi bàn giao thiết bị.</li>
+            <li><strong>Nợ thiết bị kéo dài:</strong> Khó kiểm soát ai đang giữ thiết bị nào, gây gián đoạn nghiên cứu của các nhóm khác.</li>
+          </ul>
+        </div>
+
+        <div class="compare-box good">
+          <div class="compare-header">✅ GIẢI PHÁP ĐỘT PHÁ CỦA ROAB LAB</div>
+          <ul class="compare-list">
+            <li><strong>Checklist linh kiện số hóa:</strong> Bóc tách chi tiết từng phụ kiện bắt buộc phải kiểm đếm khi hoàn trả hộp thiết bị.</li>
+            <li><strong>Sơ đồ Pinout & Cảnh báo nguồn 1-chạm:</strong> Tra cứu nhanh thông số điện áp định mức trước khi cấp điện thử nghiệm.</li>
+            <li><strong>Kiểm định đối soát song song (QA):</strong> So sánh ảnh mẫu chuẩn 100% với ảnh chụp thực tế lúc bàn giao thiết bị.</li>
+            <li><strong>Theo dõi & đôn đốc tức thời:</strong> Quản trị viên nắm danh sách thiết bị sinh viên đang giữ để liên hệ thu hồi 1 chạm.</li>
+          </ul>
+        </div>
+      </div>
+
+      <h2 class="section-title" style="margin-top: 6px;"><span class="section-num">2</span> CHU TRÌNH VẬN HÀNH 6 BƯỚC KHÉP KÍN</h2>
+      <p class="section-sub">Quy trình chuẩn hóa bảo vệ tài sản phần cứng và đảm bảo tính minh bạch xuyên suốt</p>
+
+      <!-- Sơ đồ 6 bước -->
+      <div class="workflow-container">
+        <div class="flow-step">
+          <div class="flow-step-num">1</div>
+          <div class="flow-step-title">Nhập Kho</div>
+          <div class="flow-step-desc">Tạo mã hộp, vị trí tủ, tải ảnh mẫu Golden Image & link sơ đồ Pinout.</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">2</div>
+          <div class="flow-step-title">Mượn Mới</div>
+          <div class="flow-step-desc">Xác thực MSSV, xác nhận danh mục phụ kiện, gắn tag dự án nghiên cứu.</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">3</div>
+          <div class="flow-step-title">Sử Dụng</div>
+          <div class="flow-step-desc">Tra cứu tài liệu datasheet trên Showroom để đấu nối an toàn, đúng chân.</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">4</div>
+          <div class="flow-step-title">Trả Kho</div>
+          <div class="flow-step-desc">Chụp ảnh hiện trạng hộp, tích chọn checklist phụ kiện, khai báo tình trạng.</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">5</div>
+          <div class="flow-step-title">Kiểm Định</div>
+          <div class="flow-step-desc">QA đối soát song song 2 ảnh: Bấm "Duyệt hợp lệ" hoặc "Báo vi phạm".</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">6</div>
+          <div class="flow-step-title">Mở Khóa</div>
+          <div class="flow-step-desc">Khóa máy nếu có lỗi; sau khi khắc phục/bồi hoàn, Admin mở khóa về kho.</div>
+        </div>
+      </div>
+
+      <h2 class="section-title" style="margin-top: 6px;"><span class="section-num">3</span> CƠ CHẾ PHÂN QUYỀN 3 CẤP ĐỘC LẬP</h2>
+      <p class="section-sub">Phân chia vai trò rõ ràng giúp vận hành trơn tru và bảo vệ dữ liệu</p>
+
+      <!-- Bảng Phân Quyền -->
+      <table class="table-custom">
+        <thead>
+          <tr>
+            <th style="width: 20%;">VAI TRÒ (ROLE)</th>
+            <th style="width: 28%;">QUYỀN HẠN TRUY CẬP</th>
+            <th style="width: 32%;">THAO TÁC NGHIỆP VỤ</th>
+            <th style="width: 20%;">LỢI ÍCH QUẢN TRỊ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="status-pill pill-blue">Sinh Viên / Nghiên Cứu</span></td>
+            <td>Xem Showroom thiết bị, tra cứu Pinout, xem lịch sử cá nhân.</td>
+            <td>Thực hiện Mượn mới; Chụp ảnh thực tế & xác nhận checklist phụ kiện khi Hoàn trả.</td>
+            <td>Tự phục vụ nhanh gọn, nâng cao trách nhiệm giữ gìn linh kiện.</td>
+          </tr>
+          <tr>
+            <td><span class="status-pill pill-green">Người Kiểm Định (QA)</span></td>
+            <td>Truy cập Không gian Kiểm định (Inspection Workspace), hàng đợi đối soát.</td>
+            <td>So sánh ảnh mẫu chuẩn với ảnh bàn giao; Phê duyệt hợp lệ hoặc Báo lỗi vi phạm.</td>
+            <td>Kiểm soát chất lượng bàn giao độc lập, phát hiện sai sót tức thì.</td>
+          </tr>
+          <tr>
+            <td><span class="status-pill pill-red">Quản Trị Viên (Admin)</span></td>
+            <td>Toàn quyền hệ thống, xem bảng điều khiển, nhật ký kiểm toán (Logs).</td>
+            <td>Thêm/Sửa/Xóa thiết bị, Đổi mật khẩu, Mở khóa máy lỗi, Đôn đốc sinh viên giữ đồ.</td>
+            <td>Điều hành tập trung, minh bạch dữ liệu tài sản, bảo mật cao.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout-box">
+        <div class="callout-title">💡 NGUYÊN TẮC VẬN HÀNH "TAM QUYỀN PHÂN LẬP"</div>
+        Người mượn không thể tự đánh dấu thiết bị đã trả an toàn; Người kiểm định chỉ tập trung đối soát chất lượng độc lập; và Quản trị viên can thiệp hệ thống đều được tự động ghi vết bất biến (Audit Trail). Điều này đảm bảo tính khách quan và an toàn tuyệt đối cho tài sản phòng Lab.
+      </div>
+    </div>
+
+    <div class="doc-footer">
+      <div>ROAB LAB | HỆ THỐNG QUẢN LÝ & KIỂM ĐỊNH THIẾT BỊ PHẦN CỨNG</div>
+      <div>Trang 2 / 4</div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- TRANG 3: CHI TIẾT CÁC TÍNH NĂNG CỐT LÕI (PHẦN 1) -->
+  <!-- ========================================== -->
+  <div class="page">
+    <div class="doc-header">
+      <div class="brand-badge"><span class="brand-icon">R</span> ROAB LAB - TÀI LIỆU GIỚI THIỆU SẢN PHẨM</div>
+      <div>PHẦN 2: CHI TIẾT CÁC TÍNH NĂNG HỆ THỐNG (1/2)</div>
+    </div>
+
+    <div class="page-content">
+      <h2 class="section-title"><span class="section-num">4</span> CHI TIẾT CÁC TÍNH NĂNG NỔI BẬT (SHOWROOM, MƯỢN TRẢ & KIỂM ĐỊNH)</h2>
+      <p class="section-sub">Những năng lực cốt lõi giúp số hóa quy trình quản trị thiết bị nghiên cứu</p>
+
+      <div class="feature-grid-2">
+        
+        <!-- Feature 1: Showroom -->
+        <div class="feature-card">
+          <div class="feature-card-header">
+            <div class="feature-icon-badge badge-red">01</div>
+            <div class="feature-title">Kho Thiết Bị Trực Quan & Showroom Số Hóa</div>
+          </div>
+          <p class="feature-desc">
+            • <strong>Phân loại khoa học:</strong> Nhóm thiết bị tự động thành <em>MCU/SBC</em> (ESP32, STM32, Jetson...), <em>Cảm biến</em> (LiDAR, IMU, Camera AI...), <em>Động cơ/Driver</em>, <em>Mạch giao tiếp</em>.<br>
+            • <strong>Bộ lọc trạng thái 4 cấp độ:</strong> Lọc tức thời <em>Sẵn sàng trong kho</em>, <em>Đang mượn</em>, <em>Chờ kiểm định (QA)</em>, và <em>Báo lỗi/Khóa</em>.<br>
+            • <strong>Tìm kiếm thông minh:</strong> Tìm nhanh theo tên, mã thiết bị hoặc từ khóa liên quan.<br>
+            • <strong>Định vị ngăn tủ chính xác:</strong> Ghi rõ vị trí lưu trữ (Ví dụ: <em>Tủ A - Tầng 2 - Hộp 05</em>) giúp người dùng tìm thấy thiết bị chỉ trong 10 giây.
+          </p>
+        </div>
+
+        <!-- Feature 2: Pinout & Specs -->
+        <div class="feature-card">
+          <div class="feature-card-header">
+            <div class="feature-icon-badge badge-blue">02</div>
+            <div class="feature-title">Tra Cứu Pinout & Cảnh Báo An Toàn Điện Áp</div>
+          </div>
+          <p class="feature-desc">
+            • <strong>Sơ đồ chân 1-chạm:</strong> Bấm vào thiết bị để mở ngay ảnh sơ đồ chân pinout chuẩn độ nét cao, dễ dàng kiểm tra các chân GPIO, UART, I2C, SPI.<br>
+            • <strong>Cảnh báo nguồn điện nổi bật:</strong> Ghi chú rõ điện áp định mức (Ví dụ: <em>"Chỉ cấp 5V qua cổng Type-C, mức logic 3.3V, không cấp 12V vào chân GPIO"</em>) giúp triệt tiêu nguy cơ cháy mạch.<br>
+            • <strong>Liên kết tài liệu gốc:</strong> Mở trực tiếp file datasheet PDF, sơ đồ nguyên lý hoặc trang hướng dẫn bài lab kỹ thuật chỉ với một cú click chuột.
+          </p>
+        </div>
+
+        <!-- Feature 3: Smart Checkout -->
+        <div class="feature-card">
+          <div class="feature-card-header">
+            <div class="feature-icon-badge badge-emerald">03</div>
+            <div class="feature-title">Quy Trình Mượn - Trả & Bằng Chứng Hình Ảnh</div>
+          </div>
+          <p class="feature-desc">
+            • <strong>Xác thực danh tính Whitelist:</strong> Tự động nhận diện họ tên khi nhập MSSV, đảm bảo chỉ người được cấp phép mới có thể mượn thiết bị.<br>
+            • <strong>Gắn nhãn mục đích dự án:</strong> Phân loại rõ mục đích sử dụng (<em>Test trong ngày, Đồ án tốt nghiệp, Nghiên cứu Lab, Tham gia cuộc thi</em>).<br>
+            • <strong>Bắt buộc chụp ảnh hoàn trả:</strong> Khi trả thiết bị, người dùng bắt buộc chụp ảnh hiện trạng thực tế của linh kiện và hộp chứa để lưu vết.<br>
+            • <strong>Checklist phụ kiện tự động:</strong> Tự động tách danh sách phụ kiện thành các ô tích chọn kiểm đếm (cáp nạp, anten, adapter nguồn, dây cắm).<br>
+            • <strong>Nén ảnh thông minh:</strong> Tự động tối ưu dung lượng ảnh ngay trên trình duyệt, đảm bảo tốc độ gửi siêu tốc cả khi mạng yếu.
+          </p>
+        </div>
+
+        <!-- Feature 4: QA Inspection -->
+        <div class="feature-card">
+          <div class="feature-card-header">
+            <div class="feature-icon-badge badge-cyan">04</div>
+            <div class="feature-title">Trung Tâm Kiểm Định QA & Đối Soát Song Song</div>
+          </div>
+          <p class="feature-desc">
+            • <strong>Không gian làm việc chuyên biệt:</strong> Giao diện dành riêng cho Người kiểm định để duyệt các yêu cầu hoàn trả đang chờ xử lý.<br>
+            • <strong>So sánh trực quan song song (Side-by-Side):</strong> Đặt ảnh mẫu chuẩn nguyên bản 100% (Golden Image) bên cạnh ảnh thực tế người dùng vừa chụp.<br>
+            • <strong>Chế độ phóng to điểm ảnh (High-res Zoom):</strong> Dễ dàng soi kỹ từng chân cắm pin có bị cong vênh, linh kiện có bị gãy nứt hoặc cháy xém.<br>
+            • <strong>Phê duyệt 2 chiều dứt khoát:</strong> Nút <em>"Duyệt Hợp Lệ"</em> chuyển thiết bị về kho sẵn sàng; hoặc nút <em>"Báo Vi Phạm"</em> lập tức khóa thiết bị và ghi nhận lỗi.
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Khung thông báo Zalo Bot -->
+      <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; padding: 10px 14px; border-radius: 8px; border-left: 4px solid #06b6d4; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 2px;">
+        <div style="flex: 1;">
+          <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 3px;">
+            <span style="background: #06b6d4; color: black; font-size: 6.8pt; font-weight: 800; padding: 2px 5px; border-radius: 4px; text-transform: uppercase;">TỰ ĐỘNG HÓA</span>
+            <span style="font-family: 'Montserrat', sans-serif; font-size: 8.5pt; font-weight: 800; color: #38bdf8; text-transform: uppercase;">ROAB LAB ZALO NOTIFICATION BOT</span>
+          </div>
+          <div style="font-size: 7.6pt; color: #cbd5e1; line-height: 1.4;">
+            Hệ thống tích hợp sẵn Bot tự động gửi tin nhắn thời gian thực vào nhóm Zalo của Người kiểm định (QA) ngay khi sinh viên bấm hoàn trả thiết bị. Người kiểm định nhận thông báo tức thì kèm mã giao dịch để mở đối soát ngay, không để người dùng phải chờ đợi lâu.
+          </div>
+        </div>
+        <div style="text-align: center; background: rgba(255,255,255,0.06); padding: 6px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); min-width: 120px;">
+          <div style="font-size: 11pt; font-weight: 900; color: #38bdf8; font-family: 'Montserrat', sans-serif;">REALTIME</div>
+          <div style="font-size: 6.8pt; text-transform: uppercase; color: #94a3b8;">Cảnh Báo Tức Thời</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="doc-footer">
+      <div>ROAB LAB | HỆ THỐNG QUẢN LÝ & KIỂM ĐỊNH THIẾT BỊ PHẦN CỨNG</div>
+      <div>Trang 3 / 4</div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- TRANG 4: CHI TIẾT CÁC TÍNH NĂNG CỐT LÕI (PHẦN 2) & TỔNG HỢP -->
+  <!-- ========================================== -->
+  <div class="page">
+    <div class="doc-header">
+      <div class="brand-badge"><span class="brand-icon">R</span> ROAB LAB - TÀI LIỆU GIỚI THIỆU SẢN PHẨM</div>
+      <div>PHẦN 3: TÍNH NĂNG QUẢN TRỊ & BẢNG TỔNG HỢP CHỨC NĂNG (2/2)</div>
+    </div>
+
+    <div class="page-content">
+      <h2 class="section-title"><span class="section-num">5</span> CHI TIẾT CÁC TÍNH NĂNG NỔI BẬT (QUẢN TRỊ ADMIN & BẢO MẬT)</h2>
+      <p class="section-sub">Bộ công cụ quản lý toàn diện giúp người điều hành kiểm soát chặt chẽ tài sản phòng Lab</p>
+
+      <div class="feature-grid-2">
+        
+        <!-- Feature 5: Admin Asset Operations -->
+        <div class="feature-card">
+          <div class="feature-card-header">
+            <div class="feature-icon-badge badge-amber">05</div>
+            <div class="feature-title">Quản Trị Kho Thiết Bị & Mở Khóa An Toàn</div>
+          </div>
+          <p class="feature-desc">
+            • <strong>Quản lý toàn diện (CRUD):</strong> Thêm mới hộp thiết bị, chỉnh sửa tên gọi, vị trí ngăn tủ, cập nhật danh sách phụ kiện, tải ảnh Golden Image hoặc xóa thiết bị khỏi kho.<br>
+            • <strong>Cơ chế Mở Khóa An Toàn (Unlock Override):</strong> Khi thiết bị bị khóa ở trạng thái <em>"Báo lỗi/Khóa"</em> (do QA báo hỏng/thiếu phụ kiện), chỉ Quản trị viên mới có quyền mở khóa đưa thiết bị trở lại kho sẵn sàng sau khi đã khắc phục hoặc bồi hoàn xong.<br>
+            • <strong>Lịch sử vòng đời từng thiết bị:</strong> Lưu trữ toàn bộ các lần mượn - trả từ ngày nhập kho.
+          </p>
+        </div>
+
+        <!-- Feature 6: Student Tracker -->
+        <div class="feature-card">
+          <div class="feature-card-header">
+            <div class="feature-icon-badge badge-purple">06</div>
+            <div class="feature-title">Tra Cứu Sinh Viên & Đôn Đốc Thu Hồi Tức Thì</div>
+          </div>
+          <p class="feature-desc">
+            • <strong>Tìm kiếm thông minh không dấu:</strong> Nhập MSSV hoặc họ tên (gõ <em>"nguyen van a"</em> vẫn nhận diện <em>"Nguyễn Văn A"</em>) để tra cứu hồ sơ ngay lập tức.<br>
+            • <strong>Theo dõi tài sản phân tán:</strong> Hiển thị danh sách chính xác các thiết bị phần cứng mà một cá nhân đang mượn tại thời điểm hiện tại.<br>
+            • <strong>Liên hệ 1-chạm (Speed Dial / Zalo):</strong> Tích hợp nút gọi điện hoặc nhắn tin Zalo trực tiếp tới số điện thoại sinh viên để đôn đốc hoàn trả thiết bị khi tới hạn.
+          </p>
+        </div>
+
+        <!-- Feature 7: Audit Logs -->
+        <div class="feature-card">
+          <div class="feature-card-header">
+            <div class="feature-icon-badge badge-red">07</div>
+            <div class="feature-title">Nhật Ký Kiểm Toán Bất Biến (Audit Edit Logs)</div>
+          </div>
+          <p class="feature-desc">
+            • <strong>Lưu vết 100% can thiệp quản trị:</strong> Mọi thao tác Thêm thiết bị mới, Cập nhật thông số, Xóa thiết bị, Mở khóa máy lỗi đều được máy chủ tự động ghi nhật ký bất biến.<br>
+            • <strong>Định danh & thời gian chi tiết:</strong> Ghi rõ mốc thời gian (ngày, giờ, phút, giây), tài khoản Admin thực hiện và nội dung thay đổi cụ thể để đối chiếu thanh tra.<br>
+            • <strong>Chống sửa đổi nội bộ:</strong> Không ai có thể xóa hay thay đổi dữ liệu nhật ký kiểm toán.
+          </p>
+        </div>
+
+        <!-- Feature 8: Security & Flexibility -->
+        <div class="feature-card">
+          <div class="feature-card-header">
+            <div class="feature-icon-badge badge-blue">08</div>
+            <div class="feature-title">An Toàn Xác Thực & Tương Thích Đa Nền Tảng</div>
+          </div>
+          <p class="feature-desc">
+            • <strong>Bảo mật phân tầng:</strong> Cơ chế xác thực mã PIN riêng biệt cho Người kiểm định và Quản trị viên; Hỗ trợ đổi mật khẩu bảo mật trực tiếp trên web.<br>
+            • <strong>Responsive 100% mọi thiết bị:</strong> Giao diện tự động tối ưu hiển thị mượt mà trên Điện thoại thông minh (iOS / Android), Máy tính bảng, Laptop và PC.<br>
+            • <strong>Độ tin cậy cao:</strong> Dữ liệu lưu trữ đám mây đồng bộ liên tục, tự động sao lưu, sẵn sàng xuất báo cáo phục vụ kiểm kê tài sản định kỳ.
+          </p>
+        </div>
+
+      </div>
+
+      <h2 class="section-title" style="margin-top: 4px;"><span class="section-num">6</span> BẢNG TỔNG HỢP DANH MỤC TÍNH NĂNG HỆ THỐNG</h2>
+      <p class="section-sub">Tổng kết nhanh các khả năng đáp ứng toàn diện của ROAB LAB</p>
+
+      <!-- Bảng Tổng Hợp Tính Năng -->
+      <table class="table-custom">
+        <thead>
+          <tr>
+            <th style="width: 25%;">NHÓM CHỨC NĂNG</th>
+            <th style="width: 50%;">TÍNH NĂNG CỤ THỂ</th>
+            <th style="width: 25%;">TRẠNG THÁI KHẢ DỤNG</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Quản Lý Kho Thiết Bị</strong></td>
+            <td>Phân loại linh kiện, bộ lọc trạng thái 4 cấp, tìm kiếm nhanh, định vị ngăn tủ.</td>
+            <td><span class="status-pill pill-green">SẴN SÀNG 100%</span></td>
+          </tr>
+          <tr>
+            <td><strong>An Toàn Kỹ Thuật</strong></td>
+            <td>Tra cứu ảnh sơ đồ chân Pinout, cảnh báo điện áp định mức chống cháy IC, link datasheet.</td>
+            <td><span class="status-pill pill-green">SẴN SÀNG 100%</span></td>
+          </tr>
+          <tr>
+            <td><strong>Mượn - Trả Số Hóa</strong></td>
+            <td>Xác thực MSSV Whitelist, gắn tag dự án, chụp ảnh đối soát bắt buộc, checklist phụ kiện.</td>
+            <td><span class="status-pill pill-green">SẴN SÀNG 100%</span></td>
+          </tr>
+          <tr>
+            <td><strong>Kiểm Định Chất Lượng QA</strong></td>
+            <td>Đối soát song song Golden Image vs Ảnh thực tế, phóng to chi tiết, duyệt hoặc báo lỗi.</td>
+            <td><span class="status-pill pill-green">SẴN SÀNG 100%</span></td>
+          </tr>
+          <tr>
+            <td><strong>Theo Dõi & Quản Trị</strong></td>
+            <td>CRUD thiết bị, cơ chế mở khóa an toàn, tra cứu sinh viên, liên hệ gọi/Zalo đôn đốc 1-chạm.</td>
+            <td><span class="status-pill pill-green">SẴN SÀNG 100%</span></td>
+          </tr>
+          <tr>
+            <td><strong>Tự Động Hóa & Nhật Ký</strong></td>
+            <td>Bot Zalo thông báo tức thì (< 3s), nhật ký kiểm toán bất biến (Audit Logs), phân quyền PIN.</td>
+            <td><span class="status-pill pill-green">SẴN SÀNG 100%</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 7px 12px; font-size: 7.6pt; color: #166534; line-height: 1.45;">
+        <strong>KẾT LUẬN:</strong> ROAB LAB mang đến một giải pháp hoàn chỉnh, hiện đại và dễ tiếp cận để quản trị tài sản phòng Lab. Hệ thống giúp chuẩn hóa 100% quy trình mượn trả, loại bỏ hoàn toàn tình trạng thất lạc phụ kiện, phòng ngừa chập cháy thiết bị và nâng cao tinh thần trách nhiệm của người sử dụng.
+      </div>
+    </div>
+
+    <div class="doc-footer">
+      <div>ROAB LAB | HỆ THỐNG QUẢN LÝ & KIỂM ĐỊNH THIẾT BỊ PHẦN CỨNG</div>
+      <div>Trang 4 / 4</div>
+    </div>
+  </div>
+
+</body>
+</html>
