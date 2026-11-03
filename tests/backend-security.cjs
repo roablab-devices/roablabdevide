@@ -73,6 +73,8 @@ rejected('Đang mượn', 'sv01', {tx_type:'Trả về kho', return_condition:'i
   assert.equal(s.devices[1][8], 'Đang mượn');
   assert.equal(s.devices[1][9], 'sv01');
   assert.equal(s.logs[1][8], "'=1+1");
+  assert.equal(s.logs[1][11], 'Không cần duyệt');
+  assert.equal(s.logs[1][12], 'Hệ thống');
   assert.equal(s.devices[1][11], "'=2+2");
   const before = s.writes();
   assert.equal(s.post({...base, user_id:'sv02'}).success, false);

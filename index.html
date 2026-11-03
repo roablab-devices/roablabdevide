@@ -601,7 +601,7 @@
               KIỂM ĐỊNH ĐỐI SOÁT HÌNH ẢNH THIẾT BỊ
             </h2>
             <p class="text-xs text-brand-grayText mt-1 max-w-2xl">
-              So sánh song song <strong>Ảnh Mẫu Chuẩn (Golden Image)</strong> và <strong>Ảnh Bàn Giao Của Sinh Viên</strong>. Kiểm tra các cáp nối, chân cắm và phụ kiện trước khi phê duyệt đưa máy về kho hoặc cảnh báo vi phạm.
+              So sánh song song <strong>Ảnh Mẫu Chuẩn (Golden Image)</strong> và <strong>Ảnh Hoàn Trả Của Sinh Viên</strong>. Kiểm tra các cáp nối, chân cắm và phụ kiện trước khi phê duyệt đưa máy về kho hoặc cảnh báo vi phạm.
             </p>
           </div>
 
@@ -756,7 +756,7 @@
             </div>
 
             <!-- Inspection Decision Toolbar -->
-            <div class="pt-2 border-t border-white/5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div v-if="!item.audit_status || item.audit_status === 'Chờ kiểm định'" class="pt-2 border-t border-white/5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
               <div class="flex-1">
                 <input 
                   v-model="auditNotes[item.tx_id]" 
@@ -778,6 +778,10 @@
                   <i class="fa-solid fa-triangle-exclamation mr-1.5"></i> Báo Vi Phạm (Khóa)
                 </button>
               </div>
+            </div>
+            <div v-else class="pt-2 border-t border-white/5 flex flex-wrap items-center justify-between gap-2 text-xs text-brand-grayText">
+              <span>Kiểm định bởi: <b class="text-white">{{ item.audited_by || 'Hệ thống' }}</b></span>
+              <span v-if="item.audit_note" class="italic text-slate-300">"{{ item.audit_note }}"</span>
             </div>
 
           </div>
@@ -1544,9 +1548,9 @@
 
       <div class="modal-action mt-4 flex items-center justify-between">
         <button @click="showDeviceEditModal = false" class="btn btn-sm btn-ghost text-brand-grayText font-oswald uppercase">Hủy</button>
-        <button @click="saveDeviceAsAdmin" :disabled="isSavingDevice" class="btn-red-cta px-5 py-2 rounded-xl font-oswald uppercase font-bold text-xs">
-          <i v-if="isSavingDevice" class="fa-solid fa-spinner fa-spin mr-1"></i>
-          <span>Lưu Thiết Bị & Tài Liệu</span>
+        <button @click="saveDeviceAsAdmin" :disabled="isSavingDevice" class="btn-red-cta px-5 py-2 rounded-xl font-oswald uppercase font-bold text-xs flex items-center space-x-1.5 shadow-lg">
+          <i v-if="isSavingDevice" class="fa-solid fa-spinner fa-spin"></i>
+          <span>{{ isSavingDevice ? (savingDeviceStatus || 'Đang lưu...') : 'Lưu Thiết Bị & Tài Liệu' }}</span>
         </button>
       </div>
     </div>
@@ -1658,6 +1662,7 @@ createApp({
       showDeviceEditModal: false,
       isEditingExistingDevice: false,
       isSavingDevice: false,
+      savingDeviceStatus: '',
       deviceForm: {
         device_id: '',
         name: '',
@@ -2120,18 +2125,59 @@ createApp({
     },
     readDeviceUpload(file) {
       return new Promise((resolve, reject) => {
-        const reader = new FileReader();
         let mime = (file.type || '').toLowerCase();
         if (mime === 'image/jpg' || mime === 'image/pjpeg' || (!mime && /\.jpe?g$/i.test(file.name))) mime = 'image/jpeg';
         else if (mime === 'image/png' || (!mime && /\.png$/i.test(file.name))) mime = 'image/png';
         else if (mime === 'image/webp' || (!mime && /\.webp$/i.test(file.name))) mime = 'image/webp';
         else if (mime === 'application/pdf' || (!mime && /\.pdf$/i.test(file.name))) mime = 'application/pdf';
 
-        reader.onload = () => {
-          const res = String(reader.result || '');
-          const base64 = res.indexOf(',') !== -1 ? res.split(',')[1] : res;
-          resolve({ type: mime || 'image/jpeg', base64: base64.replace(/\s+/g, '') });
+        const isImage = mime.startsWith('image/');
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+          const rawResult = String(e.target.result || '');
+
+          if (!isImage || typeof Image === 'undefined' || typeof document === 'undefined') {
+            const base64 = rawResult.indexOf(',') !== -1 ? rawResult.split(',')[1] : rawResult;
+            resolve({ type: mime || 'image/jpeg', base64: base64.replace(/\s+/g, '') });
+            return;
+          }
+
+          const img = new Image();
+          img.onload = () => {
+            try {
+              let width = img.width;
+              let height = img.height;
+              const maxDim = 1600;
+
+              if (width > maxDim || height > maxDim) {
+                const ratio = Math.min(maxDim / width, maxDim / height);
+                width = Math.round(width * ratio);
+                height = Math.round(height * ratio);
+              }
+
+              const canvas = document.createElement('canvas');
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, width, height);
+
+              const outputMime = (mime === 'image/png' && file.size < 400 * 1024) ? 'image/png' : 'image/jpeg';
+              const dataUrl = canvas.toDataURL(outputMime, 0.82);
+              const compressedBase64 = dataUrl.split(',')[1];
+              resolve({ type: outputMime, base64: compressedBase64.replace(/\s+/g, '') });
+            } catch (_) {
+              const base64 = rawResult.indexOf(',') !== -1 ? rawResult.split(',')[1] : rawResult;
+              resolve({ type: mime || 'image/jpeg', base64: base64.replace(/\s+/g, '') });
+            }
+          };
+          img.onerror = () => {
+            const base64 = rawResult.indexOf(',') !== -1 ? rawResult.split(',')[1] : rawResult;
+            resolve({ type: mime || 'image/jpeg', base64: base64.replace(/\s+/g, '') });
+          };
+          img.src = rawResult;
         };
+
         reader.onerror = () => reject(new Error('Không đọc được file. Vui lòng chọn lại.'));
         reader.readAsDataURL(file);
       });
@@ -2147,6 +2193,7 @@ createApp({
         return;
       }
       this.isSavingDevice = true;
+      this.savingDeviceStatus = 'Đang nén & tối ưu ảnh...';
       const adminName = this.adminUser ? `${this.adminUser.full_name} (${this.adminUser.role})` : 'Admin Lab';
       const nowStr = new Date().toISOString().replace('T', ' ').substring(0, 19);
 
@@ -2156,6 +2203,8 @@ createApp({
           if (this.deviceUploads[key]) uploads[key] = await this.readDeviceUpload(this.deviceUploads[key]);
         }
         
+        this.savingDeviceStatus = 'Đang tải lên Drive & lưu...';
+
         const formPayload = { ...this.deviceForm };
         if (formPayload.golden_image) {
           formPayload.golden_image = this.formatDriveImageUrl(formPayload.golden_image);
@@ -2182,6 +2231,7 @@ createApp({
         this.showToast('Lỗi lưu thiết bị: ' + e.message, 'error');
       } finally {
         this.isSavingDevice = false;
+        this.savingDeviceStatus = '';
       }
     },
 
@@ -2231,7 +2281,7 @@ createApp({
     },
     getAuditBadgeClass(st) {
       if (!st || st === 'Chờ kiểm định') return 'bg-amber-500/20 text-amber-400 border border-amber-500/30';
-      if (st.includes('hợp lệ')) return 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+      if (st.includes('hợp lệ') || st.includes('Không cần duyệt')) return 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
       return 'bg-rose-500/20 text-rose-400 border border-rose-500/30';
     },
     async submitAuditDecision(item, decision) {

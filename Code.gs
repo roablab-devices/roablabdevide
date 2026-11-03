@@ -36,6 +36,19 @@ function appendTextRow(sheet, values) {
   sheet.appendRow(values.map(sheetText));
 }
 
+function setTextMatrix(sheet, startRow, startCol, matrix) {
+  const range = sheet.getRange(startRow, startCol, matrix.length, matrix[0].length);
+  if (range && typeof range.setValues === 'function') {
+    range.setValues(matrix.map(row => row.map(sheetText)));
+  } else {
+    matrix.forEach((row, ri) => {
+      row.forEach((val, ci) => {
+        setText(sheet.getRange(startRow + ri, startCol + ci), val);
+      });
+    });
+  }
+}
+
 function formatDriveImageUrl(url) {
   if (!url || typeof url !== 'string') return '';
   const trimmed = url.trim();
@@ -163,8 +176,8 @@ function doGet(e) {
         if (actionType.indexOf("[Admin]") !== -1) {
           if (editLogs.length < 50) editLogs.push(logItem);
         } else {
-          // Là giao dịch sinh viên bàn giao cần kiểm định
-          if (auditQueue.length < 50) auditQueue.push(logItem);
+          // Chỉ giao dịch "Trả về kho" mới đưa vào hàng đợi kiểm định (QA Audit)
+          if (actionType === "Trả về kho" && auditQueue.length < 50) auditQueue.push(logItem);
           
           deviceIds.forEach(id => {
             if (!id) return;
@@ -348,14 +361,17 @@ function doPost(e) {
       const logSheet = ss.getSheetByName(CONFIG.SHEET_LOGS);
 
       if (foundRow > 0) {
-        // CẬP NHẬT THIẾT BỊ HIỆN CÓ
-        setText(devSheet.getRange(foundRow, 2), payload.name || "");
-        setText(devSheet.getRange(foundRow, 3), payload.category || "Khác");
-        setText(devSheet.getRange(foundRow, 4), payload.location || "");
-        setText(devSheet.getRange(foundRow, 5), payload.accessories || "");
-        setText(devSheet.getRange(foundRow, 6), payload.golden_image || "");
-        setText(devSheet.getRange(foundRow, 7), payload.specs_note || "");
-        setText(devSheet.getRange(foundRow, 8), payload.pinout_link || "");
+        // CẬP NHẬT THIẾT BỊ HIỆN CÓ (Gộp thành 1 lệnh ghi mảng để tăng tốc)
+        const rowUpdates = [[
+          payload.name || "",
+          payload.category || "Khác",
+          payload.location || "",
+          payload.accessories || "",
+          payload.golden_image || "",
+          payload.specs_note || "",
+          payload.pinout_link || ""
+        ]];
+        setTextMatrix(devSheet, foundRow, 2, rowUpdates);
         setText(devSheet.getRange(foundRow, 13), nowStr);
 
         // Ghi log chỉnh sửa
@@ -699,6 +715,7 @@ function doPost(e) {
       const nextLogRow = logSheet.getLastRow() + 1;
       const formulaPreview = directPhotoUrl.startsWith("http") ? `=IMAGE(J${nextLogRow})` : "";
       
+      const isReturn = txType === "Trả về kho";
       appendTextRow(logSheet, [
         timestampStr,
         txId,
@@ -711,8 +728,8 @@ function doPost(e) {
         note,
         directPhotoUrl,
         "",
-        "Chờ kiểm định",
-        "",
+        isReturn ? "Chờ kiểm định" : "Không cần duyệt",
+        isReturn ? "" : "Hệ thống",
         ""
       ]);
       if (formulaPreview) logSheet.getRange(nextLogRow, 11).setFormula(formulaPreview);
